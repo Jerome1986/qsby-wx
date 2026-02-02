@@ -1,5 +1,5 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.json",
+  "extends": "./node_modules/@vue/tsconfig/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
     "sourceMap": true,
@@ -12,23 +12,19 @@
     "lib": [
       "esnext",
       "dom"
+    ],
+    "types": [
+      "@dcloudio/types",
+      "miniprogram-api-typings",
+      "@uni-helper/uni-app-types",
+      "@uni-helper/uni-ui-types",
     ]
   },
-  "types": [
-    "@dcloudio/types",
-    "miniprogram-api-typings",
-    "@uni-helper/uni-app-types",
-    "@uni-helper/uni-ui-types"
-  ],
-  // 校验 uni-app 组件类型
   "vueCompilerOptions": {
-    "nativeTags": [
-      "block",
-      "component",
-      "template",
-      "slot"
-    ],
-    "isCustomElement": true
+    // experimentalRuntimeMode 已废弃，请升级 Vue - Official 插件至最新版本
+    "plugins": [
+      "@uni-helper/uni-app-types/volar-plugin"
+    ]
   },
   "include": [
     "src/**/*.ts",
