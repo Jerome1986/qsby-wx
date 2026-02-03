@@ -1,16 +1,83 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	}
+  "pages": [
+    //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+    {
+      "path": "pages/home/home",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/store/store",
+      "style": {
+        "navigationBarTitleText": "门店",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/goPlay/goPlay",
+      "style": {
+        "navigationBarTitleText": "趣哪游",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/activity/activity",
+      "style": {
+        "navigationBarTitleText": "活动",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/my/my",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "enablePullDownRefresh": false
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#909399",
+    "selectedColor": "#fdc204",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "iconPath": "/static/tabar/home.png",
+        "selectedIconPath": "/static/tabar/home_selected.png",
+        "text": "首页"
+      },
+       {
+         "pagePath": "pages/store/store",
+         "iconPath": "/static/tabar/store.png",
+         "selectedIconPath": "/static/tabar/store_selected.png",
+         "text": "门店"
+       },
+       {
+         "pagePath": "pages/goPlay/goPlay",
+         "iconPath": "/static/tabar/fly.png",
+         "selectedIconPath": "/static/tabar/fly_selected.png",
+         "text": "趣哪游"
+       },
+      {
+        "pagePath": "pages/activity/activity",
+        "iconPath": "/static/tabar/gift.png",
+        "selectedIconPath": "/static/tabar/gift_selected.png",
+        "text": "活动"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "iconPath": "/static/tabar/my.png",
+        "selectedIconPath": "/static/tabar/my_selected.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  }
 }
