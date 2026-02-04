@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
+import { homeData } from '@/pages/home/data.ts'
 
 const shareInfo = ref()
 
@@ -38,13 +39,13 @@ onLoad(() => {})
     <!--  导航列表主题  -->
     <view class="main">
       <view class="nav-list">
-        <view class="nav-item" v-for="index in 4" :key="index">
+        <view class="nav-item" v-for="(item, index) in homeData" :key="index">
           <view class="icon">
-            <image src="/static/images/home/jinpin.png"></image>
+            <image :src="item.icon"></image>
           </view>
           <view class="text">
-            <view class="dec">WHERE TO PLAY</view>
-            <view class="title">趣哪游</view>
+            <view class="dec">{{ item.dec }}</view>
+            <view class="title">{{ item.title }}</view>
           </view>
         </view>
       </view>
@@ -87,12 +88,11 @@ onLoad(() => {})
   padding: 0 24rpx;
   .nav-item {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
-    padding: 20rpx;
     width: calc((100% - 20rpx) / 2);
     height: 184rpx;
-    background-color: #ffffffc7;
+    background-color: $qs-pageBackGroundColor;
     border-radius: 20rpx;
     /*图标*/
     .icon {
@@ -108,8 +108,8 @@ onLoad(() => {})
     .text {
       text-align: center;
       .dec {
-        margin-bottom: 20rpx;
-        color: #999999;
+        margin-bottom: 10rpx;
+        color: $qs-font-dec2;
         font-size: 20rpx;
       }
       .title {
