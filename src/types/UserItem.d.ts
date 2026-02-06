@@ -15,6 +15,10 @@ export interface UserItem {
   role: 'user' | 'admin' | 'manager'
   /** 注册时间 */
   registerTime: Date
+  /** 主理人开始时间 */
+  managerStartTime?: Date
+  /** 主理人到期时间 */
+  managerEndTime?: Date
   /** 用户状态：active 正常 / disabled 禁用 */
   status: 'active' | 'disabled'
   /** 用户自己的邀请码 */

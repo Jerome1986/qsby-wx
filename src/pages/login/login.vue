@@ -37,12 +37,15 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
   )
   console.log('登录返回', wxRes.data)
   if (wxRes.code === 200) {
-    await uni.showToast({ icon: 'success', title: '登录成功' })
-    await uni.switchTab({
-      url: '/pages/home/home',
-    })
     // 存储用户信息到store
     userStore.setProfile(wxRes.data)
+
+    setTimeout(async () => {
+      await uni.switchTab({
+        url: '/pages/home/home',
+      })
+      await uni.showToast({ icon: 'success', title: '登录成功', duration: 1000 })
+    }, 800)
   }
 }
 
@@ -214,7 +217,7 @@ onLoad(async (options: any) => {
   .login-btn {
     width: 100%;
     height: 100rpx;
-    background: linear-gradient(135deg, $qs-brandColor 0%, lighten($qs-brandColor, 8%) 100%);
+    background: linear-gradient(135deg, $qs-brandColor 0%, #ffe34a 100%);
     border: none;
     border-radius: 50rpx;
     color: #fff;
