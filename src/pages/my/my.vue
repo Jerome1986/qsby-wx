@@ -1,17 +1,43 @@
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app'
 import { navBarHeight, getNavBarHeight } from './myConfig'
-import UserInfo from './UserInfo.vue';
+import UserInfo from './UserInfo.vue'
+import Order from '@/pages/my/Order.vue'
+import Function from '@/pages/my/Function.vue'
 
+import { useUserStore } from '@/stores'
+import { userInfoGet } from '@/composables/userInfo.ts'
+import { watch } from 'vue'
+import SendList from '@/pages/my/SendList.vue'
+import MyUtile from '@/pages/my/MyUtile.vue'
 
+// store
+const userStore = useUserStore()
 
 onLoad(() => {
+  // 获取导航栏高度
   getNavBarHeight()
+  if (userStore.profile?._id) {
+    // 获取用户信息
+    userInfoGet(userStore.profile._id)
+  }
 })
+
+// 监听用户信息变化，自动刷新界面显示
+watch(
+  () => userStore.profile,
+  (newProfile) => {
+    if (newProfile) {
+      console.log('用户信息已更新，界面会自动反映最新数据')
+      // 由于使用了响应式数据，界面会自动更新，无需额外操作
+    }
+  },
+  { deep: true },
+)
 </script>
 
 <template>
-  <view class="myPage">
+  <scroll-view class="myPage" :scroll-y="true">
     <view class="head" :style="{ height: navBarHeight + 'px' }"></view>
     <!-- 头部内容 -->
     <view class="user-head">
@@ -25,49 +51,21 @@ onLoad(() => {
     </view>
     <view class="content">
       <!-- 功能区 -->
-      <view class="function">
-        功能区
-      </view>
+      <Function></Function>
+      <!--   订单管理   -->
+      <Order></Order>
+      <!--  管理发布  -->
+      <SendList v-if="userStore.profile?.role === 'manager'"></SendList>
+      <!-- 我的工具  -->
+      <MyUtile></MyUtile>
     </view>
-  </view>
+  </scroll-view>
 </template>
 
 <style scoped lang="scss">
 .myPage {
-  position: relative;
-  height: 100vh;
-  background: linear-gradient(to bottom right, #ffeba4, #feeca6, #f5f2dc, #eff3f0, #ebf1f4, #e7f1f9);
-  filter: saturate(1.6);
-  overflow: hidden;
+  @include page-background();
 }
-
-/* 页面背景遮罩 */
-.myPage::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  background:
-    /* 底部背景色覆盖 */
-    linear-gradient(to bottom,
-      transparent 45%,
-      rgba(248, 248, 248, 0.4) 50%,
-      $qs-pageBackGroundColor 55%),
-    /* 虚化效果 */
-    linear-gradient(to bottom,
-      transparent 25%,
-      rgba(255, 255, 255, 0.2) 45%,
-      rgba(255, 255, 255, 0.4) 50%),
-    /* 边缘虚化 */
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.4), transparent 70%),
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.4), transparent 70%),
-    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.1), transparent 90%),
-    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.1), transparent 90%);
-}
-
 
 /*内容头部*/
 .user-head {
@@ -84,8 +82,8 @@ onLoad(() => {
     align-items: center;
     width: 236rpx;
     height: 71rpx;
-    border-radius: 35.5rpx 0rpx 0rpx 35.5rpx;
-    background-color: #1A1A1A;
+    border-radius: 35.5rpx 0 0 35.5rpx;
+    background-color: #1a1a1a;
 
     .icon {
       margin-right: 14rpx;
@@ -95,7 +93,7 @@ onLoad(() => {
 
     .text {
       font-size: 29rpx;
-      color: #F1EFC5;
+      color: #f1efc5;
     }
   }
 }
@@ -103,13 +101,5 @@ onLoad(() => {
 .content {
   margin-top: 48rpx;
   padding: 24rpx;
-
-  /*功能区*/
-  .function {
-    width: 100%;
-    height: 179rpx;
-    background: #FFFFFF;
-    border-radius: 30rpx;
-  }
 }
 </style>

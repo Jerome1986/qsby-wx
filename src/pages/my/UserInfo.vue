@@ -12,6 +12,17 @@ const handleLogin = () => {
     url: '/pages/login/login',
   })
 }
+
+// 跳转设置
+const handleEditInfo = () => {
+  if (userStore.profile?._id) {
+    uni.navigateTo({
+      url: `/pagesMember/setting/setting?userId=${userStore.profile?._id}`,
+    })
+  } else {
+    uni.navigateTo({ url: '/pages/login/login' })
+  }
+}
 </script>
 
 <template>
@@ -35,9 +46,12 @@ const handleLogin = () => {
   <!-- 登录 -->
   <view class="userInfo" v-else>
     <!-- 头像 -->
-    <view class="avatarInfo">
+    <view class="avatarInfo" @tap="handleEditInfo">
       <view class="avatarUrl">
-        <image src="../../static/my/avatar.png" mode="aspectFit" />
+        <image
+          :src="userStore.profile.avatarUrl || '../../static/my/avatar.png'"
+          mode="aspectFit"
+        />
       </view>
       <view class="editInfo">编辑资料</view>
     </view>

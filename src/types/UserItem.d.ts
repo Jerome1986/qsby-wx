@@ -1,3 +1,4 @@
+// 用户基础信息
 export interface UserItem {
   /** mongoId */
   _id: string
@@ -11,6 +12,8 @@ export interface UserItem {
   avatarUrl: string
   /** 性别：0-未知 1-男 2-女 */
   gender: number
+  /** 年龄 */
+  age: string
   /** 用户角色：user 普通用户 / admin 管理员 / manager 主理人 等 */
   role: 'user' | 'admin' | 'manager'
   /** 注册时间 */
@@ -31,4 +34,13 @@ export interface UserItem {
   score: number
   /** 待结算余额（单位：分） */
   balance: number
+  /** 用户更新头像的次数，超过1天后会重置 */
+  avatarUpdateCount?: number
+  /** 更新头像的时间 */
+  avatarUpdateAt?: Date
+}
+
+//用户更换头像返回类型
+export interface ChangerAvatarResult {
+  avatarUrl: string
 }

@@ -41,3 +41,75 @@ image {
   -webkit-line-clamp: $line;
   -webkit-box-orient: vertical;
 }
+
+@mixin customSelected() {
+  :deep(.uni-stat__select) {
+    width: 157rpx;
+  }
+  :deep(.uni-select) {
+    height: 38rpx !important;
+    min-height: 38rpx !important;
+    border-radius: 19rpx !important;
+    background-color: transparent !important;
+  }
+
+  :deep(.border-default) {
+    border: 1px solid #cccccc;
+  }
+  :deep(.uni-select__input-box) {
+    height: 38rpx !important;
+    line-height: 38rpx !important;
+  }
+  :deep(.uni-select__input-text) {
+    font-size: 24rpx;
+  }
+}
+
+// 页面渐变 + 虚化背景
+@mixin page-background(
+  $saturate: 1.6,
+  $split: 55%,
+  $baseColor: #f8f8f8
+) {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+
+  background: linear-gradient(
+      to bottom right,
+      #ffeba4,
+      #feeca6,
+      #f5f2dc,
+      #eff3f0,
+      #ebf1f4,
+      #e7f1f9
+  );
+
+  filter: saturate($saturate);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    background:
+      linear-gradient(
+          to bottom,
+          transparent 45%,
+          rgba(248, 248, 248, 0.4) 50%,
+          $baseColor $split
+      ),
+      linear-gradient(
+          to bottom,
+          transparent 25%,
+          rgba(255, 255, 255, 0.2) 45%,
+          rgba(255, 255, 255, 0.4) 50%
+      ),
+      radial-gradient(circle at top left, rgba(255, 255, 255, 0.4), transparent 70%),
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.4), transparent 70%),
+      radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.1), transparent 90%),
+      radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.1), transparent 90%);
+  }
+}
+
