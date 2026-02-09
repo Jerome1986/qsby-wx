@@ -118,7 +118,7 @@ const change = (value: any) => {
       </view>
     </view>
     <!-- 没数据  -->
-    <view class="consumptionDetails" v-if="true">
+    <view class="consumptionDetails" v-if="false">
       <NavTitle title="消费明细"> </NavTitle>
       <NoData
         image-url="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/friendDetail/noData.png"

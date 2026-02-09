@@ -263,27 +263,7 @@ const handleLoginOut = () => {
 
     .uni-forms-item__content {
       .uni-easyinput {
-        .uni-easyinput__content {
-          .uni-easyinput__inner {
-            border: 1rpx solid #f1f1f1;
-            border-radius: 8rpx;
-            padding: 0 20rpx;
-            font-size: 28rpx;
-            color: #0b0a0a;
-            background-color: #fafafa;
-            height: 80rpx;
-            line-height: 80rpx;
-
-            &::placeholder {
-              color: #b5b5b5;
-            }
-
-            &:focus {
-              border-color: #ffd018;
-              background-color: #ffffff;
-            }
-          }
-        }
+        @include customUniEasyInput();
       }
     }
   }

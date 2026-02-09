@@ -90,6 +90,29 @@
             "enablePullDownRefresh": false,
             "navigationBarBackgroundColor": "#fff4b9"
           }
+        },
+        {
+          "path": "myWallet/myWallet",
+          "style": {
+            "navigationBarTitleText": "我的钱包",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9"
+          }
+        },
+        {
+          "path": "myWallet/applyForCash ",
+          "style": {
+            "navigationBarTitleText": "余额提现",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9"
+          }
+        },
+        {
+          "path": "voucher/voucher",
+          "style": {
+            "navigationBarTitleText": "代金券",
+            "enablePullDownRefresh": false
+          }
         }
       ]
     }

@@ -42,6 +42,42 @@ image {
   -webkit-box-orient: vertical;
 }
 
+// 自定义按钮--常用（提交、返回首页等）
+@mixin customBtn() {
+  text-align: center;
+  width: 309rpx;
+  height: 87rpx;
+  line-height: 87rpx;
+  background: #ffd018;
+  border-radius: 44rpx;
+}
+
+// 自定义input样式
+@mixin customUniEasyInput() {
+  .uni-easyinput__content {
+    .uni-easyinput__inner {
+      border: 1rpx solid #f1f1f1;
+      border-radius: 8rpx;
+      padding: 0 20rpx;
+      font-size: 28rpx;
+      color: #0b0a0a;
+      background-color: #fafafa;
+      height: 80rpx;
+      line-height: 80rpx;
+
+      &::placeholder {
+        color: #b5b5b5;
+      }
+
+      &:focus {
+        border-color: #ffd018;
+        background-color: #ffffff;
+      }
+    }
+  }
+}
+
+// 自定义选择TAB
 @mixin customSelected() {
   :deep(.uni-stat__select) {
     width: 157rpx;
@@ -50,7 +86,6 @@ image {
     height: 38rpx !important;
     min-height: 38rpx !important;
     border-radius: 19rpx !important;
-    background-color: transparent !important;
   }
 
   :deep(.border-default) {
@@ -62,6 +97,9 @@ image {
   }
   :deep(.uni-select__input-text) {
     font-size: 24rpx;
+  }
+  :deep(.uni-stat-box) {
+    background-color: transparent !important;
   }
 }
 

@@ -19,6 +19,7 @@ const handleNav = (val: string) => {
       break
     case '我的钱包':
       console.log('我的钱包')
+      uni.navigateTo({ url: '/pagesMember/myWallet/myWallet' })
       break
     case '代金券':
       console.log('代金券')
