@@ -23,6 +23,7 @@ const handleNav = (val: string) => {
       break
     case '代金券':
       console.log('代金券')
+      uni.navigateTo({ url: '/pagesMember/voucher/voucher' })
       break
     case '我的积分':
       console.log('我的积分')

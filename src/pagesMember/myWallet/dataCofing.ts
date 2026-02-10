@@ -1,6 +1,6 @@
-<script setup lang="ts">
 import { ref } from 'vue'
-// 消费明细数据类型
+
+// 收入记录类型
 interface ConsumptionItem {
   buyerName: string
   amount: string
@@ -12,7 +12,7 @@ interface ConsumptionItem {
 }
 
 // 定义字段配置
-const fields: { label: string; key: keyof ConsumptionItem }[] = [
+export const fields: { label: string; key: keyof ConsumptionItem }[] = [
   { label: '购买人', key: 'buyerName' },
   { label: '产品金额', key: 'amount' },
   { label: '下单时间', key: 'orderTime' },
@@ -22,7 +22,7 @@ const fields: { label: string; key: keyof ConsumptionItem }[] = [
 ]
 
 // 列表数据（后期从接口获取）
-const listData = ref<ConsumptionItem[]>([
+export const listData = ref<ConsumptionItem[]>([
   {
     buyerName: '何**',
     amount: '4950.00',
@@ -57,43 +57,3 @@ const listData = ref<ConsumptionItem[]>([
   },
   // ... 更多数据
 ])
-</script>
-
-<template>
-  <view class="item" v-for="(item, index) in listData" :key="index">
-    <view class="row" v-for="field in fields" :key="field.key">
-      <view class="label">{{ field.label }}</view>
-      <view class="value">{{ item[field.key] }}</view>
-    </view>
-  </view>
-</template>
-
-<style scoped lang="scss">
-/*明细列表*/
-.item {
-  padding: 24rpx;
-  margin-bottom: 20rpx;
-  background: #ffffff;
-  border-radius: 30rpx;
-  &:last-of-type {
-    margin-bottom: 0;
-  }
-  .row {
-    margin-bottom: 20rpx;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 28rpx;
-    &:last-of-type {
-      margin-bottom: 0;
-    }
-
-    .label {
-      color: $qs-font-dec2;
-    }
-    .value {
-      color: $qs-font-title;
-    }
-  }
-}
-</style>

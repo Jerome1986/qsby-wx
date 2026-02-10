@@ -111,7 +111,16 @@
           "path": "voucher/voucher",
           "style": {
             "navigationBarTitleText": "代金券",
-            "enablePullDownRefresh": false
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9"
+          }
+        },
+        {
+          "path": "voucher/voucherDetail",
+          "style": {
+            "navigationBarTitleText": "代金券明细",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9"
           }
         }
       ]

@@ -2,7 +2,8 @@
 import { ref } from 'vue'
 import { generateMonthOptions, getCurrentMonth } from '@/utils/generateMonth.ts'
 import CashRecord from '@/pagesMember/myWallet/components/CashRecord.vue'
-import IncomeRecord from '@/pagesMember/myWallet/components/IncomeRecord.vue'
+import Record from '@/components/Record.vue'
+import { fields, listData } from './dataCofing.ts'
 
 // 当前激活的tab
 const activeTab = ref('cash')
@@ -92,7 +93,7 @@ const handleBalance = () => {
       :enhanced="true"
       :show-scrollbar="false"
     >
-      <IncomeRecord></IncomeRecord>
+      <Record :fields="fields" :list-data="listData"></Record>
     </scroll-view>
   </view>
 </template>
