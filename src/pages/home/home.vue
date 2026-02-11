@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { homeData } from '@/pages/home/data.ts'
+import { getNavBarHeight, navBarHeight } from '@/pages/my/myConfig.ts'
 
 const shareInfo = ref()
 
@@ -13,7 +14,10 @@ onShareTimeline(() => {
   return shareInfo.value
 })
 
-onLoad(() => {})
+onLoad(() =>
+  // 获取导航栏高度
+  getNavBarHeight(),
+)
 </script>
 
 <template>
@@ -38,6 +42,7 @@ onLoad(() => {})
     </view>
     <!--  导航列表主题  -->
     <view class="main">
+      <view class="head" :style="{ height: navBarHeight + 'px' }"></view>
       <view class="nav-list">
         <view class="nav-item" v-for="(item, index) in homeData" :key="index">
           <view class="icon">

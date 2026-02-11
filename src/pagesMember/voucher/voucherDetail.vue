@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { generateMonthOptions, getCurrentMonth } from '@/utils/generateMonth.ts'
 import Record from '@/components/Record.vue'
 import { fields, listData } from './dataConfig.ts'
+import NavHead from '@/components/NavHead.vue'
 
 // 默认选择当前月份
 const selectedMonth = ref(getCurrentMonth())
@@ -21,6 +22,7 @@ const handleScroll = () => {
 </script>
 <template>
   <view class="detail">
+    <NavHead title="代金券明细" :show-back="true"></NavHead>
     <view class="head">
       <NavTitle title="代金券明细"></NavTitle>
     </view>

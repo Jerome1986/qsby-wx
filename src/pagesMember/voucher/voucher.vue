@@ -2,6 +2,7 @@
 import Card from './components/Card.vue'
 import NavTitle from '@/components/NavTitle.vue'
 import Table from './components/Table.vue'
+import NavHead from '@/components/NavHead.vue'
 
 const goDetail = () => {
   uni.navigateTo({
@@ -11,6 +12,7 @@ const goDetail = () => {
 </script>
 <template>
   <view class="voucher">
+    <NavHead title="代金券" :show-back="true"></NavHead>
     <!--  代金券卡片信息  -->
     <Card></Card>
     <!--  title    -->
@@ -56,5 +58,6 @@ const goDetail = () => {
   background-color: #ffffff;
   border-radius: 30rpx;
   overflow: hidden;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
 }
 </style>

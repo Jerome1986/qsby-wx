@@ -27,6 +27,7 @@ const handleNav = (val: string) => {
       break
     case '我的积分':
       console.log('我的积分')
+      uni.navigateTo({ url: '/pagesMember/myScore/myScore' })
       break
   }
 }
@@ -56,6 +57,7 @@ const handleNav = (val: string) => {
   height: 179rpx;
   background: #ffffff;
   border-radius: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
 
   .function-item {
     display: flex;

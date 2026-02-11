@@ -21,6 +21,7 @@ defineProps<{
   margin-bottom: 20rpx;
   background: #ffffff;
   border-radius: 30rpx;
+  @include customShadow();
   &:last-of-type {
     margin-bottom: 0;
   }

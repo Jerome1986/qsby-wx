@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import NavHead from '@/components/NavHead.vue'
 
 const formData = ref({
   name: '',
@@ -26,6 +27,7 @@ const goHome = () => {
 </script>
 <template>
   <view class="applyForCash">
+    <NavHead title="余额提现" :show-back="true"></NavHead>
     <!-- 提交前表单   -->
     <template v-if="!isSuccess">
       <!-- 提现表单  -->
@@ -109,6 +111,7 @@ const goHome = () => {
   padding: 20rpx 30rpx;
   background: #ffffff;
   border-radius: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
 }
 :deep(.uni-forms-item) {
   margin-bottom: 20rpx;
@@ -127,6 +130,7 @@ const goHome = () => {
   align-items: center;
   background-color: #ffffff;
   border-radius: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
   .label {
     font-size: 26rpx;
     color: #0b0a0a;

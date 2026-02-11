@@ -4,6 +4,7 @@ import { generateMonthOptions, getCurrentMonth } from '@/utils/generateMonth.ts'
 import CashRecord from '@/pagesMember/myWallet/components/CashRecord.vue'
 import Record from '@/components/Record.vue'
 import { fields, listData } from './dataCofing.ts'
+import NavHead from '@/components/NavHead.vue'
 
 // 当前激活的tab
 const activeTab = ref('cash')
@@ -35,6 +36,7 @@ const handleBalance = () => {
 </script>
 <template>
   <view class="myWallet">
+    <NavHead title="我的钱包" :show-back="true"></NavHead>
     <!--  金额信息  -->
     <view class="userMoney">
       <view class="top">

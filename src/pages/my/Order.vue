@@ -25,6 +25,7 @@ import NavTitle from '@/components/NavTitle.vue'
   height: 232rpx;
   background-color: #ffffff;
   border-radius: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
   .order-head {
     display: flex;
     justify-content: space-between;

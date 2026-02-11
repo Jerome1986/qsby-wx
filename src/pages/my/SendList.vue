@@ -20,6 +20,7 @@ import NavTitle from '@/components/NavTitle.vue'
   height: 168rpx;
   background: linear-gradient(0deg, #fcfcfc 0%, #fff9ca 100%);
   border-radius: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
   .dec {
     padding-left: 12rpx;
     margin-top: 24rpx;

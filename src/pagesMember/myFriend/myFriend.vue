@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import NavTitle from '@/components/NavTitle.vue'
 import NoData from '@/components/NoData.vue'
+import NavHead from '@/components/NavHead.vue'
 
 const handleScroll = () => {
   console.log('触底')
@@ -15,6 +16,7 @@ const handleDetail = (index: number) => {
 </script>
 <template>
   <view class="myFriend">
+    <NavHead title="我的好友" :show-back="true"></NavHead>
     <view class="head">
       <!-- 邀请人数  -->
       <view class="item">

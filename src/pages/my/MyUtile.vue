@@ -21,6 +21,7 @@ import { utilsData } from '@/pages/my/myConfig.ts'
   padding: 26rpx 30rpx;
   background: #ffffff;
   border-radius: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
   .utils {
     margin-top: 30rpx;
     display: grid;
