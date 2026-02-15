@@ -85,6 +85,8 @@ const handleDetail = (index: number) => {
 
 <style scoped lang="scss">
 .myFriend {
+  display: flex;
+  flex-direction: column;
   padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
@@ -124,6 +126,7 @@ const handleDetail = (index: number) => {
     }
   }
   .content {
+    flex: 1;
     padding: 28rpx;
     margin-top: 20rpx;
     width: 100%;

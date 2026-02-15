@@ -137,6 +137,49 @@
             "navigationBarBackgroundColor": "#fff4b9",
             "navigationStyle": "custom"
           }
+        },
+        {
+          "path": "myScore/scoreProductDetail",
+          "style": {
+            "navigationBarTitleText": "商品详情",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "myScore/exchange",
+          "style": {
+            "navigationBarTitleText": "积分兑换",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "myScore/scoreDetail",
+          "style": {
+            "navigationBarTitleText": "积分明细",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "myScore/scoreOrder",
+          "style": {
+            "navigationBarTitleText": "积分订单",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "applyFor/applyFor",
+          "style": {
+            "navigationBarTitleText": "申请主理人",
+            "enablePullDownRefresh": false
+          }
         }
       ]
     }

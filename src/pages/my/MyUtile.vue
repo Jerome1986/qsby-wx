@@ -33,8 +33,8 @@ import { utilsData } from '@/pages/my/myConfig.ts'
       align-items: center;
       gap: 10rpx;
       .icon {
-        width: 61rpx;
-        height: 61rpx;
+        width: 52rpx;
+        height: 52rpx;
         overflow: hidden;
       }
       .text {

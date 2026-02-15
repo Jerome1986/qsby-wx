@@ -119,7 +119,10 @@ image {
   );
 }
 
-// 通用阴影
+// 通用阴影（柔和立体卡片阴影）
 @mixin customShadow() {
-  box-shadow: 0 8rpx 8rpx rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 1rpx 2rpx rgba(0, 0, 0, 0.03),
+    0 2rpx 6rpx rgba(0, 0, 0, 0.05),
+    0 4rpx 10rpx rgba(0, 0, 0, 0.04);
 }

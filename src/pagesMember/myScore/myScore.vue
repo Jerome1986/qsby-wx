@@ -4,6 +4,31 @@ import NavHead from '@/components/NavHead.vue'
 const handleScroll = () => {
   console.log('触底')
 }
+
+// 积分商品详情
+const goDetail = (index: number) => {
+  console.log(index)
+  uni.navigateTo({
+    url: `/pagesMember/myScore/scoreProductDetail?productId=${index}`,
+  })
+}
+
+//  处理TAP跳转
+const handelGo = (val: string) => {
+  switch (val) {
+    case 'detail':
+      uni.navigateTo({
+        url: '/pagesMember/myScore/scoreDetail',
+      })
+      break
+    case 'order':
+      console.log('积分订单')
+      uni.navigateTo({
+        url: '/pagesMember/myScore/scoreOrder',
+      })
+      break
+  }
+}
 </script>
 <template>
   <view class="myScore">
@@ -14,8 +39,8 @@ const handleScroll = () => {
       <view class="value">
         <view class="score">1299</view>
         <view class="btn">
-          <view class="details item">积分明细</view>
-          <view class="order item">积分订单</view>
+          <view class="details item" @tap="handelGo('detail')">积分明细</view>
+          <view class="order item" @tap="handelGo('order')">积分订单</view>
         </view>
       </view>
     </view>
@@ -27,7 +52,7 @@ const handleScroll = () => {
       :enhanced="true"
       :show-scrollbar="false"
     >
-      <view class="product-item" v-for="index in 10" :key="index">
+      <view class="product-item" v-for="index in 10" :key="index" @tap="goDetail(index)">
         <view class="cover">
           <image
             class="img"
@@ -61,10 +86,9 @@ const handleScroll = () => {
 /*积分展示*/
 .head {
   padding: 30rpx;
-  background: linear-gradient(180deg, #fff2bd 0%, #ffffff 100%);
+  background-color: #ffffff;
   border-radius: 30rpx;
   @include customShadow();
-  z-index: 2;
   .title {
     margin-bottom: 20rpx;
     font-size: 28rpx;
