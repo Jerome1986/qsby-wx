@@ -30,7 +30,7 @@ const change = (value: any) => {
 
 const handleBalance = () => {
   uni.navigateTo({
-    url: '/pagesMember/myWallet/applyForCash ',
+    url: '/pagesMember/myWallet/applyForCash',
   })
 }
 </script>

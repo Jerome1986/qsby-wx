@@ -1,13 +1,24 @@
 <script setup lang="ts">
 import NavTitle from '@/components/NavTitle.vue'
-import { utilsData } from '@/pages/my/myConfig.ts'
+import { utilsData, utilsJumpMap } from '@/pages/my/myConfig.ts'
+import type { myUtilsType } from '@/types/My'
+
+const handleGo = (val: myUtilsType) => {
+  console.log(val)
+  utilsJumpMap[val]()
+}
 </script>
 
 <template>
   <view class="myUtils">
     <NavTitle title="我的工具"></NavTitle>
     <view class="utils">
-      <view class="utils-item" v-for="(item, index) in utilsData" :key="index">
+      <view
+        class="utils-item"
+        v-for="(item, index) in utilsData"
+        :key="index"
+        @tap="handleGo(item.type)"
+      >
         <image class="icon" :src="item.icon" mode="aspectFit"></image>
         <view class="text">{{ item.text }}</view>
       </view>

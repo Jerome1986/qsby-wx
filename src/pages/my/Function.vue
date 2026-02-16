@@ -1,35 +1,20 @@
 <script setup lang="ts">
-import { functionData } from '@/pages/my/myConfig.ts'
+import { functionData, functionJumpMap } from '@/pages/my/myConfig.ts'
 import { useUserStore } from '@/stores'
+import type { FeatureType } from '@/types/My'
 
 const userStore = useUserStore()
 
-// 处理路径跳转
-const handleNav = (val: string) => {
+// 处理功能区路径跳转
+const handleNav = (val: FeatureType) => {
+  console.log('类型', val)
   // 验证登录
   if (!userStore.profile?._id) {
     uni.showToast({ icon: 'none', title: '请登录后使用', duration: 1000, mask: true })
     return
   }
   // 跳转
-  switch (val) {
-    case '我的好友':
-      console.log('我的好友')
-      uni.navigateTo({ url: '/pagesMember/myFriend/myFriend' })
-      break
-    case '我的钱包':
-      console.log('我的钱包')
-      uni.navigateTo({ url: '/pagesMember/myWallet/myWallet' })
-      break
-    case '代金券':
-      console.log('代金券')
-      uni.navigateTo({ url: '/pagesMember/voucher/voucher' })
-      break
-    case '我的积分':
-      console.log('我的积分')
-      uni.navigateTo({ url: '/pagesMember/myScore/myScore' })
-      break
-  }
+  functionJumpMap[val]()
 }
 </script>
 
@@ -39,7 +24,7 @@ const handleNav = (val: string) => {
       class="function-item"
       v-for="(item, index) in functionData"
       :key="index"
-      @tap="handleNav(item.text)"
+      @tap="handleNav(item.type)"
     >
       <image class="icon" :src="item.icon" mode="aspectFit"></image>
       <view class="text">{{ item.text }}</view>

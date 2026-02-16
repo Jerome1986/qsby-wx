@@ -103,7 +103,7 @@
           }
         },
         {
-          "path": "myWallet/applyForCash ",
+          "path": "myWallet/applyForCash",
           "style": {
             "navigationBarTitleText": "余额提现",
             "enablePullDownRefresh": false,
@@ -178,6 +178,15 @@
           "path": "applyFor/applyFor",
           "style": {
             "navigationBarTitleText": "申请主理人",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "suggestion/suggestion",
+          "style": {
+            "navigationBarTitleText": "意见反馈",
             "enablePullDownRefresh": false
           }
         }
