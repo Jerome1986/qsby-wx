@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
-import { homeData } from '@/pages/home/data.ts'
+import { homeData, HomeJump, type NavType } from '@/pages/home/data.ts'
 import { getNavBarHeight, navBarHeight } from '@/pages/my/myConfig.ts'
 
 const shareInfo = ref()
+
+// 跳转页面
+const handleGo = (val: NavType) => {
+  HomeJump[val]()
+}
 
 onShareAppMessage(() => {
   return shareInfo.value
@@ -44,7 +49,12 @@ onLoad(() =>
     <view class="main">
       <view class="head" :style="{ height: navBarHeight + 'px' }"></view>
       <view class="nav-list">
-        <view class="nav-item" v-for="(item, index) in homeData" :key="index">
+        <view
+          class="nav-item"
+          v-for="(item, index) in homeData"
+          :key="index"
+          @tap="handleGo(item.type)"
+        >
           <view class="icon">
             <image :src="item.icon"></image>
           </view>

@@ -36,6 +36,22 @@
         "navigationBarTitleText": "登录",
         "enablePullDownRefresh": false
       }
+    },
+    {
+      "path": "pages/play/play",
+      "style": {
+        "navigationBarTitleText": "趣哪•游",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/play/playDetail",
+      "style": {
+        "navigationBarTitleText": "行程详情",
+        "enablePullDownRefresh": false
+      }
     }
   ],
   "tabBar": {
@@ -187,7 +203,9 @@
           "path": "suggestion/suggestion",
           "style": {
             "navigationBarTitleText": "意见反馈",
-            "enablePullDownRefresh": false
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
           }
         }
       ]

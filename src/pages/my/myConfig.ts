@@ -87,7 +87,9 @@ export const utilsJumpMap: Record<myUtilsType, () => void> = {
   share: () => {},
   group: () => {},
   message: () => {},
-  suggestion: () => {},
+  suggestion: () => {
+    uni.navigateTo({ url: '/pagesMember/suggestion/suggestion' })
+  },
   cooperate: () => {},
 }
 
