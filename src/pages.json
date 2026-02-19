@@ -50,7 +50,9 @@
       "path": "pages/play/playDetail",
       "style": {
         "navigationBarTitleText": "行程详情",
-        "enablePullDownRefresh": false
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
       }
     }
   ],

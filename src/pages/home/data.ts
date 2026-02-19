@@ -8,6 +8,7 @@ interface Data {
   dec: string
   /** 标题 */
   title: string
+  /** 导航映射类型 */
   type: NavType
 }
 

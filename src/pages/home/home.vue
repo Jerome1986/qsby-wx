@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { homeData, HomeJump, type NavType } from '@/pages/home/data.ts'
-import { getNavBarHeight, navBarHeight } from '@/pages/my/myConfig.ts'
+import { getNavBarHeight, navBarHeight } from '@/utils/system-info.ts'
 
 const shareInfo = ref()
 

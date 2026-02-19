@@ -1,7 +1,13 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const handleGo = (index: number) => {
+  uni.navigateTo({
+    url: `/pages/play/playDetail?productId=${index}`,
+  })
+}
+</script>
 
 <template>
-  <view class="productCard" v-for="index in 10" :key="index">
+  <view class="productCard" v-for="index in 10" :key="index" @tap="handleGo(index)">
     <!--   封面   -->
     <view class="cover">
       <image

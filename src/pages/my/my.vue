@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app'
-import { navBarHeight, getNavBarHeight } from './myConfig'
+import { navBarHeight, getNavBarHeight } from '@/utils/system-info.ts'
 import UserInfo from './UserInfo.vue'
 import Order from '@/pages/my/Order.vue'
 import Function from '@/pages/my/Function.vue'
