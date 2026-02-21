@@ -54,6 +54,24 @@
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/play/signUp",
+      "style": {
+        "navigationBarTitleText": "报名信息",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/public/public",
+      "style": {
+        "navigationBarTitleText": "发布",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
     }
   ],
   "tabBar": {

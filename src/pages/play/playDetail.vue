@@ -2,6 +2,16 @@
 import NavHead from '@/components/NavHead.vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info.ts'
+import { useUserStore } from '@/stores'
+
+const userStore = useUserStore()
+
+// 处理报名
+const handleSign = () => {
+  uni.navigateTo({
+    url: '/pages/play/signUp',
+  })
+}
 
 onLoad(() => {
   getSafeAreaBottom()
@@ -39,10 +49,10 @@ onLoad(() => {
         </view>
         <view class="bottom">
           <view class="row">
-            <view class="text">行程报名费用</view>
+            <view class="text">报名费用</view>
             <view class="value">￥400.00</view>
           </view>
-          <view class="row">
+          <view class="row" v-if="userStore.profile?.role === 'manager'">
             <view class="text">佣金</view>
             <view class="value">￥200.00</view>
           </view>
@@ -126,7 +136,7 @@ onLoad(() => {
         <view>分享</view>
       </view>
       <!--   报名按钮   -->
-      <view class="sign">行程报名</view>
+      <view class="sign" @tap="handleSign">行程报名</view>
     </view>
   </view>
 </template>
@@ -171,6 +181,9 @@ onLoad(() => {
     }
 
     .info {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       flex: 1;
       margin-left: 24rpx;
 

@@ -11,13 +11,19 @@ const cateData = ref([
   { _id: '04', cateName: '定制' },
   { _id: '05', cateName: '银发' },
 ])
+
+const handleSend = () => {
+  uni.navigateTo({
+    url: '/pages/public/public',
+  })
+}
 </script>
 <template>
   <view class="play">
     <NavHead title="趣哪•游 " :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  发布  -->
-      <view class="banner">
+      <view class="banner" @tap="handleSend">
         <image
           class="img"
           src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/fbxc.jpg"
