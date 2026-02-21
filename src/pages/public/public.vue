@@ -43,6 +43,49 @@ const handleEditRequirement = () => {
   // TODO: 跳转行程需求编辑页
 }
 
+interface imageItem {
+  name: string
+  extname: string
+  url: string
+}
+
+// 行程图片上传
+const imageValue = ref<any[]>([])
+const filePickerRef = ref()
+
+const select = (e: any) => {
+  const existNames = new Set(imageValue.value.map((img: imageItem) => img.name))
+  const dupIndexes: number[] = []
+
+  e.tempFiles.forEach((item: imageItem, index: number) => {
+    if (existNames.has(item.name)) {
+      dupIndexes.push(imageValue.value.length - e.tempFiles.length + index)
+    }
+  })
+
+  // 从后往前删除，避免索引偏移
+  dupIndexes.reverse().forEach((i) => {
+    filePickerRef.value?.clearFiles(i)
+  })
+}
+
+const progress = (e: any) => {
+  console.log('上传进度：', e)
+}
+
+const success = (e: any) => {
+  console.log('上传成功：', e)
+}
+
+const fail = (e: any) => {
+  console.log('上传失败：', e)
+}
+
+// 提交审核
+const handleSubmit = () => {
+  // TODO: 表单校验 & 提交逻辑
+}
+
 // 搜索地点
 const changeLocal = () => {
   uni.chooseLocation({
@@ -217,7 +260,29 @@ const changeLocal = () => {
         </uni-forms>
       </view>
       <!-- 行程图片上传 -->
-
+      <view class="contentUpdateImage">
+        <view class="contentUpdateImage-header">
+          <text>行程图片</text>
+          <text class="contentUpdateImage-count">{{ imageValue.length }}/6</text>
+        </view>
+        <uni-file-picker
+          ref="filePickerRef"
+          v-model="imageValue"
+          fileMediatype="image"
+          mode="grid"
+          :limit="6"
+          :auto-upload="false"
+          @select="select"
+          @progress="progress"
+          @success="success"
+          @fail="fail"
+        />
+        <view class="contentUpdateImage-tip">最多上传6张，支持JPG、PNG格式</view>
+      </view>
+      <!-- 提交审核 -->
+      <view class="submit">
+        <view class="submit-btn" @tap="handleSubmit">提交审核</view>
+      </view>
       <!-- 底部占位 -->
       <view class="scroll-bottom-placeholder"></view>
     </scroll-view>
@@ -236,7 +301,7 @@ const changeLocal = () => {
 /* 内容区域 */
 .content {
   flex: 1;
-  padding: 24rpx;
+  padding: 24rpx 24rpx 120rpx;
 
   .scroll-bottom-placeholder {
     height: 20rpx;
@@ -395,5 +460,66 @@ const changeLocal = () => {
   }
 }
 
+/* 提交审核 */
+.submit {
+  margin-top: 40rpx;
+  padding: 0 24rpx;
+
+  .submit-btn {
+    width: 309rpx;
+    height: 87rpx;
+    line-height: 87rpx;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: $qs-font-title;
+    background: $qs-brandColor;
+    border-radius: 44rpx;
+  }
+}
+
 /* 图片上传区域 */
+.contentUpdateImage {
+  margin-top: 24rpx;
+  padding: 24rpx;
+  border-bottom: 1px solid #f5f5f5;
+
+  .contentUpdateImage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 28rpx;
+    color: $qs-font-title;
+    margin-bottom: 20rpx;
+
+    .contentUpdateImage-count {
+      font-size: 24rpx;
+      color: $qs-font-dec2;
+    }
+  }
+
+  .contentUpdateImage-tip {
+    margin-top: 16rpx;
+    font-size: 24rpx;
+    color: $qs-font-dec2;
+  }
+
+  :deep(.file-picker__box) {
+    border-radius: 12rpx;
+  }
+
+  :deep(.file-picker__box-content) {
+    border-radius: 12rpx;
+  }
+
+  :deep(.is-add) {
+    border-radius: 12rpx;
+    background-color: #fafafa;
+  }
+
+  :deep(.file-picker__progress) {
+    border-radius: 0 0 12rpx 12rpx;
+  }
+}
 </style>

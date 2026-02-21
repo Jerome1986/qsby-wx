@@ -124,17 +124,13 @@ onLoad(async (options: any) => {
       <!-- 协议区域 -->
       <view class="agreement-section">
         <view class="agreement-content">
-          <view class="checkbox-wrapper" @tap="toggleAgreement">
-            <view class="checkbox-icon" :class="{ checked: isAgreePrivacy }">
-              <text v-if="isAgreePrivacy" class="check-mark">✓</text>
-            </view>
-            <text class="agreement-text">已阅读并同意</text>
+          <view class="checkbox-icon" :class="{ checked: isAgreePrivacy }" @tap="toggleAgreement">
+            <text v-if="isAgreePrivacy" class="check-mark">✓</text>
           </view>
-          <view class="agreement-links">
-            <text class="link">《服务条款》</text>
-            <text class="and-text">和</text>
-            <text class="link">《隐私协议》</text>
-          </view>
+          <text class="agreement-text">已阅读并同意</text>
+          <text class="link">《服务条款》</text>
+          <text class="and-text">和</text>
+          <text class="link">《隐私协议》</text>
         </view>
       </view>
     </view>
@@ -246,69 +242,54 @@ onLoad(async (options: any) => {
 // 协议区域
 .agreement-section {
   .agreement-content {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
 
-    .checkbox-wrapper {
+    .checkbox-icon {
+      width: 32rpx;
+      height: 32rpx;
+      border-radius: 50%;
+      border: 2rpx solid $qs-font-dec2;
+      margin-right: 8rpx;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 12rpx;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
+      font-size: 20rpx;
+      transition: all 0.2s ease;
 
-      .checkbox-icon {
-        width: 32rpx;
-        height: 32rpx;
-        border-radius: 50%;
-        border: 2rpx solid $qs-font-dec2;
-        margin-right: 12rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20rpx;
+      &.checked {
+        background-color: $qs-brandColor;
+        border-color: $qs-brandColor;
+      }
+
+      .check-mark {
         color: #fff;
-        transition: all 0.2s ease;
-
-        &.checked {
-          background-color: $qs-brandColor;
-          border-color: $qs-brandColor;
-        }
-
-        .check-mark {
-          color: #fff;
-          font-size: 20rpx;
-          line-height: 1;
-        }
+        font-size: 20rpx;
+        line-height: 1;
       }
 
-      .agreement-text {
-        font-size: 26rpx;
-        color: $qs-font-dec;
-        transition: color 0.2s ease;
-      }
-
-      &:active .checkbox-icon {
+      &:active {
         transform: scale(0.9);
       }
     }
 
-    .agreement-links {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
+    .agreement-text {
+      font-size: 26rpx;
+      color: $qs-font-dec;
+    }
 
-      .link {
-        font-size: 26rpx;
-        color: $qs-brandColor;
-        font-weight: 500;
-      }
+    .link {
+      font-size: 26rpx;
+      color: $qs-brandColor;
+      font-weight: 500;
+    }
 
-      .and-text {
-        margin: 0 6rpx;
-        font-size: 24rpx;
-        color: $qs-font-dec2;
-      }
+    .and-text {
+      margin: 0 4rpx;
+      font-size: 24rpx;
+      color: $qs-font-dec2;
     }
   }
 }
