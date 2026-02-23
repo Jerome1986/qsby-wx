@@ -5,6 +5,9 @@ import NavTitle from '@/components/NavTitle.vue'
 // 跳转发布
 const handleSend = () => {
   console.log('handleSend')
+  uni.navigateTo({
+    url: '/pages/project/sendProject',
+  })
 }
 
 // 跳转项目详情

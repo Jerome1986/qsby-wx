@@ -109,6 +109,15 @@
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/project/sendProject",
+      "style": {
+        "navigationBarTitleText": "发布项目",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
     }
   ],
   "tabBar": {
