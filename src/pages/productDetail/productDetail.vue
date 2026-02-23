@@ -3,6 +3,11 @@ import NavHead from '@/components/NavHead.vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info.ts'
 import { useUserStore } from '@/stores'
+import { ref } from 'vue'
+import OrganizerInfo from '@/components/OrganizerInfo.vue'
+
+// 页面标题
+const title = ref('详情')
 
 const userStore = useUserStore()
 
@@ -13,14 +18,20 @@ const handleSign = () => {
   })
 }
 
-onLoad(() => {
+onLoad((options: any) => {
+  console.log('options:', options)
+  // 获取页面参数
+  if (options && options.title) {
+    title.value = options.title
+  }
+  // 获取底部安全区域高度
   getSafeAreaBottom()
 })
 </script>
 
 <template>
   <view class="playDetail">
-    <NavHead title="行程详情" :show-back="true"></NavHead>
+    <NavHead :title="title" :show-back="true"></NavHead>
     <!--  滚动内容区域  -->
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!-- 商品信息 -->
@@ -85,37 +96,8 @@ onLoad(() => {
           </view>
         </view>
       </view>
-
       <!-- 组织方 -->
-      <view class="organizer">
-        <view class="title">组织方</view>
-        <view class="content">
-          <view class="left">
-            <view class="avatar">
-              <image
-                mode="aspectFill"
-                src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg"
-              ></image>
-            </view>
-            <view class="nickname">何无念</view>
-          </view>
-          <view class="right">
-            <view class="wx">
-              <image
-                mode="aspectFill"
-                src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/wx.png"
-              ></image>
-            </view>
-            <view class="phone">
-              <image
-                mode="aspectFill"
-                src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/phone.png"
-              ></image>
-            </view>
-          </view>
-        </view>
-      </view>
-
+      <OrganizerInfo></OrganizerInfo>
       <!-- 活动介绍 -->
       <view class="activity">
         <view class="title">活动介绍</view>
@@ -356,61 +338,6 @@ onLoad(() => {
         .count {
           color: $qs-font-title;
         }
-      }
-    }
-  }
-}
-
-/* 组织方卡片 */
-.organizer {
-  margin-top: 24rpx;
-  padding: 24rpx;
-  background-color: #ffffff;
-  border-radius: 24rpx;
-  @include customShadow();
-
-  .title {
-    font-size: 28rpx;
-    font-weight: bold;
-    color: $qs-font-title;
-    margin-bottom: 20rpx;
-  }
-
-  .content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .left {
-      display: flex;
-      align-items: center;
-
-      .avatar {
-        width: 64rpx;
-        height: 64rpx;
-        border-radius: 50%;
-        overflow: hidden;
-      }
-
-      .nickname {
-        margin-left: 16rpx;
-        font-size: 28rpx;
-        color: $qs-font-title;
-      }
-    }
-
-    .right {
-      display: flex;
-      align-items: center;
-      gap: 20rpx;
-
-      .wx,
-      .phone {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 64rpx;
-        height: 64rpx;
       }
     }
   }

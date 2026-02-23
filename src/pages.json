@@ -3,7 +3,8 @@
     "autoscan": true,
     "custom": {
       // uni-ui 规则如下配置
-      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue",
+      "^wd-(.*)": "wot-design-uni/components/wd-$1/wd-$1.vue"
     }
   },
   "pages": [
@@ -47,15 +48,6 @@
       }
     },
     {
-      "path": "pages/play/playDetail",
-      "style": {
-        "navigationBarTitleText": "行程详情",
-        "enablePullDownRefresh": false,
-        "navigationBarBackgroundColor": "#fff4b9",
-        "navigationStyle": "custom"
-      }
-    },
-    {
       "path": "pages/play/signUp",
       "style": {
         "navigationBarTitleText": "报名信息",
@@ -68,6 +60,51 @@
       "path": "pages/public/public",
       "style": {
         "navigationBarTitleText": "发布",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/activity/activity",
+      "style": {
+        "navigationBarTitleText": "同城活动",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/productDetail/productDetail",
+      "style": {
+        "navigationBarTitleText": "详情",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/project/project",
+      "style": {
+        "navigationBarTitleText": "有趣的项目",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/project/projectDetail",
+      "style": {
+        "navigationBarTitleText": "项目详情",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/project/checkProject",
+      "style": {
+        "navigationBarTitleText": "查看项目",
         "enablePullDownRefresh": false,
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
@@ -233,7 +270,7 @@
   ],
   "globalStyle": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "uni-app",
+    "navigationBarTitleText": "千宿百院",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
   }

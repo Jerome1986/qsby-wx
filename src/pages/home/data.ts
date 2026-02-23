@@ -46,7 +46,15 @@ export const HomeJump: Record<NavType, () => void> = {
       url: '/pages/play/play',
     })
   },
-  city: () => {},
-  interesting: () => {},
+  city: () => {
+    uni.navigateTo({
+      url: '/pages/activity/activity',
+    })
+  },
+  interesting: () => {
+    uni.navigateTo({
+      url: '/pages/project/project',
+    })
+  },
   store: () => {},
 }

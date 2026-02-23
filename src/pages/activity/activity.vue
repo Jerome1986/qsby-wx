@@ -5,10 +5,10 @@ import { ref } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
 
 const cateData = ref([
-  { _id: '01', cateName: '亲子' },
-  { _id: '02', cateName: '社交' },
-  { _id: '03', cateName: '定制' },
-  { _id: '04', cateName: '银发' },
+  { _id: '01', cateName: '体育运动' },
+  { _id: '02', cateName: '餐饮聚餐' },
+  { _id: '03', cateName: '文体艺术' },
+  { _id: '04', cateName: '活动派对' },
 ])
 
 const handleSend = () => {
@@ -19,21 +19,21 @@ const handleSend = () => {
 </script>
 <template>
   <view class="play">
-    <NavHead title="趣哪•游 " :show-back="true"></NavHead>
+    <NavHead title="同城活动 " :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  发布  -->
       <view class="banner" @tap="handleSend">
         <image
           class="img"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/fbxc.jpg"
+          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/fabuhd2.png"
           mode="aspectFill"
         ></image>
       </view>
       <!--  title    -->
-      <view class="title">发现有趣好玩的行程</view>
+      <view class="title">发现同城好玩的活动</view>
       <!--   筛选   -->
       <view class="filter">
-        <FilterBar :cateData="cateData" title="所有行程"></FilterBar>
+        <FilterBar :cateData="cateData" title="活动类别"></FilterBar>
       </view>
       <!--   行程列表   -->
       <view class="list">

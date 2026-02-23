@@ -1,7 +1,8 @@
 <script setup lang="ts">
+// 跳转页面时根据类型来设置动态标题
 const handleGo = (index: number) => {
   uni.navigateTo({
-    url: `/pages/play/playDetail?productId=${index}`,
+    url: `/pages/productDetail/productDetail?productId=${index}&title=动态标题`,
   })
 }
 </script>

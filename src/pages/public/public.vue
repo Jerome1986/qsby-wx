@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
+import type { UploadChangeEvent } from 'wot-design-uni/components/wd-upload/types'
 
 // 表单数据
 const formData = ref({
@@ -43,42 +44,12 @@ const handleEditRequirement = () => {
   // TODO: 跳转行程需求编辑页
 }
 
-interface imageItem {
-  name: string
-  extname: string
-  url: string
-}
-
 // 行程图片上传
-const imageValue = ref<any[]>([])
-const filePickerRef = ref()
-
-const select = (e: any) => {
-  const existNames = new Set(imageValue.value.map((img: imageItem) => img.name))
-  const dupIndexes: number[] = []
-
-  e.tempFiles.forEach((item: imageItem, index: number) => {
-    if (existNames.has(item.name)) {
-      dupIndexes.push(imageValue.value.length - e.tempFiles.length + index)
-    }
-  })
-
-  // 从后往前删除，避免索引偏移
-  dupIndexes.reverse().forEach((i) => {
-    filePickerRef.value?.clearFiles(i)
-  })
-}
-
-const progress = (e: any) => {
-  console.log('上传进度：', e)
-}
-
-const success = (e: any) => {
-  console.log('上传成功：', e)
-}
-
-const fail = (e: any) => {
-  console.log('上传失败：', e)
+const fileList = ref<any[]>([])
+const action: string = 'https://x9zmst6evg.sealoshzh.site/upload/images'
+const handleChange = (e: UploadChangeEvent) => {
+  fileList.value = e.fileList
+  console.log('上传后的文件', fileList.value)
 }
 
 // 提交审核
@@ -99,6 +70,7 @@ const changeLocal = () => {
 <template>
   <view class="public">
     <NavHead title="发布行程" :show-back="true"></NavHead>
+
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  上传封面图    -->
       <view class="updateCover" @tap="handleUpdateCover" v-if="!cover">
@@ -263,20 +235,14 @@ const changeLocal = () => {
       <view class="contentUpdateImage">
         <view class="contentUpdateImage-header">
           <text>行程图片</text>
-          <text class="contentUpdateImage-count">{{ imageValue.length }}/6</text>
         </view>
-        <uni-file-picker
-          ref="filePickerRef"
-          v-model="imageValue"
-          fileMediatype="image"
-          mode="grid"
+        <wd-upload
+          :file-list="fileList"
+          image-mode="aspectFill"
+          :action="action"
           :limit="6"
-          :auto-upload="false"
-          @select="select"
-          @progress="progress"
-          @success="success"
-          @fail="fail"
-        />
+          @change="handleChange"
+        ></wd-upload>
         <view class="contentUpdateImage-tip">最多上传6张，支持JPG、PNG格式</view>
       </view>
       <!-- 提交审核 -->

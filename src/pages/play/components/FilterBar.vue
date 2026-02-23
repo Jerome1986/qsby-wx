@@ -3,10 +3,11 @@ import { ref } from 'vue'
 
 const props = defineProps<{
   cateData: any[]
+  title?: string
 }>()
 
 // 选择行程分类
-const currentCateData = ref(props.cateData[0].cateName || '')
+const currentCateData = ref(props.title ?? props.cateData[0].cateName)
 const filterCateActive = ref(false)
 const handleFilterCate = () => {
   filterCateActive.value = !filterCateActive.value
