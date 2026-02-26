@@ -154,6 +154,15 @@
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/shop/managerRights",
+      "style": {
+        "navigationBarTitleText": "主理人权益",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
     }
   ],
   "tabBar": {

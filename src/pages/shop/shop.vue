@@ -32,6 +32,13 @@ const handleDetail = () => {
     url: '/pages/shop/shopDetail',
   })
 }
+
+// 跳转主理人权益
+const handleRights = () => {
+  uni.navigateTo({
+    url: '/pages/shop/managerRights',
+  })
+}
 </script>
 <template>
   <view class="shop">
@@ -47,7 +54,7 @@ const handleDetail = () => {
       <!--  主理人权益  -->
       <view class="section">
         <NavTitle title="千宿百院/主理人计划"></NavTitle>
-        <view class="interests">
+        <view class="interests" @tap="handleRights">
           <view class="top">
             <view class="left">
               <text class="iconfont icon-wode" style="margin-right: 8rpx; font-weight: bold"></text>
