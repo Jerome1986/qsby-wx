@@ -146,8 +146,8 @@ const handleDetail = () => {
       @include customShadow();
 
       .product-cover {
-        width: 192rpx;
-        height: 192rpx;
+        width: 200rpx;
+        height: 240rpx;
         border-radius: 10rpx;
         overflow: hidden;
         flex-shrink: 0;
@@ -158,7 +158,6 @@ const handleDetail = () => {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 192rpx;
 
         .product-head {
           .product-name {
