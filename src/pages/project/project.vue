@@ -106,8 +106,8 @@ const handleGoDetail = () => {
 
       /* 封面图 */
       .cover {
-        width: 192rpx;
-        height: 192rpx;
+        width: 200rpx;
+        height: 240rpx;
         border-radius: 10rpx;
         overflow: hidden;
         flex-shrink: 0;
@@ -118,13 +118,12 @@ const handleGoDetail = () => {
         flex: 1;
         display: flex;
         flex-direction: column;
-        height: 192rpx;
 
         .name {
+          margin-bottom: 20rpx;
           font-weight: bold;
           font-size: 28rpx;
           color: $qs-font-title;
-          line-height: 1.4;
           @include ellipsis(1);
         }
 

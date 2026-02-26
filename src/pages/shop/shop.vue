@@ -42,7 +42,7 @@ const handleRights = () => {
 </script>
 <template>
   <view class="shop">
-    <NavHead title="门店" :show-back="true"></NavHead>
+    <NavHead title="自营门店" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!-- 顶部横幅 -->
       <view class="banner">
@@ -73,7 +73,7 @@ const handleRights = () => {
         </view>
       </view>
       <view class="section">
-        <NavTitle title="千宿百院·自营门店"></NavTitle>
+        <NavTitle title="千宿百院/自营门店"></NavTitle>
       </view>
       <!--   筛选（不加padding，内部有遮罩）   -->
       <view class="filter">
@@ -213,8 +213,8 @@ const handleRights = () => {
     @include customShadow();
 
     .cover {
-      width: 192rpx;
-      height: 192rpx;
+      width: 200rpx;
+      height: 240rpx;
       border-radius: 10rpx;
       overflow: hidden;
       flex-shrink: 0;
@@ -225,7 +225,6 @@ const handleRights = () => {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 192rpx;
 
       .head {
         .title {

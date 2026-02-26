@@ -64,12 +64,15 @@ const handleSend = () => {
     padding: 0 24rpx;
     width: 100%;
     height: 240rpx;
+    image {
+      border-radius: 30rpx;
+    }
   }
 
   /* 页面标题 */
   .title {
     padding: 0 24rpx;
-    margin: 30rpx 0;
+    margin: 24rpx 0;
     color: $qs-font-title;
     font-weight: bold;
   }
@@ -77,7 +80,7 @@ const handleSend = () => {
   /* 行程列表 */
   .list {
     padding: 0 24rpx 60rpx;
-    margin-top: 30rpx;
+    margin-top: 24rpx;
   }
 }
 </style>

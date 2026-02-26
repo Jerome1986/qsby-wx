@@ -46,7 +46,7 @@ const navBarOptions = [
   position: relative;
   width: 100%;
   height: 220rpx;
-  border-radius: 20rpx;
+  border-radius: 30rpx;
   overflow: hidden;
   margin-bottom: 24rpx;
 
