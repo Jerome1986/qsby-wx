@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const props = defineProps<{
-  cateData: any[]
-  title?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    cateData: any[]
+    title?: string
+    isIcon?: boolean
+  }>(),
+  {
+    cateData: () => [],
+    title: '',
+    isIcon: false,
+  },
+)
 
 // 选择行程分类
 const currentCateData = ref(props.title ?? props.cateData[0].cateName)
@@ -42,7 +50,10 @@ const selectedSort = (item: any) => {
     <!--   行程   -->
     <view class="filter-item" @tap="handleFilterCate">
       <!--   当前所选值   -->
-      <view class="text">{{ currentCateData }}</view>
+      <view class="cate-label">
+        <text v-if="isIcon" class="iconfont icon-address cate-icon"></text>
+        <text>{{ currentCateData }}</text>
+      </view>
       <text
         v-show="!filterCateActive"
         class="iconfont icon-laxiatubiao"
@@ -109,11 +120,22 @@ const selectedSort = (item: any) => {
   display: flex;
   gap: 40rpx;
   .filter-item {
+    margin-right: 40rpx;
     display: flex;
     align-items: center;
     gap: 8rpx;
     font-size: 28rpx;
     color: $qs-font-title;
+
+    .cate-label {
+      display: flex;
+      align-items: center;
+
+      .cate-icon {
+        margin-right: 8rpx;
+        font-weight: bold;
+      }
+    }
   }
 }
 /* 下拉容器 */

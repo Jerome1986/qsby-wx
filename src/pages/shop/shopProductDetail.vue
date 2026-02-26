@@ -5,13 +5,10 @@ import BookFlow from '@/components/BookFlow.vue'
 import Note from '@/components/Note.vue'
 import ImageTextDetail from '@/components/ImageTextDetail.vue'
 import BottomActionBar from '@/components/BottomActionBar.vue'
-
-// 图文详情数据（后续从接口获取）
 </script>
 <template>
-  <view class="productDetail">
+  <view class="shopProductDetail">
     <NavHead title="商品详情" :show-back="true"></NavHead>
-    <!--  内容区域  -->
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  封面图  -->
       <view class="cover">
@@ -25,7 +22,7 @@ import BottomActionBar from '@/components/BottomActionBar.vue'
         <NavTitle title="湖景大床房"></NavTitle>
       </view>
       <!--  商品信息  -->
-      <BookFlow type="score"></BookFlow>
+      <BookFlow type="product"></BookFlow>
       <!--  预约须知  -->
       <Note></Note>
       <!--  图文详情    -->
@@ -34,12 +31,12 @@ import BottomActionBar from '@/components/BottomActionBar.vue'
       <view class="action-bar-placeholder"></view>
     </scroll-view>
     <!--  底部操作栏  -->
-    <BottomActionBar page-type="score"></BottomActionBar>
+    <BottomActionBar page-type="product"></BottomActionBar>
   </view>
 </template>
 
 <style scoped lang="scss">
-.productDetail {
+.shopProductDetail {
   display: flex;
   flex-direction: column;
   padding: 24rpx 24rpx 60rpx 24rpx;

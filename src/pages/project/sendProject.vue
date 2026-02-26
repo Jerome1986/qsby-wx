@@ -67,13 +67,6 @@ const handleChange = (e: UploadChangeEvent) => {
 // 是否同意提交须知
 const agreed = ref(false)
 
-// 温馨提示
-const tipsList = ref([
-  '发布内容需经平台审核，审核通过后将展示在商机广场。',
-  '请确保发布信息真实有效，禁止发布虚假或违规内容。',
-  '提交后我们将在24小时内完成审核。',
-])
-
 // 查看提交须知
 const handleNotice = () => {
   // TODO: 跳转提交须知页面

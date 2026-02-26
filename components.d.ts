@@ -7,9 +7,14 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    BookFlow: typeof import('./src/components/BookFlow.vue')['default']
+    BottomActionBar: typeof import('./src/components/BottomActionBar.vue')['default']
+    FilterBar: typeof import('./src/components/FilterBar.vue')['default']
+    ImageTextDetail: typeof import('./src/components/ImageTextDetail.vue')['default']
     NavHead: typeof import('./src/components/NavHead.vue')['default']
     NavTitle: typeof import('./src/components/NavTitle.vue')['default']
     NoData: typeof import('./src/components/NoData.vue')['default']
+    Note: typeof import('./src/components/Note.vue')['default']
     OrderItem: typeof import('./src/components/OrderItem.vue')['default']
     OrganizerInfo: typeof import('./src/components/OrganizerInfo.vue')['default']
     ProductCard: typeof import('./src/components/ProductCard.vue')['default']

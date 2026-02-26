@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import FilterBar from '@/pages/play/components/FilterBar.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import { ref } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
+import NavTitle from '@/components/NavTitle.vue'
 
 const cateData = ref([
   { _id: '01', cateName: '体育运动' },
@@ -30,7 +31,9 @@ const handleSend = () => {
         ></image>
       </view>
       <!--  title    -->
-      <view class="title">发现同城好玩的活动</view>
+      <view class="title">
+        <NavTitle title="发现同城好玩的活动"></NavTitle>
+      </view>
       <!--   筛选   -->
       <view class="filter">
         <FilterBar :cateData="cateData" title="活动类别"></FilterBar>

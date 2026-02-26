@@ -118,6 +118,42 @@
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/shop/shop",
+      "style": {
+        "navigationBarTitleText": "门店",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/shop/shopDetail",
+      "style": {
+        "navigationBarTitleText": "门店详情",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/shop/shopProductDetail",
+      "style": {
+        "navigationBarTitleText": "商品详情",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/shop/createOrder",
+      "style": {
+        "navigationBarTitleText": "确认订单",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
     }
   ],
   "tabBar": {
