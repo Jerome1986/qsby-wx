@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 5127112 */
-  src: url('iconfont.woff2?t=1772102521549') format('woff2'),
-       url('iconfont.woff?t=1772102521549') format('woff'),
-       url('iconfont.ttf?t=1772102521549') format('truetype');
+  src: url('iconfont.woff2?t=1772185362356') format('woff2'),
+       url('iconfont.woff?t=1772185362356') format('woff'),
+       url('iconfont.ttf?t=1772185362356') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-duigou:before {
+  content: "\e606";
 }
 
 .icon-weixinzhifu:before {

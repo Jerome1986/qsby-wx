@@ -41,6 +41,8 @@ const handleDetail = () => {
           <view class="nav-label">周边旅游路线推荐</view>
         </view>
       </view>
+      <!-- 门店办理入住 -->
+      <view class="checkIn" @tap="">办理入住</view>
       <!--   预约流程   -->
       <BookFlow type="shop"></BookFlow>
       <view class="title" style="margin: 20rpx 0">
@@ -132,6 +134,20 @@ const handleDetail = () => {
         color: #0b0a0a;
       }
     }
+  }
+
+  /* 办理入住 */
+  .checkIn {
+    margin-top: 24rpx;
+    height: 88rpx;
+    line-height: 88rpx;
+    text-align: center;
+    font-size: 30rpx;
+    font-weight: 600;
+    color: $qs-brandColor;
+    background: #fff7e2;
+    border-radius: 30rpx;
+    @include customShadow();
   }
 
   /* 门店商品列表 */

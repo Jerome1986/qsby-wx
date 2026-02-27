@@ -1,26 +1,18 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
+import { navBarOptions, rightsJump, type NavbarType } from './data';
 
-const navBarOptions = [
-  {
-    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/01.png',
-    text: '/static/images/bloggers.png',
-  },
-  {
-    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/02.png',
-    text: '/static/images/planners.png',
-  },
-  {
-    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/03.png',
-    text: '/static/images/travel.png',
-  },
-]
+const handleGo = (type: NavbarType) => {
+  console.log('跳转')
+  
+  rightsJump[type](type)
+}
 </script>
 <template>
   <view class="managerRights">
     <NavHead title="主理人计划" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <view class="rights-item" v-for="(item, index) in navBarOptions" :key="index">
+      <view class="rights-item" v-for="(item, index) in navBarOptions" :key="index" @tap="handleGo(item.type)">
         <image class="bg" :src="item.img" mode="aspectFill"></image>
         <image class="label" mode="aspectFit" :src="item.text"></image>
       </view>
