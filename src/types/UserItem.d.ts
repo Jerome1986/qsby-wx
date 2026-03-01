@@ -44,3 +44,9 @@ export interface UserItem {
 export interface ChangerAvatarResult {
   avatarUrl: string
 }
+
+// 用户提交主理人申请返回类型
+export interface ApplyManagerResult {
+  applicationId: string
+  status: 'pending' | 'approved' | 'rejected'
+}

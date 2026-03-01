@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
-import type { UploadChangeEvent } from 'wot-design-uni/components/wd-upload/types'
+import type { UploadChangeEvent, UploadFileItem } from 'wot-design-uni/components/wd-upload/types'
+import type { PublicFormData } from '@/types/Public'
+import { displayFormat, minDate } from '@/utils/generateMonth.ts'
+import { validatePublicForm } from '@/pages/public/dataConfig.ts'
 
 // 表单数据
-const formData = ref({
+const formData = ref<PublicFormData>({
+  cover: '', // 封面
   title: '', // 行程主题
   type: '', // 行程类型
-  time: '', // 行程时间
+  time: '', // 行程时间（时间戳）
   address_name: '', // 行程地点--地图上的商户名
   event_address: '', // 行程地址--地图上的具体位置
-  latitude: '', // 纬度
-  longitude: '', // 经度
+  latitude: 0, // 纬度
+  longitude: 0, // 经度
   wechat: '', // 联系微信
   phone: '', // 联系电话
   maxPeople: '', // 人数限制
@@ -20,6 +24,7 @@ const formData = ref({
   userFee: '', // 用户报名费用
   commission: '', // 主理人佣金
   requirement: '', // 行程需求
+  images: [],
 })
 
 // 上传封面图
@@ -29,6 +34,16 @@ const handleUpdateCover = () => {
     count: 1,
     success: (res) => {
       cover.value = res.tempFilePaths[0]
+      const name = 'cover' + Date.now()
+      uni.uploadFile({
+        url: 'https://x9zmst6evg.sealoshzh.site/upload/images',
+        filePath: res.tempFilePaths[0],
+        name,
+        success: async (uploadFileRes) => {
+          console.log(uploadFileRes.data)
+          formData.value.cover = uploadFileRes.data
+        },
+      })
     },
   })
 }
@@ -39,13 +54,11 @@ const typeOptions = ref([
   { value: 2, text: '类型2' },
 ])
 
-// 去填写行程需求
-const handleEditRequirement = () => {
-  // TODO: 跳转行程需求编辑页
-}
+// 行程需求输入框显示
+const showRequirementInput = ref(false)
 
 // 行程图片上传
-const fileList = ref<any[]>([])
+const fileList = ref<UploadFileItem[]>([])
 const action: string = 'https://x9zmst6evg.sealoshzh.site/upload/images'
 const handleChange = (e: UploadChangeEvent) => {
   fileList.value = e.fileList
@@ -54,7 +67,13 @@ const handleChange = (e: UploadChangeEvent) => {
 
 // 提交审核
 const handleSubmit = () => {
-  // TODO: 表单校验 & 提交逻辑
+  // 提取已上传的图片
+  formData.value.images = fileList.value.map((file) => file.response) as string[]
+  //  表单校验
+  const validate = validatePublicForm(formData.value)
+  if (!validate) return
+  //  提交逻辑
+  console.log('表单', formData.value)
 }
 
 // 搜索地点
@@ -62,8 +81,15 @@ const changeLocal = () => {
   uni.chooseLocation({
     success: (res) => {
       console.log('地点', res)
+      formData.value.address_name = res.name
+      formData.value.event_address = res.address
+      formData.value.latitude = res.latitude
+      formData.value.longitude = res.longitude
     },
-    fail: () => {},
+    fail: (error) => {
+      console.log('地图错误信息', error)
+      uni.showToast({ icon: 'fail', title: '地图打开失败' })
+    },
   })
 }
 </script>
@@ -110,9 +136,18 @@ const changeLocal = () => {
               mode="none"
             ></uni-data-select>
           </uni-forms-item>
-          <!-- 行程时间 (预留位置，后期用组件实现) -->
+          <!-- 行程时间 -->
           <uni-forms-item label="行程时间" name="time">
-            <!-- TODO: 时间选择组件 -->
+            <view class="time">
+              <wd-datetime-picker
+                v-model="formData.time"
+                :min-date="minDate"
+                :displayFormat="displayFormat"
+                label=""
+                placeholder="请选择行程开始日期"
+                confirmButtonText="选择"
+              />
+            </view>
           </uni-forms-item>
           <!-- 行程地点 -->
           <uni-forms-item label="行程地点" name="location">
@@ -167,8 +202,8 @@ const changeLocal = () => {
                 :inputBorder="false"
                 placeholder="请输入最高人数"
                 primaryColor="#ffd018"
-                type="number"
                 trim
+                type="number"
               />
               <text class="unit">人</text>
             </view>
@@ -181,8 +216,8 @@ const changeLocal = () => {
                 :inputBorder="false"
                 placeholder="可手动输入已报名男士数量"
                 primaryColor="#ffd018"
-                type="number"
                 trim
+                type="number"
               />
               <text class="unit">人</text>
             </view>
@@ -195,8 +230,8 @@ const changeLocal = () => {
                 :inputBorder="false"
                 placeholder="可手动输入已报名女士数量"
                 primaryColor="#ffd018"
-                type="number"
                 trim
+                type="number"
               />
               <text class="unit">人</text>
             </view>
@@ -208,7 +243,7 @@ const changeLocal = () => {
               :inputBorder="false"
               placeholder="请输入报名费用"
               primaryColor="#ffd018"
-              type="digit"
+              type="number"
               trim
             />
           </uni-forms-item>
@@ -219,16 +254,26 @@ const changeLocal = () => {
               :inputBorder="false"
               placeholder="请输入主理人佣金"
               primaryColor="#ffd018"
-              type="digit"
+              type="number"
               trim
             />
           </uni-forms-item>
           <!-- 行程需求 -->
           <uni-forms-item label="行程需求" name="requirement">
-            <view class="requirement-row" @tap="handleEditRequirement">
+            <view
+              class="requirement-row"
+              v-show="!showRequirementInput"
+              @tap="showRequirementInput = true"
+            >
               <text class="requirement-placeholder">去填写</text>
             </view>
           </uni-forms-item>
+          <wd-textarea
+            v-if="showRequirementInput"
+            v-model="formData.requirement"
+            placeholder="请输入行程需求"
+            :maxlength="500"
+          />
         </uni-forms>
       </view>
       <!-- 行程图片上传 -->
@@ -375,6 +420,21 @@ const changeLocal = () => {
         color: $qs-font-dec2;
       }
     }
+  }
+}
+
+/* 时间选择器 */
+.time {
+  flex: 1;
+  :deep(.wd-datetime-picker__cell) {
+    width: 100%;
+    background-color: transparent;
+  }
+  :deep(.wd-datetime-picker__action) {
+    color: $qs-font-title;
+  }
+  :deep(.wd-cell__wrapper) {
+    padding: 0;
   }
 }
 

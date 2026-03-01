@@ -1,6 +1,7 @@
-import type { ChangerAvatarResult, UserItem } from '@/types/UserItem'
+import type { ApplyManagerResult, ChangerAvatarResult, UserItem } from '@/types/UserItem'
 import { request } from '@/utils/http'
 import type { UpdateResult } from '@/types/Gobal'
+import type { ApplyForStatusResult } from '@/types/ApplyFor'
 
 /**
  * 获取用户信息
@@ -45,5 +46,37 @@ export const updateUserInfoApi = (
     method: 'POST',
     url: '/user/updateInfo',
     data: { userId, nickname, age, gender },
+  })
+}
+
+/**
+ * 申请主理人接口
+ * @param userId  - 用户ID
+ * @param username - 真实姓名
+ * @param idCard - 身份证号
+ * @param mobile - 手机号
+ */
+export const applyManagerApi = (
+  userId: string,
+  username: string,
+  idCard: string,
+  mobile: string,
+) => {
+  return request<ApplyManagerResult>({
+    method: 'POST',
+    url: '/user/managerApply',
+    data: { userId, username, idCard, mobile },
+  })
+}
+
+/**
+ * 验证当前用户是否主理人申请，返回申请状态
+ * @param userId - 用户ID
+ */
+export const verifyManagerApplyApi = (userId: string) => {
+  return request<ApplyForStatusResult>({
+    method: 'GET',
+    url: '/user/findApplyByUser',
+    data: { userId },
   })
 }

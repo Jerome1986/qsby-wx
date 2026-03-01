@@ -19,3 +19,17 @@ export const getCurrentMonth = () => {
   const month = now.getMonth() + 1 // getMonth() 返回 0-11
   return `${year}-${month < 10 ? '0' + month : month}`
 }
+
+// 自定义时间组件的时间显示
+// 限制最小时间 = 当前时间
+export const minDate = Date.now()
+
+export const displayFormat = (items: any[]) => {
+  const year = items[0].label
+  const month = items[1].label.padStart(2, '0')
+  const day = items[2].label.padStart(2, '0')
+  const hour = items[3].label.padStart(2, '0')
+  const minute = items[4].label.padStart(2, '0')
+
+  return `${year}年${month}月${day}日 ${hour}:${minute}`
+}

@@ -1,35 +1,59 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
+import { applyManagerApi, verifyManagerApplyApi } from '@/api/user.ts'
+import { useUserStore } from '@/stores'
+import type { ApplyForStatus, FormData } from '@/types/ApplyFor'
+import { validateApplyForm, applyForStatusText } from '@/pagesMember/applyFor/dataConfig.ts'
+import { onLoad } from '@dcloudio/uni-app'
 
-// 表单数据
-interface FormData {
-  realName: string
-  idCard: string
-  phone: string
+// 定义store
+const userStore = useUserStore()
+
+// 查询用户申请状态
+const checkUserApply = async (userId: string) => {
+  const res = await verifyManagerApplyApi(userId)
+  console.log(res)
+  status.value = res.data.status
+  formData.value.username = res.data.username
+  formData.value.idCard = res.data.idCard
+  formData.value.mobile = res.data.mobile
 }
 
-const formData = ref<FormData>({
-  realName: '',
-  idCard: '',
-  phone: '',
+onLoad(() => {
+  if (userStore.profile?._id) checkUserApply(userStore.profile?._id)
 })
+
+// 表单
+const formData = ref<FormData>({
+  username: '',
+  idCard: '',
+  mobile: '',
+})
+
+// 申请单状态
+const status = ref<ApplyForStatus>('no')
 
 // 提交申请
 const handleSubmit = async () => {
   // 表单验证
-  if (!formData.value.realName) {
-    return uni.showToast({ icon: 'none', title: '请输入真实姓名' })
-  }
-  if (!formData.value.idCard) {
-    return uni.showToast({ icon: 'none', title: '请输入身份证号' })
-  }
-  if (!formData.value.phone) {
-    return uni.showToast({ icon: 'none', title: '请输入手机号' })
-  }
+  const errorMsg = validateApplyForm(formData.value)
+  if (errorMsg) return uni.showToast({ icon: 'none', title: errorMsg })
 
-  console.log('提交申请:', formData.value)
-  // TODO: 调用申请接口
+  //调用申请接口
+  if (userStore.profile?._id) {
+    const res = await applyManagerApi(
+      userStore.profile?._id,
+      formData.value.username,
+      formData.value.idCard,
+      formData.value.mobile,
+    )
+    console.log('提交结果', res)
+    if (res.code === 200) {
+      status.value = res.data.status
+      await uni.showToast({ icon: 'success', title: res.message, mask: true })
+    }
+  }
 }
 </script>
 <template>
@@ -39,13 +63,14 @@ const handleSubmit = async () => {
     <!-- 表单 -->
     <view class="form">
       <uni-forms :modelValue="formData" labelWidth="160rpx">
-        <uni-forms-item label="真实姓名" name="realName">
+        <uni-forms-item label="真实姓名" name="username">
           <uni-easyinput
             :inputBorder="false"
-            v-model="formData.realName"
+            v-model="formData.username"
             placeholder="请输入真实姓名"
             primaryColor="#ffd018"
             trim
+            :disabled="status !== 'no'"
           />
         </uni-forms-item>
 
@@ -56,17 +81,19 @@ const handleSubmit = async () => {
             placeholder="请输入身份证号"
             primaryColor="#ffd018"
             trim
+            :disabled="status !== 'no'"
           />
         </uni-forms-item>
 
-        <uni-forms-item label="手机号" name="phone">
+        <uni-forms-item label="手机号" name="mobile">
           <uni-easyinput
             :inputBorder="false"
-            v-model="formData.phone"
+            v-model="formData.mobile"
             placeholder="请输入手机号"
             primaryColor="#ffd018"
             :maxlength="11"
             trim
+            :disabled="status !== 'no'"
           />
         </uni-forms-item>
       </uni-forms>
@@ -74,7 +101,7 @@ const handleSubmit = async () => {
 
     <!-- 提交按钮 -->
     <view class="submit">
-      <view class="btn" @tap="handleSubmit">申请主理人</view>
+      <view class="btn" @tap="handleSubmit">{{ applyForStatusText[status]() }}</view>
     </view>
 
     <!--  温馨提示  -->
