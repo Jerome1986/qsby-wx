@@ -15,14 +15,14 @@ const props = withDefaults(
 )
 
 // 选择行程分类
-const currentCateData = ref(props.title ?? props.cateData[0].cateName)
+const currentCateData = ref(props.title ?? props.cateData[0].name)
 const filterCateActive = ref(false)
 const handleFilterCate = () => {
   filterCateActive.value = !filterCateActive.value
   filterSortActive.value = false
 }
 const selectedCate = (item: any) => {
-  currentCateData.value = item.cateName
+  currentCateData.value = item.name
   filterCateActive.value = false
 }
 
@@ -86,11 +86,11 @@ const selectedSort = (item: any) => {
     <view class="filterCate">
       <view
         class="cate"
-        :class="{ active: item.cateName === currentCateData }"
+        :class="{ active: item.name === currentCateData }"
         v-for="item in cateData"
         :key="item._id"
         @tap="selectedCate(item)"
-        >{{ item.cateName }}</view
+        >{{ item.name }}</view
       >
     </view>
     <!-- 遮罩层（只在弹框下方） -->

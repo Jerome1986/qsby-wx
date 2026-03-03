@@ -4,14 +4,24 @@ import FilterBar from '@/components/FilterBar.vue'
 import { ref } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
 import NavTitle from '@/components/NavTitle.vue'
+import { tripTypeGetAllApi } from '@/api/trip.ts'
+import type { TripTypeItem } from '@/types/Public'
+import { onLoad } from '@dcloudio/uni-app'
 
-const cateData = ref([
-  { _id: '01', cateName: '亲子' },
-  { _id: '02', cateName: '社交' },
-  { _id: '03', cateName: '定制' },
-  { _id: '04', cateName: '银发' },
-])
+// 分类
+const cateData = ref<TripTypeItem[]>([])
+const tripTypeGet = async () => {
+  const res = await tripTypeGetAllApi()
+  console.log('分类', res)
+  cateData.value = res.data
+  cateData.value.push({ _id: 'all', name: '全部' })
+}
 
+onLoad(() => tripTypeGet())
+
+// todo 根据分类和排序获取行程列表
+
+// 发布行程
 const handleSend = () => {
   uni.navigateTo({
     url: `/pages/public/public?sendType=play`,

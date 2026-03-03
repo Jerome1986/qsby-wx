@@ -41,7 +41,7 @@ const handleGo = (index: number) => {
         <!-- 右侧价格和按钮 -->
         <view class="right">
           <view class="price">￥200</view>
-          <view class="btn">已结束</view>
+          <view class="btn">我要报名</view>
         </view>
       </view>
     </view>
@@ -157,7 +157,7 @@ const handleGo = (index: number) => {
           background-color: $qs-brandColor;
           border-radius: 30rpx;
           font-size: 24rpx;
-          color: #ffffff;
+          color: $qs-font-title;
         }
       }
     }

@@ -155,7 +155,7 @@ onLoad((options) => {
           <uni-forms-item label="行程时间" name="time">
             <view class="time">
               <wd-datetime-picker
-                v-model="formData.time"
+                v-model="formData.time as string"
                 :min-date="minDate"
                 :displayFormat="displayFormat"
                 label=""

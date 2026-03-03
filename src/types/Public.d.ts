@@ -14,11 +14,11 @@ export interface TripTypeItem {
   /** 分类名称 */
   name: string
   /** 排序 */
-  sort: number
+  sort?: number
   /** 创建时间 */
-  createdAt: Date
+  createdAt?: Date
   /** 更新时间 */
-  updatedAt: Date
+  updatedAt?: Date
 }
 
 // 发布行程状态类型

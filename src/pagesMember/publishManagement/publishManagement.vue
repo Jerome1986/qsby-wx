@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
-import { publicListGetAll, testApi } from '@/api/publicManagement.ts'
+import { publicListGetAll } from '@/api/publicManagement.ts'
 import { useUserStore } from '@/stores'
 import type { EventItem, PublicType } from '@/types/PublicManagement'
 import { onLoad } from '@dcloudio/uni-app'
+import { formatTimestamp } from '@/utils/generateMonth.ts'
 
+// store
 const userStore = useUserStore()
 
+// tab列表处理
 const tagList = [
   { id: '1', label: '趣哪游', value: 'trip' },
   { id: '2', label: '同城活动', value: 'activity' },
@@ -81,7 +84,7 @@ const handleSignUpList = () => {
             <view class="title">{{ item.title }}</view>
             <view class="info-row">
               <text class="label">行程日期：</text>
-              <text class="value">{{ item.time }}</text>
+              <text class="value">{{ formatTimestamp(item.time, 2) }}</text>
             </view>
             <view class="info-row">
               <text class="label">行程门店：</text>

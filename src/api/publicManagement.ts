@@ -20,14 +20,3 @@ export const publicListGetAll = (
     data: { userId, publicType, pageNum, pageSize },
   })
 }
-
-export const testApi = () => {
-  return request({
-    method: 'GET',
-    url: 'http://localhost/mp.php/plays/getEventList',
-    header: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  })
-}
