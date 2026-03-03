@@ -14,7 +14,7 @@ const cateData = ref([
 
 const handleSend = () => {
   uni.navigateTo({
-    url: '/pages/public/public',
+    url: `/pages/public/public?sendType=play`,
   })
 }
 </script>

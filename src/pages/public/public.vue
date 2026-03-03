@@ -2,30 +2,19 @@
 import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
 import type { UploadChangeEvent, UploadFileItem } from 'wot-design-uni/components/wd-upload/types'
-import type { PublicFormData } from '@/types/Public'
 import { displayFormat, minDate } from '@/utils/generateMonth.ts'
-import { validatePublicForm } from '@/pages/public/dataConfig.ts'
+import { onLoad } from '@dcloudio/uni-app'
+import { sendTripApi, tripTypeGetAllApi } from '@/api/trip.ts'
+import { initFormData } from '@/pages/public/dataConfig.ts'
+import type { PublicFormData } from '@/types/Public'
+import { useUserStore } from '@/stores'
+import { validatePublicForm } from '@/pages/public/verifyFunctions.ts'
+
+// 定义store
+const userStore = useUserStore()
 
 // 表单数据
-const formData = ref<PublicFormData>({
-  cover: '', // 封面
-  title: '', // 行程主题
-  type: '', // 行程类型
-  time: '', // 行程时间（时间戳）
-  address_name: '', // 行程地点--地图上的商户名
-  event_address: '', // 行程地址--地图上的具体位置
-  latitude: 0, // 纬度
-  longitude: 0, // 经度
-  wechat: '', // 联系微信
-  phone: '', // 联系电话
-  maxPeople: '', // 人数限制
-  maleCount: '', // 男士报名
-  femaleCount: '', // 女士报名
-  userFee: '', // 用户报名费用
-  commission: '', // 主理人佣金
-  requirement: '', // 行程需求
-  images: [],
-})
+const formData = ref<PublicFormData>(initFormData())
 
 // 上传封面图
 const cover = ref('')
@@ -48,35 +37,7 @@ const handleUpdateCover = () => {
   })
 }
 
-// 行程类型选项
-const typeOptions = ref([
-  { value: 1, text: '类型1' },
-  { value: 2, text: '类型2' },
-])
-
-// 行程需求输入框显示
-const showRequirementInput = ref(false)
-
-// 行程图片上传
-const fileList = ref<UploadFileItem[]>([])
-const action: string = 'https://x9zmst6evg.sealoshzh.site/upload/images'
-const handleChange = (e: UploadChangeEvent) => {
-  fileList.value = e.fileList
-  console.log('上传后的文件', fileList.value)
-}
-
-// 提交审核
-const handleSubmit = () => {
-  // 提取已上传的图片
-  formData.value.images = fileList.value.map((file) => file.response) as string[]
-  //  表单校验
-  const validate = validatePublicForm(formData.value)
-  if (!validate) return
-  //  提交逻辑
-  console.log('表单', formData.value)
-}
-
-// 搜索地点
+// 搜索地点函数
 const changeLocal = () => {
   uni.chooseLocation({
     success: (res) => {
@@ -92,6 +53,60 @@ const changeLocal = () => {
     },
   })
 }
+
+// 行程类型选项
+const typeOptions = ref<{ value: string; text: string }[]>([])
+
+// 根据页面参数获取不同的行程类型
+const tripTypeGet = async () => {
+  const res = await tripTypeGetAllApi()
+  console.log('分类', res)
+  typeOptions.value = res.data.map((item) => ({
+    value: item._id,
+    text: item.name,
+  }))
+}
+
+// 行程需求输入框显示
+const showRequirementInput = ref(false)
+
+// 行程图片上传
+const fileList = ref<UploadFileItem[]>([])
+const action: string = 'https://x9zmst6evg.sealoshzh.site/upload/images'
+const handleChange = (e: UploadChangeEvent) => {
+  fileList.value = e.fileList
+  console.log('上传后的文件', fileList.value)
+}
+
+// 提交审核
+const handleSubmit = async () => {
+  // 提取已上传的图片
+  formData.value.images = fileList.value.map((file) => file.response) as string[]
+  //  表单校验
+  const validate = validatePublicForm(formData.value)
+  if (!validate) return
+  console.log('表单', formData.value)
+  // 行程发布提交逻辑
+  if (userStore.profile?._id && sendType.value === 'play') {
+    const submitData = { userId: userStore.profile?._id, ...formData.value }
+    const res = await sendTripApi(submitData)
+    console.log(res)
+    if (res.code === 200) {
+      await uni.showToast({ icon: 'success', title: '已发布', mask: true })
+      await uni.switchTab({ url: '/pages/home/home' })
+    }
+  }
+}
+
+// 获取页面参数用来区分不同发布类型
+const sendType = ref('')
+onLoad((options) => {
+  console.log('页面参数', options)
+  if (options?.sendType && options?.sendType === 'play') {
+    sendType.value = options?.sendType
+    tripTypeGet()
+  }
+})
 </script>
 <template>
   <view class="public">

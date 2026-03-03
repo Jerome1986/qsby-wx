@@ -1,9 +1,23 @@
 <script setup lang="ts">
 import NavTitle from '@/components/NavTitle.vue'
+import { useUserStore } from '@/stores'
+
+const userStore = useUserStore()
+
+// 跳转发布管理
+const handlePublishManagement = () => {
+  if (userStore.profile?.role === 'manager' && userStore.profile._id) {
+    uni.navigateTo({
+      url: '/pagesMember/publishManagement/publishManagement',
+    })
+  } else {
+    uni.showToast({ icon: 'none', title: '请先登录' })
+  }
+}
 </script>
 
 <template>
-  <view class="sendList">
+  <view class="sendList" @tap="handlePublishManagement">
     <NavTitle title="管理发布"></NavTitle>
     <view class="dec">已经发布的内容丨有趣的项目丨同城活动丨社交旅行</view>
     <view class="bg">
