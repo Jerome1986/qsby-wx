@@ -1,5 +1,6 @@
 import { request } from '@/utils/http.ts'
 import type { PublicResponse, SubmitFormData, TripTypeItem } from '@/types/Public'
+import type { PlayListItem, PlayListPageResponse, SortType } from '@/types/Play'
 
 // 获取行程分类
 export const tripTypeGetAllApi = () => {
@@ -15,5 +16,37 @@ export const sendTripApi = (data: SubmitFormData) => {
     method: 'POST',
     url: '/trip/add',
     data,
+  })
+}
+
+/**
+ * 趣哪游页面-行程列表获取
+ * @param tripTypeId - 行程分类
+ * @param sortType - 排序
+ * @param pageNum - 页码
+ * @param pageSize - 条数
+ */
+export const tripListGetAllApi = (
+  tripTypeId: string,
+  sortType: SortType,
+  pageNum: number,
+  pageSize: number,
+) => {
+  return request<PlayListPageResponse>({
+    method: 'GET',
+    url: '/trip/tripListFindAll',
+    data: { tripTypeId, sortType, pageNum, pageSize },
+  })
+}
+
+/**
+ * 根据行程ID获取行程详情
+ * @param tripId - 行程ID
+ */
+export const tripDetailGetApi = (tripId: string) => {
+  return request<PlayListItem>({
+    method: 'GET',
+    url: '/trip/tripListFindDetail',
+    data: { tripId },
   })
 }

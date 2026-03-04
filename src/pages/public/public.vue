@@ -342,9 +342,25 @@ onLoad((options) => {
   align-items: center;
   height: 219rpx;
   border-radius: 20rpx;
-  border: 2rpx solid #e4e4e4;
-  font-size: 28rpx;
-  color: $qs-font-dec2;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 2rpx dashed #cdcdcd;
+  box-shadow: inset 0 0 20rpx rgba(255, 208, 24, 0.1);
+
+  .title {
+    font-size: 28rpx;
+    color: $qs-font-title;
+    font-weight: 500;
+    margin-bottom: 12rpx;
+
+    .iconfont {
+      color: $qs-brandColor;
+    }
+  }
+
+  .text {
+    font-size: 24rpx;
+    color: $qs-font-dec;
+  }
 }
 
 /* 封面图预览 */
@@ -390,7 +406,7 @@ onLoad((options) => {
     .uni-forms-item {
       padding: 24rpx 0;
       margin-bottom: 0;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid rgba(205, 205, 205, 0.5);
 
       .uni-forms-item__label {
         font-size: 28rpx;

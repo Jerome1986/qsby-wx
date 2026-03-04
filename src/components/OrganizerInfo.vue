@@ -1,4 +1,22 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import type { UserItem } from '@/types/UserItem'
+
+const props = defineProps<{
+  userData: UserItem
+}>()
+
+const emits = defineEmits(['copyWx', 'callPhone'])
+
+// 复制微信号
+const handleWx = () => {
+emits('copyWx')
+}
+
+// 拨打电话
+const handlePhone = () => {
+  emits('callPhone')
+}
+</script>
 
 <template>
   <view class="organizer">
@@ -8,19 +26,19 @@
         <view class="avatar">
           <image
             mode="aspectFill"
-            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg"
+            :src="userData.avatarUrl"
           ></image>
         </view>
-        <view class="nickname">何无念</view>
+        <view class="nickname">{{ userData.nickname }}</view>
       </view>
       <view class="right">
-        <view class="wx">
+        <view class="wx" @tap="handleWx">
           <image
             mode="aspectFill"
             src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/wx.png"
           ></image>
         </view>
-        <view class="phone">
+        <view class="phone" @tap="handlePhone">
           <image
             mode="aspectFill"
             src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/phone.png"

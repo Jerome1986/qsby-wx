@@ -4,9 +4,10 @@ import FilterBar from '@/components/FilterBar.vue'
 import { ref } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
 import NavTitle from '@/components/NavTitle.vue'
-import { tripTypeGetAllApi } from '@/api/trip.ts'
+import { tripListGetAllApi, tripTypeGetAllApi } from '@/api/trip.ts'
 import type { TripTypeItem } from '@/types/Public'
 import { onLoad } from '@dcloudio/uni-app'
+import type { PlayListItem, SortType } from '@/types/Play'
 
 // 分类
 const cateData = ref<TripTypeItem[]>([])
@@ -19,7 +20,43 @@ const tripTypeGet = async () => {
 
 onLoad(() => tripTypeGet())
 
-// todo 根据分类和排序获取行程列表
+// 排序
+const sortData = ref([
+  { _id: 'composite', cateName: '综合排序' },
+  { _id: 'dailyHot', cateName: '日度排序' },
+  { _id: 'enrolling', cateName: '正在报名' },
+  { _id: 'startTime', cateName: '时间排序' },
+])
+
+// 筛选默认值
+const cateId = ref('all')
+const sortId = ref<SortType>('composite')
+
+//  根据分类和排序获取行程列表
+const pageNum = ref(1)
+const pageSize = ref(10)
+// 行程列表类型
+const tripList = ref<PlayListItem[]>([])
+const tripListGet = async (tripTypeId: string, sortType: SortType) => {
+  const res = await tripListGetAllApi(tripTypeId, sortType, pageNum.value, pageSize.value)
+  console.log(res)
+  tripList.value = res.data.list
+}
+onLoad(() => tripListGet(cateId.value, sortId.value))
+
+// 处理分类选择
+const handleSelectedCate = (currentCateId: string) => {
+  console.log(currentCateId)
+  cateId.value = currentCateId
+  tripListGet(currentCateId, sortId.value)
+}
+
+// 处理排序选择
+const handleSelectedSort = (currentSortId: SortType) => {
+  console.log(currentSortId)
+  sortId.value = currentSortId
+  tripListGet(cateId.value, currentSortId)
+}
 
 // 发布行程
 const handleSend = () => {
@@ -46,11 +83,22 @@ const handleSend = () => {
       </view>
       <!--   筛选   -->
       <view class="filter">
-        <FilterBar :cateData="cateData" title="所有行程"></FilterBar>
+        <FilterBar
+          :cateData="cateData"
+          :sortData="sortData"
+          title="所有行程"
+          @selected-cate="handleSelectedCate"
+          @select-sort="handleSelectedSort"
+        ></FilterBar>
       </view>
       <!--   行程列表   -->
-      <view class="list">
-        <ProductCard></ProductCard>
+      <view class="list" v-if="tripList.length > 0">
+        <ProductCard :list="tripList"></ProductCard>
+      </view>
+      <!--   空状态   -->
+      <view class="empty" v-else>
+        <image class="empty-img" src="/static/images/noAny.png" mode="widthFix"></image>
+        <text class="empty-text">暂无数据</text>
       </view>
     </scroll-view>
   </view>
@@ -91,6 +139,25 @@ const handleSend = () => {
   .list {
     padding: 0 24rpx 60rpx;
     margin-top: 24rpx;
+  }
+
+  /* 空状态 */
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+
+    .empty-img {
+      width: 320rpx;
+    }
+
+    .empty-text {
+      margin-top: 24rpx;
+      font-size: 28rpx;
+      color: $qs-font-dec;
+    }
   }
 }
 </style>

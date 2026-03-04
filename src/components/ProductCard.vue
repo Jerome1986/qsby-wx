@@ -1,46 +1,65 @@
 <script setup lang="ts">
+import type { PlayListItem } from '@/types/Play'
+import { formatTimestamp } from '@/utils/generateMonth.ts'
+
 // 跳转页面时根据类型来设置动态标题
-const handleGo = (index: number) => {
+const handleGo = (proId: string, title: string) => {
   uni.navigateTo({
-    url: `/pages/productDetail/productDetail?productId=${index}&title=动态标题`,
+    url: `/pages/productDetail/productDetail?productId=${proId}&title=${title}`,
   })
 }
+
+const props = withDefaults(
+  defineProps<{
+    list: PlayListItem[]
+    title?: string
+  }>(),
+  {
+    list: () => [],
+  },
+)
 </script>
 
 <template>
-  <view class="productCard" v-for="index in 10" :key="index" @tap="handleGo(index)">
+  <view
+    class="productCard"
+    v-for="item in list"
+    :key="item._id"
+    @tap="handleGo(item._id, item.title)"
+  >
     <!--   封面   -->
     <view class="cover">
-      <image
-        src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-        mode="aspectFill"
-      ></image>
+      <image :src="item.cover" mode="aspectFill"></image>
     </view>
     <!--   内容   -->
     <view class="productInfo">
-      <view class="name">12.5北疆大环线（轻奢小团）</view>
+      <view class="name">{{ item.title }}</view>
       <view class="bottom">
         <!-- 左侧信息 -->
         <view class="left">
           <view class="info-row">
             <text class="iconfont icon-shijian1" style="font-size: 32rpx"></text>
-            <text class="text">2025-12-05 00:00:00</text>
+            <text class="text">{{ formatTimestamp(item.time, 2) }}</text>
           </view>
           <view class="info-row">
             <text class="iconfont icon-fangzi" style="font-size: 28rpx"></text>
-            <text class="text">千宿百院</text>
+            <text class="text shop">{{ item.address_name }}</text>
           </view>
           <view class="info-row">
             <text class="iconfont icon-address" style="font-size: 32rpx"></text>
-            <text class="text address">湖北省武汉市蔡甸区新华大道</text>
+            <text class="text address">{{ item.event_address }}</text>
           </view>
           <view class="info-row">
-            <text class="text">报名中 17/25</text>
+            <text class="text"
+              >报名中 {{ Number(item.maleCount) + Number(item.femaleCount) }}/{{
+                item.maxPeople
+              }}</text
+            >
           </view>
         </view>
         <!-- 右侧价格和按钮 -->
         <view class="right">
-          <view class="price">￥200</view>
+          <view class="price">￥{{ item.userFee }}</view>
           <view class="btn">我要报名</view>
         </view>
       </view>
@@ -98,7 +117,10 @@ const handleGo = (index: number) => {
       .text {
         flex: 1;
       }
-
+      // 商家名
+      .shop {
+        @include ellipsis(1);
+      }
       /* 地址单行省略 */
       .address {
         @include ellipsis(1);
@@ -122,7 +144,7 @@ const handleGo = (index: number) => {
         .info-row {
           display: flex;
           align-items: center;
-          font-size: 28rpx;
+          font-size: 24rpx;
           color: $qs-font-dec;
 
           .iconfont {

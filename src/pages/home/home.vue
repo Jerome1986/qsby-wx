@@ -90,7 +90,8 @@ onLoad(() =>
 .main {
   position: absolute;
   width: 100vw;
-  top: 50rpx;
+  top: 40rpx;
+  border-radius: 30rpx 30rpx 0 0;
 }
 
 /* 导航 */
@@ -107,7 +108,7 @@ onLoad(() =>
     align-items: center;
     width: calc((100% - 20rpx) / 2);
     height: 184rpx;
-    background-color: $qs-pageBackGroundColor;
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 20rpx;
     /*图标*/
     .icon {

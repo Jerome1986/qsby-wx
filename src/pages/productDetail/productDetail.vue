@@ -1,15 +1,38 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
 import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info.ts'
 import { useUserStore } from '@/stores'
 import { ref } from 'vue'
 import OrganizerInfo from '@/components/OrganizerInfo.vue'
+import { tripDetailGetApi } from '@/api/trip.ts'
+import type { PlayListItem } from '@/types/Play'
+import { formatTimestamp } from '@/utils/generateMonth.ts'
+import { userInfoGetApi } from '@/api/user.ts'
+import type { UserItem } from '@/types/UserItem'
 
 // 页面标题
 const title = ref('详情')
+const tripId = ref<string>('')
 
 const userStore = useUserStore()
+
+// 获取详情
+const detailData = ref<PlayListItem>({} as PlayListItem)
+const detailGet = async (id: string) => {
+  const res = await tripDetailGetApi(id)
+  console.log('详情', res)
+  detailData.value = res.data
+  await userInfoGet(res.data.userId)
+}
+
+// 获取用户信息
+const userData = ref<UserItem>({} as UserItem)
+const userInfoGet = async (userId: string) => {
+  const res = await userInfoGetApi(userId)
+  console.log('用户信息', res)
+  userData.value = res.data
+}
 
 // 处理报名
 const handleSign = () => {
@@ -21,11 +44,77 @@ const handleSign = () => {
 onLoad((options: any) => {
   console.log('options:', options)
   // 获取页面参数
-  if (options && options.title) {
+  if (options) {
     title.value = options.title
+    tripId.value = options.productId
+    detailGet(tripId.value)
   }
   // 获取底部安全区域高度
   getSafeAreaBottom()
+})
+
+// 打开地图
+const openLocation = () => {
+  uni.openLocation({
+    latitude: detailData.value.latitude,
+    longitude: detailData.value.longitude,
+    success: () => {
+      console.log('地图定位打开成功')
+    },
+    fail: (error) => {
+      console.log('打开定位失败', error)
+      uni.showToast({ icon: 'fail', title: '定位打开失败' })
+    },
+  })
+}
+
+// 复制微信号
+const handleCopyWx = () => {
+  // 调用uni的剪贴板API
+  uni.setClipboardData({
+    data: detailData.value.wechat, // 要复制的内容
+    success: () => {
+      // 复制成功的提示
+      uni.showToast({
+        title: '微信号复制成功',
+        icon: 'success',
+        duration: 2000, // 提示显示时长（毫秒）
+      })
+    },
+    fail: (err) => {
+      // 复制失败的提示
+      console.error('复制失败：', err)
+      uni.showToast({
+        title: '复制失败，请重试',
+        icon: 'none',
+        duration: 2000,
+      })
+    },
+  })
+}
+
+// 拨打电话
+const handleCallPhone = () => {
+  uni.makePhoneCall({
+    phoneNumber: detailData.value.phone,
+  })
+}
+
+onShareAppMessage((res) => {
+  if (res.from === 'button' && userStore.profile) {
+    // 来自页面内按钮
+    return {
+      title: detailData.value.title,
+      path: `/pages/login/login?inviterCode=${userStore.profile.referralCode}&productId=${tripId.value}`,
+      imageUrl: detailData.value.cover,
+    }
+  }
+  // 默认分享
+  return {
+    title: detailData.value.title,
+    path: `/pages/productDetail/productDetail?inviterCode=${userStore.profile?.referralCode}`,
+    imageUrl: detailData.value.cover,
+  }
 })
 </script>
 
@@ -38,34 +127,33 @@ onLoad((options: any) => {
       <view class="productInfo">
         <view class="top">
           <view class="cover">
-            <image
-              mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-            ></image>
+            <image mode="aspectFill" :src="detailData.cover"></image>
           </view>
           <view class="info">
             <view class="title-row">
-              <view class="title">12.5北疆大环线(轻奢小团)</view>
+              <view class="title">{{ detailData.address_name }}</view>
               <view class="poster-btn">生成海报</view>
             </view>
-            <view class="time">
-              <text class="iconfont icon-shijian1"></text>
-              <text>2025-12-27 12:00:00</text>
-            </view>
-            <view class="address">
-              <text class="iconfont icon-address"></text>
-              <text>黑龙江省哈尔滨市阿城区地址信息地址 地址（信息）</text>
+            <view class="location-info">
+              <view class="time">
+                <text class="iconfont icon-shijian1"></text>
+                <text>{{ formatTimestamp(detailData.time, 2) }}</text>
+              </view>
+              <view class="address">
+                <text class="iconfont icon-address"></text>
+                <text>{{ detailData.event_address }}</text>
+              </view>
             </view>
           </view>
         </view>
         <view class="bottom">
           <view class="row">
             <view class="text">报名费用</view>
-            <view class="value">￥400.00</view>
+            <view class="value">￥{{ detailData.userFee }}</view>
           </view>
           <view class="row" v-if="userStore.profile?.role === 'manager'">
             <view class="text">佣金</view>
-            <view class="value">￥200.00</view>
+            <view class="value">￥{{ detailData.commission }}</view>
           </view>
         </view>
       </view>
@@ -74,41 +162,52 @@ onLoad((options: any) => {
       <view class="shopInfo">
         <view class="top">
           <view class="left">
-            <view class="title">千宿百院武汉公司</view>
-            <view class="address">黑龙江省哈尔滨市阿城区地址信息地址地址（信息）</view>
+            <view class="title">{{ detailData.address_name }}</view>
+            <view class="address">{{ detailData.event_address }}</view>
           </view>
-          <view class="right">
+          <view class="right" @tap="openLocation">
             <text class="iconfont icon-ditu"></text>
             <view class="text">地图</view>
           </view>
         </view>
         <view class="bottom">
-          <view class="signUp">已报名（13/20）</view>
+          <view class="signUp"
+            >已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
+              detailData.maxPeople
+            }}）</view
+          >
           <view class="num">
             <view class="item">
               <text class="male">男</text>
-              <text class="count">5人</text>
+              <text class="count">{{ detailData.maleCount }}人</text>
             </view>
             <view class="item">
               <text class="female">女</text>
-              <text class="count">8人</text>
+              <text class="count">{{ detailData.femaleCount }}人</text>
             </view>
           </view>
         </view>
       </view>
       <!-- 组织方 -->
-      <OrganizerInfo></OrganizerInfo>
+      <OrganizerInfo
+        :userData="userData"
+        @copyWx="handleCopyWx"
+        @callPhone="handleCallPhone"
+      ></OrganizerInfo>
       <!-- 活动介绍 -->
       <view class="activity">
         <view class="title">活动介绍</view>
-        <view class="content">活动内容</view>
+        <view class="content" v-if="detailData.requirement">{{ detailData.requirement }}</view>
+        <view class="images" v-for="(item, index) in detailData.images" :key="index">
+          <image mode="widthFix" :src="item"></image>
+        </view>
       </view>
       <!-- 底部占位，防止阴影被裁剪 -->
       <view class="scroll-bottom-placeholder"></view>
     </scroll-view>
     <!--  底部操作区  -->
     <view class="footerBar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
-      <view class="share">
+      <button class="share" open-type="share">
         <view class="icon">
           <image
             mode="aspectFill"
@@ -116,7 +215,7 @@ onLoad((options: any) => {
           ></image>
         </view>
         <view>分享</view>
-      </view>
+      </button>
       <!--   报名按钮   -->
       <view class="sign" @tap="handleSign">行程报名</view>
     </view>
@@ -169,6 +268,12 @@ onLoad((options: any) => {
       flex: 1;
       margin-left: 24rpx;
 
+      .location-info {
+        .time {
+          margin-top: 0;
+        }
+      }
+
       .title-row {
         display: flex;
         justify-content: space-between;
@@ -201,13 +306,20 @@ onLoad((options: any) => {
       .time,
       .address {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         font-size: 24rpx;
         color: $qs-font-dec;
 
         .iconfont {
+          width: 32rpx;
           margin-right: 8rpx;
           font-size: 28rpx;
+          text-align: center;
+        }
+
+        text:last-child {
+          flex: 1;
+          @include ellipsis(2);
         }
       }
 
@@ -216,13 +328,7 @@ onLoad((options: any) => {
       }
 
       .address {
-        align-items: flex-start;
         margin-top: 12rpx;
-
-        text:last-child {
-          flex: 1;
-          @include ellipsis(2);
-        }
       }
     }
   }
@@ -362,6 +468,16 @@ onLoad((options: any) => {
     font-size: 26rpx;
     color: $qs-font-dec;
     line-height: 1.8;
+    margin-bottom: 20rpx;
+  }
+
+  .images {
+    margin-top: 16rpx;
+
+    image {
+      width: 100%;
+      border-radius: 16rpx;
+    }
   }
 }
 
@@ -384,6 +500,7 @@ onLoad((options: any) => {
     align-items: center;
     font-size: 24rpx;
     color: $qs-font-dec;
+    background-color: transparent;
 
     .icon {
       width: 46rpx;

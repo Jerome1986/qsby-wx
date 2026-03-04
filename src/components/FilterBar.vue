@@ -4,15 +4,19 @@ import { ref } from 'vue'
 const props = withDefaults(
   defineProps<{
     cateData: any[]
+    sortData: any[]
     title?: string
     isIcon?: boolean
   }>(),
   {
     cateData: () => [],
+    sortData: () => [],
     title: '',
     isIcon: false,
   },
 )
+
+const emits = defineEmits(['selectedCate', 'selectSort'])
 
 // 选择行程分类
 const currentCateData = ref(props.title ?? props.cateData[0].name)
@@ -21,19 +25,15 @@ const handleFilterCate = () => {
   filterCateActive.value = !filterCateActive.value
   filterSortActive.value = false
 }
+
 const selectedCate = (item: any) => {
   currentCateData.value = item.name
   filterCateActive.value = false
+  emits('selectedCate', item._id)
 }
 
-// 排序
-const sortData = ref([
-  { _id: '01', cateName: '综合排序' },
-  { _id: '01', cateName: '日度排序' },
-  { _id: '01', cateName: '正在报名' },
-  { _id: '01', cateName: '时间排序' },
-])
-const currentSortData = ref(sortData.value[0].cateName || '')
+// 选择排序
+const currentSortData = ref(props.sortData[0].cateName || '')
 const filterSortActive = ref(false)
 const handleFilterSort = () => {
   filterSortActive.value = !filterSortActive.value
@@ -42,6 +42,7 @@ const handleFilterSort = () => {
 const selectedSort = (item: any) => {
   currentSortData.value = item.cateName
   filterSortActive.value = false
+  emits('selectSort', item._id)
 }
 </script>
 

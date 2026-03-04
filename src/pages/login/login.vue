@@ -41,10 +41,18 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
     userStore.setProfile(wxRes.data)
 
     setTimeout(async () => {
+      await uni.showToast({ icon: 'success', title: '登录成功', duration: 1000 })
+      // 如果携带了商品链接直接跳转商品详情
+      if (productId.value) {
+        await uni.redirectTo({
+          url: `/pages/productDetail/productDetail?productId=${productId.value}`,
+        })
+        return
+      }
+      // 如果没有就跳转首页
       await uni.switchTab({
         url: '/pages/home/home',
       })
-      await uni.showToast({ icon: 'success', title: '登录成功', duration: 1000 })
     }, 800)
   }
 }
@@ -53,6 +61,7 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
 const freshCode = ref('')
 // 获取参数-邀请码
 const inviterCode = ref('')
+const productId = ref('')
 onLoad(async (options: any) => {
   console.log('入参', options)
   // 进页面就重新获取code，防止过期
@@ -71,9 +80,10 @@ onLoad(async (options: any) => {
     },
   })
 
-  // 先判断分享链接进入
-  if (options.inviterCode) {
+  // 先判断分享链接进入且是分享商品详情进入
+  if (options.inviterCode && options.productId) {
     inviterCode.value = options.inviterCode
+    productId.value = options.productId
   } else {
     // 再判断二维码扫码进入
     const scene = decodeURIComponent(options.scene || '')
