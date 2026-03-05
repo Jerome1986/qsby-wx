@@ -1,4 +1,5 @@
 import type { FeatureItem, FeatureType, MyUtilsItem, myUtilsType } from '@/types/My'
+import type { OrderStatus } from '@/types/OrderItem'
 
 // 功能区数据
 export const functionData: FeatureItem[] = [
@@ -40,25 +41,47 @@ export const functionJumpMap: Record<FeatureType, () => void> = {
   },
 }
 
+interface OrderData {
+  icon: string
+  text: string
+  type: Partial<OrderStatus>
+}
+
 // 订单区数据
-export const OrderData = [
+export const OrderData: OrderData[] = [
   {
     icon: '/static/my/UNPAID.png',
     text: '待付款',
+    type: 'pending',
   },
   {
     icon: '/static/my/UNUSED.png',
     text: '待核销',
+    type: 'paid',
   },
   {
     icon: '/static/my/USED.png',
     text: '已核销',
+    type: 'verified',
   },
   {
     icon: '/static/my/REFUNDED.png',
     text: '退款/售后',
+    type: 'refunded',
   },
 ]
+
+// 订单对应的跳转函数
+export const orderJumpMap: Partial<Record<OrderStatus, () => void>> = {
+  pending: () => {
+    uni.navigateTo({
+      url: '/pagesMember/orderManage/orderManage',
+    })
+  },
+  paid: () => {},
+  verified: () => {},
+  refunded: () => {},
+}
 
 // 我的工具跳转函数
 export const utilsJumpMap: Record<myUtilsType, () => void> = {

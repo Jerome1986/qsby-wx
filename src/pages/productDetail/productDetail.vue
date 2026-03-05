@@ -23,7 +23,7 @@ const detailGet = async (id: string) => {
   const res = await tripDetailGetApi(id)
   console.log('详情', res)
   detailData.value = res.data
-  await userInfoGet(res.data.userId)
+  await userInfoGet(res.data.userId as string)
 }
 
 // 获取用户信息
@@ -37,7 +37,7 @@ const userInfoGet = async (userId: string) => {
 // 处理报名
 const handleSign = () => {
   uni.navigateTo({
-    url: '/pages/play/signUp',
+    url: `/pages/play/signUp?productId=${detailData.value._id}`,
   })
 }
 
@@ -56,8 +56,8 @@ onLoad((options: any) => {
 // 打开地图
 const openLocation = () => {
   uni.openLocation({
-    latitude: detailData.value.latitude,
-    longitude: detailData.value.longitude,
+    latitude: detailData.value?.latitude!,
+    longitude: detailData.value?.longitude!,
     success: () => {
       console.log('地图定位打开成功')
     },
@@ -72,7 +72,7 @@ const openLocation = () => {
 const handleCopyWx = () => {
   // 调用uni的剪贴板API
   uni.setClipboardData({
-    data: detailData.value.wechat, // 要复制的内容
+    data: detailData.value?.wechat as string, // 要复制的内容
     success: () => {
       // 复制成功的提示
       uni.showToast({
@@ -96,7 +96,7 @@ const handleCopyWx = () => {
 // 拨打电话
 const handleCallPhone = () => {
   uni.makePhoneCall({
-    phoneNumber: detailData.value.phone,
+    phoneNumber: detailData.value.phone as string,
   })
 }
 
@@ -137,7 +137,7 @@ onShareAppMessage((res) => {
             <view class="location-info">
               <view class="time">
                 <text class="iconfont icon-shijian1"></text>
-                <text>{{ formatTimestamp(detailData.time, 2) }}</text>
+                <text>{{ formatTimestamp(detailData.time!, 2) }}</text>
               </view>
               <view class="address">
                 <text class="iconfont icon-address"></text>
@@ -171,11 +171,9 @@ onShareAppMessage((res) => {
           </view>
         </view>
         <view class="bottom">
-          <view class="signUp"
-            >已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
-              detailData.maxPeople
-            }}）</view
-          >
+          <view class="signUp">已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
+            detailData.maxPeople
+          }}）</view>
           <view class="num">
             <view class="item">
               <text class="male">男</text>
@@ -189,11 +187,7 @@ onShareAppMessage((res) => {
         </view>
       </view>
       <!-- 组织方 -->
-      <OrganizerInfo
-        :userData="userData"
-        @copyWx="handleCopyWx"
-        @callPhone="handleCallPhone"
-      ></OrganizerInfo>
+      <OrganizerInfo :userData="userData" @copyWx="handleCopyWx" @callPhone="handleCallPhone"></OrganizerInfo>
       <!-- 活动介绍 -->
       <view class="activity">
         <view class="title">活动介绍</view>
@@ -209,10 +203,7 @@ onShareAppMessage((res) => {
     <view class="footerBar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
       <button class="share" open-type="share">
         <view class="icon">
-          <image
-            mode="aspectFill"
-            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/share.png"
-          ></image>
+          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/share.png"></image>
         </view>
         <view>分享</view>
       </button>

@@ -37,9 +37,9 @@ export interface EventItem {
   /** 女士报名 */
   femaleCount: string
   /** 用户报名费用 */
-  userFee: string
+  userFee: number
   /** 主理人佣金 */
-  commission: string
+  commission: number
   /** 行程需求 */
   requirement: string
   /** 内容图片 */

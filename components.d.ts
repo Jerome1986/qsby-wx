@@ -17,7 +17,9 @@ declare module 'vue' {
     Note: typeof import('./src/components/Note.vue')['default']
     OrderItem: typeof import('./src/components/OrderItem.vue')['default']
     OrganizerInfo: typeof import('./src/components/OrganizerInfo.vue')['default']
+    PayMethod: typeof import('./src/components/PayMethod.vue')['default']
     ProductCard: typeof import('./src/components/ProductCard.vue')['default']
     Record: typeof import('./src/components/Record.vue')['default']
+    Voucher: typeof import('./src/components/Voucher.vue')['default']
   }
 }

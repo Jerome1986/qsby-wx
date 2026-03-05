@@ -3,6 +3,8 @@ import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
 import { safeAreaBottom, getSafeAreaBottom } from '@/utils/system-info'
 import NavTitle from '@/components/NavTitle.vue'
+import PayMethod from '@/components/PayMethod.vue'
+import Voucher from '@/components/Voucher.vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useUserStore } from '@/stores'
 
@@ -85,37 +87,14 @@ const handlePay = () => {
       </view>
 
       <!-- 支付方式 -->
-      <view class="card pay-row">
-        <text class="pay-label">支付方式</text>
-        <view class="pay-method">
-          <text class="iconfont icon-weixinzhifu" style="color: #07c160; font-size: 40rpx"></text>
-          <text class="pay-text">微信支付</text>
-        </view>
-      </view>
+      <PayMethod />
 
       <!-- 代金券 -->
-      <view class="card voucher-card" v-if="userStore.profile?.role === 'manager'">
-        <view class="voucher-header">
-          <NavTitle title="代金券余额"></NavTitle>
-          <text class="voucher-amount">¥ 1000.00</text>
-        </view>
-        <view class="voucher-tips">
-          <view class="voucher-tip-item">
-            <text class="iconfont icon-duigou tip-icon"></text>
-            <text class="tip-text">全额抵扣</text>
-          </view>
-          <view class="voucher-tip-item">
-            <text class="iconfont icon-duigou tip-icon"></text>
-            <text class="tip-text">余额不足时，可以补缴差价。</text>
-          </view>
-        </view>
-        <view class="voucher-toggle" @tap="useVoucher = !useVoucher">
-          <view class="radio" :class="{ active: useVoucher }">
-            <view class="radio-inner" v-if="useVoucher"></view>
-          </view>
-          <text class="voucher-toggle-text">使用代金券抵扣</text>
-        </view>
-      </view>
+      <Voucher
+        v-if="userStore.profile?.role === 'manager'"
+        :amount="1000"
+        v-model:useVoucher="useVoucher"
+      />
 
       <!-- 订单须知 -->
       <view class="card notice-card">
@@ -218,104 +197,6 @@ const handlePay = () => {
     .uni-easyinput__inner {
       padding-left: 0 !important;
       font-size: 28rpx;
-      color: $qs-font-title;
-    }
-  }
-}
-
-/* 支付方式 */
-.pay-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .pay-label {
-    font-size: 28rpx;
-    font-weight: bold;
-    color: $qs-font-title;
-  }
-
-  .pay-method {
-    display: flex;
-    align-items: center;
-    gap: 10rpx;
-
-    .pay-text {
-      font-size: 28rpx;
-      color: $qs-font-title;
-    }
-  }
-}
-
-/* 代金券 */
-.voucher-card {
-  .voucher-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .voucher-amount {
-      font-size: 32rpx;
-      font-weight: bold;
-      color: #ff3b3b;
-    }
-  }
-
-  .voucher-tips {
-    margin-top: 20rpx;
-    display: flex;
-    flex-direction: column;
-    gap: 12rpx;
-
-    .voucher-tip-item {
-      display: flex;
-      align-items: center;
-      gap: 8rpx;
-
-      .tip-icon {
-        font-size: 24rpx;
-        color: $qs-brandColor;
-      }
-
-      .tip-text {
-        font-size: 24rpx;
-        color: $qs-font-dec;
-      }
-    }
-  }
-
-  .voucher-toggle {
-    margin-top: 24rpx;
-    padding-top: 24rpx;
-    border-top: 1rpx solid $qs-border;
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-
-    .radio {
-      width: 32rpx;
-      height: 32rpx;
-      border-radius: 50%;
-      border: 2rpx solid $qs-font-dec2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.2s;
-
-      &.active {
-        border-color: $qs-brandColor;
-      }
-
-      .radio-inner {
-        width: 18rpx;
-        height: 18rpx;
-        border-radius: 50%;
-        background: $qs-brandColor;
-      }
-    }
-
-    .voucher-toggle-text {
-      font-size: 26rpx;
       color: $qs-font-title;
     }
   }

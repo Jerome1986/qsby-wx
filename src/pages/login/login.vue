@@ -84,6 +84,8 @@ onLoad(async (options: any) => {
   if (options.inviterCode && options.productId) {
     inviterCode.value = options.inviterCode
     productId.value = options.productId
+  }else if(options.productId){
+    productId.value = options.productId
   } else {
     // 再判断二维码扫码进入
     const scene = decodeURIComponent(options.scene || '')

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 // 定义 props
 const props = defineProps<{
@@ -18,13 +18,25 @@ const statusBarHeight = ref(0)
 const navBarHeight = ref(44)
 const totalHeight = ref(0)
 
-// 返回上一页
+// 检查页面栈，判断是否只有当前页面
+const isOnlyCurrentPage = computed(() => {
+  const pages = getCurrentPages()
+  return pages.length <= 1
+})
+
+// 返回上一页或跳转首页
 const handleBack = () => {
-  uni.navigateBack({
-    fail: () => {
-      uni.switchTab({ url: '/pages/home/home' })
-    },
-  })
+  if (isOnlyCurrentPage.value) {
+    // 只有当前页面，跳转到首页
+    uni.switchTab({ url: '/pages/home/home' })
+  } else {
+    // 有多个页面，返回上一页
+    uni.navigateBack({
+      fail: () => {
+        uni.switchTab({ url: '/pages/home/home' })
+      },
+    })
+  }
 }
 
 onMounted(() => {
@@ -50,12 +62,10 @@ onMounted(() => {
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
     <!-- 导航栏内容 -->
     <view class="nav-bar" :style="{ height: navBarHeight + 'px' }">
-      <!-- 左侧返回按钮 -->
-      <view v-if="props.showBack" @tap="handleBack">
-        <uni-icons type="back" size="20"></uni-icons>
-      </view>
-      <view v-else>
-        <uni-icons type="back" size="20"></uni-icons>
+      <!-- 左侧返回按钮/首页图标 -->
+      <view @tap="handleBack">
+        <uni-icons v-if="isOnlyCurrentPage" type="home" size="24"></uni-icons>
+        <uni-icons v-else type="back" size="24"></uni-icons>
       </view>
       <!-- 中间标题 -->
       <view class="center">

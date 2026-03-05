@@ -1,3 +1,4 @@
+import type { EventItem } from '@/types/PublicManagement'
 // 页面排序类型
 export type SortType = 'composite' | 'dailyHot' | 'enrolling' | 'startTime'
 

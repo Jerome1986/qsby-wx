@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { OrderData } from './myConfig.ts'
+import type { OrderStatus } from '@/types/OrderItem';
+import { OrderData, orderJumpMap } from './myConfig'
 import NavTitle from '@/components/NavTitle.vue'
+
+const handleGo = (type: OrderStatus) => {
+  orderJumpMap[type]?.()
+}
 </script>
 
 <template>
@@ -10,7 +15,7 @@ import NavTitle from '@/components/NavTitle.vue'
       <view class="dec">全部订单 </view>
     </view>
     <view class="orderList">
-      <view class="order-item" v-for="(item, index) in OrderData" :key="index">
+      <view class="order-item" v-for="(item, index) in OrderData" :key="index" @tap="handleGo(item.type)">
         <image class="icon" :src="item.icon" mode="aspectFit"></image>
         <view class="text">{{ item.text }} </view>
       </view>
@@ -26,6 +31,7 @@ import NavTitle from '@/components/NavTitle.vue'
   background-color: #ffffff;
   border-radius: 30rpx;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+
   .order-head {
     display: flex;
     justify-content: space-between;
@@ -35,20 +41,24 @@ import NavTitle from '@/components/NavTitle.vue'
       color: $qs-font-dec2;
     }
   }
+
   .orderList {
     display: flex;
     justify-content: space-around;
+
     .order-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: 45rpx;
+
       .icon {
         margin-bottom: 16rpx;
         width: 54rpx;
         height: 54rpx;
         overflow: hidden;
       }
+
       .text {
         font-size: 24rpx;
         color: $qs-font-title;
