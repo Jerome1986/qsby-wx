@@ -36,6 +36,12 @@ const userInfoGet = async (userId: string) => {
 
 // 处理报名
 const handleSign = () => {
+  const totalPerson = Number(detailData.value.maleCount) + Number(detailData.value.femaleCount)
+  // 跳转之前对人数进行判断
+  if (totalPerson >= Number(detailData.value.maxPeople)) {
+    uni.showToast({ icon: 'none', title: '当前行程人数已满', mask: true })
+    return
+  }
   uni.navigateTo({
     url: `/pages/play/signUp?productId=${detailData.value._id}`,
   })
@@ -131,7 +137,7 @@ onShareAppMessage((res) => {
           </view>
           <view class="info">
             <view class="title-row">
-              <view class="title">{{ detailData.address_name }}</view>
+              <view class="title">{{ detailData.title }}</view>
               <view class="poster-btn">生成海报</view>
             </view>
             <view class="location-info">
@@ -173,7 +179,7 @@ onShareAppMessage((res) => {
         <view class="bottom">
           <view class="signUp">已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
             detailData.maxPeople
-          }}）</view>
+            }}）</view>
           <view class="num">
             <view class="item">
               <text class="male">男</text>

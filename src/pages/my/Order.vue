@@ -4,7 +4,13 @@ import { OrderData, orderJumpMap } from './myConfig'
 import NavTitle from '@/components/NavTitle.vue'
 
 const handleGo = (type: OrderStatus) => {
-  orderJumpMap[type]?.()
+  orderJumpMap[type]?.(type)
+}
+
+const handleAll = (status: string) => {
+  uni.navigateTo({
+    url: `/pagesMember/orderManage/orderManage?orderStatus=${status}`
+  })
 }
 </script>
 
@@ -12,7 +18,7 @@ const handleGo = (type: OrderStatus) => {
   <view class="order">
     <view class="order-head">
       <NavTitle title="我的订单"> </NavTitle>
-      <view class="dec">全部订单 </view>
+      <view class="dec" @tap="handleAll('all')">全部订单 </view>
     </view>
     <view class="orderList">
       <view class="order-item" v-for="(item, index) in OrderData" :key="index" @tap="handleGo(item.type)">

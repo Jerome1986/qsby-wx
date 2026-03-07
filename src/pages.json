@@ -2,13 +2,11 @@
   "easycom": {
     "autoscan": true,
     "custom": {
-      // uni-ui 规则如下配置
       "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue",
       "^wd-(.*)": "wot-design-uni/components/wd-$1/wd-$1.vue"
     }
   },
   "pages": [
-    //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
     {
       "path": "pages/home/home",
       "style": {
@@ -172,6 +170,12 @@
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/test/test",
+      "style": {
+        "navigationBarTitleText": "测试"
+      }
     }
   ],
   "tabBar": {
@@ -202,7 +206,6 @@
   },
   "subPackages": [
     {
-      // 子包的根目录
       "root": "pagesMember",
       "pages": [
         {
@@ -350,6 +353,15 @@
           "path": "orderManage/orderManage",
           "style": {
             "navigationBarTitleText": "订单管理",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "orderDetail/orderDetail",
+          "style": {
+            "navigationBarTitleText": "订单详情",
             "enablePullDownRefresh": false,
             "navigationBarBackgroundColor": "#fff4b9",
             "navigationStyle": "custom"

@@ -10,5 +10,5 @@ export interface PlayListPageResponse {
   list: PlayListItem[]
   pageNum: number
   pageSize: number
-  totalPages: number
+  totalPage: number
 }

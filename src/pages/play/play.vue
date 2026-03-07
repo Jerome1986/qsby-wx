@@ -18,8 +18,6 @@ const tripTypeGet = async () => {
   cateData.value.push({ _id: 'all', name: '全部' })
 }
 
-onLoad(() => tripTypeGet())
-
 // 排序
 const sortData = ref([
   { _id: 'composite', cateName: '综合排序' },
@@ -34,28 +32,56 @@ const sortId = ref<SortType>('composite')
 
 //  根据分类和排序获取行程列表
 const pageNum = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(6)
+const finish = ref(false)
+const loading = ref(false)
 // 行程列表类型
 const tripList = ref<PlayListItem[]>([])
+
 const tripListGet = async (tripTypeId: string, sortType: SortType) => {
-  const res = await tripListGetAllApi(tripTypeId, sortType, pageNum.value, pageSize.value)
-  console.log(res)
-  tripList.value = res.data.list
+  if (finish.value || loading.value) return
+  loading.value = true
+  try {
+    const res = await tripListGetAllApi(tripTypeId, sortType, pageNum.value, pageSize.value)
+    tripList.value.push(...res.data.list)
+    if (pageNum.value < res.data.totalPage) {
+      pageNum.value++
+    } else {
+      finish.value = true
+    }
+  } finally {
+    loading.value = false
+  }
 }
-onLoad(() => tripListGet(cateId.value, sortId.value))
+
+// 重置列表并加载（切换分类/排序时调用）
+const resetAndFetch = (tripTypeId: string, sortType: SortType) => {
+  tripList.value = []
+  pageNum.value = 1
+  finish.value = false
+  tripListGet(tripTypeId, sortType)
+}
+
+onLoad(() => {
+  tripTypeGet()
+  resetAndFetch(cateId.value, sortId.value)
+})
+
+// 加载更多（scrolltolower 可能连续触发，需加 loading 锁）
+const handleMore = () => {
+  if (!finish.value) tripListGet(cateId.value, sortId.value)
+}
 
 // 处理分类选择
 const handleSelectedCate = (currentCateId: string) => {
-  console.log(currentCateId)
   cateId.value = currentCateId
-  tripListGet(currentCateId, sortId.value)
+  resetAndFetch(currentCateId, sortId.value)
 }
 
 // 处理排序选择
 const handleSelectedSort = (currentSortId: SortType) => {
-  console.log(currentSortId)
   sortId.value = currentSortId
-  tripListGet(cateId.value, currentSortId)
+  resetAndFetch(cateId.value, currentSortId)
 }
 
 // 发布行程
@@ -68,14 +94,11 @@ const handleSend = () => {
 <template>
   <view class="play">
     <NavHead title="趣哪•游 " :show-back="true"></NavHead>
-    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
+    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
       <!--  发布  -->
       <view class="banner" @tap="handleSend">
-        <image
-          class="img"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/fbxc.jpg"
-          mode="aspectFill"
-        ></image>
+        <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/fbxc.jpg" mode="aspectFill">
+        </image>
       </view>
       <!--  title    -->
       <view class="title">
@@ -83,13 +106,8 @@ const handleSend = () => {
       </view>
       <!--   筛选   -->
       <view class="filter">
-        <FilterBar
-          :cateData="cateData"
-          :sortData="sortData"
-          title="所有行程"
-          @selected-cate="handleSelectedCate"
-          @select-sort="handleSelectedSort"
-        ></FilterBar>
+        <FilterBar :cateData="cateData" :sortData="sortData" title="所有行程" @selected-cate="handleSelectedCate"
+          @select-sort="handleSelectedSort"></FilterBar>
       </view>
       <!--   行程列表   -->
       <view class="list" v-if="tripList.length > 0">
@@ -110,7 +128,8 @@ const handleSend = () => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  @include page-background(); /* 渐变背景 */
+  @include page-background();
+  /* 渐变背景 */
 }
 
 /* 内容区域 */
@@ -122,6 +141,7 @@ const handleSend = () => {
     padding: 0 24rpx;
     width: 100%;
     height: 240rpx;
+
     image {
       border-radius: 30rpx;
     }

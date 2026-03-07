@@ -38,6 +38,8 @@ export interface UserItem {
   avatarUpdateCount?: number
   /** 更新头像的时间 */
   avatarUpdateAt?: Date
+  /** 用户的真实姓名,主理人身份实名必填 */
+  username?: string
 }
 
 //用户更换头像返回类型

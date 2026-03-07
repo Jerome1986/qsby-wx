@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores'
 import type { EventItem, PublicType } from '@/types/PublicManagement'
 import { onLoad } from '@dcloudio/uni-app'
 import { formatTimestamp } from '@/utils/generateMonth.ts'
+import NoData from '@/components/NoData.vue'
 
 // store
 const userStore = useUserStore()
@@ -20,12 +21,23 @@ const tagList = [
 const currentTab = ref<PublicType>('trip')
 const activeIndex = ref(0)
 const handleTab = (tabItem: PublicType, index: number) => {
+  reset()
+
   activeIndex.value = index
   currentTab.value = tabItem
+
   if (userStore.profile?._id && currentTab.value) {
     console.log(currentTab.value)
     publicListGet(userStore.profile?._id, currentTab.value)
   }
+}
+
+// 重置页面
+const reset = () => {
+  pageNum.value = 1
+  publicList.value = []
+  finish.value = false
+  loading.value = false
 }
 
 // 获取发布列表
@@ -33,12 +45,30 @@ const publicList = ref<EventItem[]>([])
 const pageNum = ref(1)
 const pageSize = ref(10)
 const loading = ref(false)
+const finish = ref(false)
 const publicListGet = async (userId: string, publicType: PublicType) => {
+  if (finish.value && loading.value) return
   loading.value = false
   const res = await publicListGetAll(userId, publicType, pageNum.value, pageSize.value)
-  console.log('list', res.data)
-  publicList.value = res.data.list
-  loading.value = true
+  console.log(res)
+
+  publicList.value.push(...res.data.list)
+
+  if (pageNum.value < res.data.totalPage) {
+    console.log('当前页', pageNum.value)
+
+    pageNum.value++
+    console.log('页数增加', pageNum.value, '总页数', res.data.totalPage)
+  } else {
+    finish.value = true
+    loading.value = true
+  }
+}
+
+// 加载更多
+const handleMore = () => {
+  if (finish.value && loading.value) return
+  publicListGet(userStore.profile?._id as string, currentTab.value)
 }
 
 onLoad(() => {
@@ -63,16 +93,11 @@ const handleSignUpList = () => {
   <view class="publishManagement">
     <NavHead title="发布管理" :show-back="true"></NavHead>
     <view class="tabList">
-      <view
-        class="tabItem"
-        v-for="(item, index) in tagList"
-        :key="item.id"
-        :class="{ activeTabItem: activeIndex === index }"
-        @tap="handleTab(item.value as PublicType, index)"
-        >{{ item.label }}</view
-      >
+      <view class="tabItem" v-for="(item, index) in tagList" :key="item.id"
+        :class="{ activeTabItem: activeIndex === index }" @tap="handleTab(item.value as PublicType, index)">{{
+          item.label }}</view>
     </view>
-    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
+    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
       <view class="orderItem" v-for="item in publicList" :key="item._id">
         <view class="card-body">
           <!-- 封面区域 -->
@@ -113,7 +138,15 @@ const handleSignUpList = () => {
           </view>
         </view>
       </view>
+      <!-- 底部占位，防止阴影被裁剪 -->
+      <view class="scroll-bottom-placeholder" style="height: 20rpx;"></view>
+      <!--   空状态   -->
+      <view class="empty" v-if="!publicList.length">
+        <image class="empty-img" src="/static/images/noAny.png" mode="widthFix"></image>
+        <text class="empty-text">暂无数据</text>
+      </view>
     </scroll-view>
+
   </view>
 </template>
 
@@ -124,6 +157,9 @@ const handleSignUpList = () => {
   padding: 24rpx;
   height: 100%;
   @include page-background();
+
+
+
 }
 
 /*标签*/
@@ -132,6 +168,7 @@ const handleSignUpList = () => {
   display: flex;
   justify-content: space-around;
   border-bottom: 1px solid #cdcdcd;
+
   .tabItem {
     color: $qs-font-dec;
   }
@@ -146,6 +183,26 @@ const handleSignUpList = () => {
 .content {
   margin-top: 24rpx;
   flex: 1;
+
+  /* 空状态 */
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+
+    .empty-img {
+      width: 320rpx;
+    }
+
+    .empty-text {
+      margin-top: 24rpx;
+      font-size: 28rpx;
+      color: $qs-font-dec;
+    }
+  }
+
 }
 
 .orderItem {

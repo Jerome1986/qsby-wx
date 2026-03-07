@@ -1,118 +1,70 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
-import type { OrderStatus, OrderType } from '@/types/OrderItem'
+import { onLoad, onShow } from '@dcloudio/uni-app'
+import type { OrderItem, OrderType, PageOrderStatus, PageOrderType } from '@/types/OrderItem'
+import { orderFindAll } from '@/api/order'
+import { useUserStore, useOrderStore } from '@/stores'
+
+
+// store
+const userStore = useUserStore()
+const orderStore = useOrderStore()
 
 // 一级Tab：订单类型
 const orderTypes = [
-  { label: '全部', value: '' },
+  { label: '全部', value: 'all' },
   { label: '趣哪游', value: 'play' },
   { label: '趣活动', value: 'activity' },
   { label: '商城', value: 'shop' },
-  { label: '项目', value: 'projuect' },
-  {label:'积分',value:'score'}
+  { label: '项目', value: 'project' },
 ] as const
 
-const currentOrderType = ref<OrderType | ''>('')
-const handleTypeTab = (value: OrderType | '') => {
+const currentOrderType = ref<PageOrderType>('all')
+const handleTypeTab = (value: PageOrderType) => {
   currentOrderType.value = value
-  fetchOrders()
+  fetchOrders(currentOrderType.value, currentStatus.value)
 }
 
 // 二级Tab：订单状态
 const statusTabs = [
-  { label: '全部', value: '' },
+  { label: '全部', value: 'all' },
+  { label: '待付款', value: 'pending' },
   { label: '待核销', value: 'paid' },
   { label: '已核销', value: 'verified' },
-  { label: '退款/售后', value: 'refunding' },
+  { label: '退款/售后', value: 'refunded' },
 ] as const
 
-const currentStatus = ref<OrderStatus | ''>('')
-const handleStatusTab = (value: OrderStatus | '') => {
+// 当前订单状态
+const currentStatus = ref<PageOrderStatus>('all')
+const handleStatusTab = (value: PageOrderStatus) => {
   currentStatus.value = value
-  fetchOrders()
+  fetchOrders(currentOrderType.value, currentStatus.value)
 }
 
-// 订单列表
-interface OrderItem {
-  id: string
-  orderType: OrderType
-  title: string
-  cover: string
-  // 商城类型
-  shopName?: string
-  address?: string
-  price?: number
-  // 活动/行程类型
-  activityDate?: string
-  storeName?: string
-  activityAddress?: string
-  signUpFee?: number
-  // 商城积分类型
-  points?: number
-  status: OrderStatus
-}
 
+// 获取订单列表
 const orderList = ref<OrderItem[]>([])
 const loading = ref(false)
-
-// 模拟获取订单列表
-const fetchOrders = () => {
+const pageNum = ref(1)
+const pageSize = ref(10)
+const finish = ref(false)
+const fetchOrders = async (orderType: PageOrderType, orderStatus: PageOrderStatus) => {
   loading.value = true
-  setTimeout(() => {
-    orderList.value = [
-      {
-        id: '1',
-        orderType: 'shop',
-        title: '超辣火锅4人套餐',
-        cover: '/static/images/travel.png',
-        shopName: '成都老火锅',
-        address: '四川升成都春熙路1号',
-        price: 126.0,
-        status: 'paid',
-      },
-      {
-        id: '2',
-        orderType: 'activity',
-        title: '12.27体验冬日里的庐山2天1晚',
-        cover: '/static/images/travel.png',
-        activityDate: '2025-12-27 12:00:00',
-        storeName: '门店名称旅游名称（某公司）',
-        activityAddress: '地址文案地址文案地址文案地址文案地址',
-        signUpFee: 2.0,
-        status: 'paid',
-      },
-      {
-        id: '3',
-        orderType: 'play',
-        title: '12.27体验冬日里的庐山2天1晚',
-        cover: '/static/images/travel.png',
-        activityDate: '2025-12-27 12:00:00',
-        storeName: '门店名称旅游名称（某公司）',
-        activityAddress: '地址文案地址文案地址文案地址文案地址',
-        signUpFee: 2.0,
-        status: 'paid',
-      },
-      {
-        id: '4',
-        orderType: 'shop',
-        title: '湖景大床房',
-        cover: '/static/images/travel.png',
-        shopName: '门店名称旅游名称（某公司）',
-        address: '地址文案地址文案地址文案地址文案地址',
-        points: 500,
-        status: 'paid',
-      },
-    ]
-    loading.value = false
-  }, 300)
+  const openid = userStore.profile?.openid as string
+  console.log('参数', orderType, orderStatus)
+
+  const res = await orderFindAll(orderType, orderStatus, openid, pageNum.value, pageSize.value)
+  console.log(res)
+
+  orderList.value = res.data.list
+  loading.value = false
 }
 
 // 查看订单详情
 const handleViewDetail = (item: OrderItem) => {
   uni.navigateTo({
-    url: `/pagesMember/orderDetail/orderDetail?id=${item.id}&type=${item.orderType}`,
+    url: `/pagesMember/orderDetail/orderDetail?orderId=${item._id}&type=${item.orderType}`,
   })
 }
 
@@ -120,7 +72,7 @@ const handleViewDetail = (item: OrderItem) => {
 const handleRefund = (item: OrderItem) => {
   uni.showModal({
     title: '申请退款',
-    content: `确定要申请退款「${item.title}」吗？`,
+    content: `确定要申请退款吗？`,
     success: (res) => {
       if (res.confirm) {
         // TODO: 调用退款 API
@@ -136,14 +88,24 @@ const getOrderTypeLabel = (type: OrderType) => {
     play: '趣哪游',
     activity: '趣活动',
     shop: '门店',
-    projuect: '项目',
-    score: '积分',
+    project: '项目',
   }
   return map[type] || ''
 }
 
-onLoad(() => {
-  fetchOrders()
+onLoad((options) => {
+  if (options?.orderStatus) {
+    currentStatus.value = options?.orderStatus
+  }
+
+  fetchOrders(currentOrderType.value, currentStatus.value)
+})
+
+onShow(() => {
+  if (orderStore.orderListDirtyCount > 0) {
+    orderStore.clearOrderListDirty()
+    fetchOrders(currentOrderType.value, currentStatus.value)
+  }
 })
 </script>
 
@@ -156,26 +118,16 @@ onLoad(() => {
       <!-- 一级Tab：订单类型 -->
       <scroll-view class="type-tabs-scroll" :scroll-x="true" enable-flex :show-scrollbar="false">
         <view class="type-tabs">
-          <view
-            v-for="item in orderTypes"
-            :key="item.value"
-            class="type-tab-item"
-            :class="{ active: currentOrderType === item.value }"
-            @tap="handleTypeTab(item.value)"
-          >
+          <view v-for="item in orderTypes" :key="item.value" class="type-tab-item"
+            :class="{ active: currentOrderType === item.value }" @tap="handleTypeTab(item.value)">
             {{ item.label }}
           </view>
         </view>
       </scroll-view>
       <!-- 二级Tab：订单状态 -->
       <view class="status-tabs">
-        <view
-          v-for="item in statusTabs"
-          :key="item.value"
-          class="status-tab-item"
-          :class="{ active: currentStatus === item.value }"
-          @tap="handleStatusTab(item.value)"
-        >
+        <view v-for="item in statusTabs" :key="item.value" class="status-tab-item"
+          :class="{ active: currentStatus === item.value }" @tap="handleStatusTab(item.value)">
           {{ item.label }}
         </view>
       </view>
@@ -191,63 +143,44 @@ onLoad(() => {
         <text class="empty-text">暂无订单</text>
       </view>
       <view v-else class="order-list">
-        <view
-          class="order-card"
-          v-for="item in orderList"
-          :key="item.id"
-          @tap="handleViewDetail(item)"
-        >
+        <view class="order-card" v-for="item in orderList" :key="item._id" @tap="handleViewDetail(item)">
           <!-- 封面图 -->
           <view class="cover-wrap">
-            <image class="cover" :src="item.cover" mode="aspectFill"></image>
+            <image class="cover" :src="item.productInfo.cover" mode="aspectFill"></image>
             <view class="type-tag">{{ getOrderTypeLabel(item.orderType) }}</view>
           </view>
           <!-- 订单信息：标题、每条信息、价格+按钮 各为独立 view -->
           <view class="order-info">
-            <view class="title">{{ item.title }}</view>
-            <!-- 商城类型 -->
-            <template v-if="item.orderType === 'shop'">
-              <view class="info-row" v-if="item.shopName">
-                <text class="label">店名：</text>
-                <text class="value">{{ item.shopName }}</text>
-              </view>
-              <view class="info-row" v-if="item.address">
-                <text class="label">地址：</text>
-                <text class="value">{{ item.address }}</text>
-              </view>
-            </template>
-            <!-- 活动/行程类型 -->
-            <template v-else>
-              <view class="info-row" v-if="item.activityDate">
+            <view class="title">{{ item.productInfo.title }}</view>
+            <!-- 门店类型 -->
+            <template>
+              <view class="info-row" v-if="item.orderType !== 'shop'">
                 <text class="label">{{ item.orderType === 'play' ? '行程日期：' : '活动日期：' }}</text>
-                <text class="value">{{ item.activityDate }}</text>
+                <text class="value">{{ item.productInfo.time }}</text>
               </view>
-              <view class="info-row" v-if="item.storeName">
-                <text class="label">{{ item.orderType === 'play' ? '行程门店：' : '活动门店：' }}</text>
-                <text class="value">{{ item.storeName }}</text>
+              <view class="info-row" v-if="item.productInfo.address_name">
+                <text class="label">店名：</text>
+                <text class="value">{{ item.productInfo.address_name }}</text>
               </view>
-              <view class="info-row" v-if="item.activityAddress">
-                <text class="label">{{ item.orderType === 'play' ? '行程地址：' : '活动地址：' }}</text>
-                <text class="value">{{ item.activityAddress }}</text>
+              <view class="info-row" v-if="item.productInfo.event_address">
+                <text class="label">地址：</text>
+                <text class="value">{{ item.productInfo.event_address }}</text>
               </view>
             </template>
+
             <!-- 价格 + 按钮 同一 view -->
             <view class="price-btn-row">
               <view class="price-part">
                 <template v-if="item.orderType === 'shop'">
-                  <template v-if="item.price">
+                  <template>
                     <text class="label">订单价格：</text>
-                    <text class="price">￥{{ item.price.toFixed(2) }}</text>
-                  </template>
-                  <template v-else-if="item.points">
-                    <text class="label">积分数量：</text>
-                    <text class="points">{{ item.points }}积分</text>
+                    <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
                   </template>
                 </template>
                 <template v-else>
-                  <template v-if="item.signUpFee !== undefined">
+                  <template>
                     <text class="label">报名金额：</text>
-                    <text class="price">￥{{ item.signUpFee.toFixed(2) }}</text>
+                    <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
                   </template>
                 </template>
               </view>

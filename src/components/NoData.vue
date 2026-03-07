@@ -6,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-  <view class="noFriend">
+  <view class="noData">
     <image :src="imageUrl" mode="aspectFit"></image>
     <view class="tips">{{ tips }}</view>
   </view>
@@ -14,17 +14,19 @@ defineProps<{
 
 <style scoped lang="scss">
 /*无数据提示*/
-.noFriend {
+.noData {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: calc(100% - 188rpx);
+
   image {
     width: 434rpx;
     height: 292rpx;
   }
+
   .tips {
     margin-top: 20rpx;
     font-size: 28rpx;

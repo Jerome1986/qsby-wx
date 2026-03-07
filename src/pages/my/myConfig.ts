@@ -71,16 +71,19 @@ export const OrderData: OrderData[] = [
   },
 ]
 
+// 跳转封装
+const Jump = (status: OrderStatus) => {
+  uni.navigateTo({
+    url: `/pagesMember/orderManage/orderManage?orderStatus=${status}`,
+  })
+}
+
 // 订单对应的跳转函数
-export const orderJumpMap: Partial<Record<OrderStatus, () => void>> = {
-  pending: () => {
-    uni.navigateTo({
-      url: '/pagesMember/orderManage/orderManage',
-    })
-  },
-  paid: () => {},
-  verified: () => {},
-  refunded: () => {},
+export const orderJumpMap: Partial<Record<OrderStatus, (status: OrderStatus) => void>> = {
+  pending: (status) => Jump(status),
+  paid: (status) => Jump(status),
+  verified: (status) => Jump(status),
+  refunded: (status) => Jump(status),
 }
 
 // 我的工具跳转函数

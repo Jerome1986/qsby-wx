@@ -31,11 +31,11 @@ export interface EventItem {
   /** 联系电话 */
   phone: string
   /** 人数限制 */
-  maxPeople: string
+  maxPeople: number
   /** 男士报名 */
-  maleCount: string
+  maleCount: number
   /** 女士报名 */
-  femaleCount: string
+  femaleCount: number
   /** 用户报名费用 */
   userFee: number
   /** 主理人佣金 */
@@ -50,6 +50,8 @@ export interface EventItem {
   enrollCount: number
   /** 已支付且未退款的累计营收（单位：元） */
   revenue: number
+  /** 报名列表：存储用户ID，检测用户是否报名 */
+  signUpList: string[]
   /** 创建时间 */
   createAt: Date
   /** 更新时间 */

@@ -1,9 +1,16 @@
+import type { EventItem } from '@/types/PublicManagement'
+
 // 订单类型
-export type OrderType = 'play' | 'activity' | 'projuect' | 'shop' | 'score'
+export type OrderType = 'play' | 'activity' | 'project' | 'shop'
+
+// 页面展示订单类型
+export type PageOrderType = OrderType | 'all'
 
 // 订单状态
 // pending: 待支付, paid: 已支付（待核销）, verified: 已核销（已完成）, cancelled: 已取消, refunding: 退款中, refunded: 已退款
 export type OrderStatus = 'pending' | 'paid' | 'verified' | 'cancelled' | 'refunding' | 'refunded'
+// 页面展示订单状态类型
+export type PageOrderStatus = OrderStatus | 'all'
 
 // 订单支付方式
 export type OrderPaymentMethod = 'wechat' | 'alipay' | 'bank'
@@ -31,10 +38,12 @@ export interface OrderSubmitParams {
   openid: string
   /** 订单类型 */
   orderType: OrderType
-  /** 产品ID */
-  productId: string
+  /** 产品信息嵌套对象 */
+  productInfo: ProductInfo
   /** 报名人信息 */
   userInfo: OrderUserInfo
+  /** 发起人信息 */
+  initiatorInfo: InitiatorInfo
   /** 原价 */
   totalAmount: number
   /** 主理人佣金/折扣 */
@@ -47,4 +56,93 @@ export interface OrderSubmitParams {
   payAmount: number
   /** 订单描述 */
   description: string
+}
+
+// 订单列表
+/**
+ * 订单主类型
+ * 包含订单核心信息、用户信息、金额信息等
+ */
+export interface OrderItem {
+  /** 订单唯一标识（MongoDB ObjectId） */
+  _id: string
+  /** 业务订单号（外部交易单号，如支付单号） */
+  out_trade_no: string
+  /** 用户微信开放ID（唯一标识用户） */
+  openid: string
+  /** 订单类型（play-旅游/activity-活动/project-项目） */
+  orderType: OrderType
+  /** 产品信息嵌套对象 */
+  productInfo: ProductInfo
+  /** 用户信息嵌套对象(报名人信息) */
+  userInfo: {
+    /** 用户昵称 */
+    nickname: string
+    /** 性别（1-男/2-女/0-未知） */
+    gender: number
+    /** 用户手机号（脱敏前） */
+    phone: string
+  }
+  /** 发起人信息 */
+  initiatorInfo: InitiatorInfo
+  /** 订单总金额（原价，单位：元） */
+  totalAmount: number
+  /** 佣金金额（推广返佣，单位：元） */
+  commission: number
+  /** 优惠金额（抵扣金额，单位：元） */
+  discountAmount: number
+  /** 优惠类型（voucher-优惠券/discount-直减/redpacket-红包） */
+  discountType: DiscountType
+  /** 实际支付金额（单位：元，0表示免支付） */
+  payAmount: number
+  /** 实际支付积分 只用于积分订单 */
+  payScore: number
+  /** 订单状态（pending-待付款/verifying-待核销/verified-已核销/refunded-退款） */
+  status: OrderStatus
+  /** 核销码--二维码链接 前端展示用 */
+  couponCode: string
+  /** 订单创建时间（ISO格式字符串） */
+  createdAt: string
+  /** 订单更新时间（ISO格式字符串，空表示未更新） */
+  updatedAt: string
+}
+
+// 订单对应的产品信息类型
+export interface ProductInfo {
+  /** 产品ID */
+  productId: string
+  /** 产品封面 */
+  cover: string
+  /** 产品名称 */
+  title: string
+  /** 产品时间 行程、活动等 */
+  time: string
+  /** 产品对应的门店名称 */
+  address_name: string
+  /** 产品对应的门店地址 */
+  event_address: string
+}
+
+// 订单对应的发起人信息 酒店类订单除外，默认空对象
+export interface InitiatorInfo {
+  /** 真实姓名 */
+  username: string
+  /** 手机号 */
+  mobile: string
+  /** 微信号 */
+  wechat: string
+}
+
+export interface OrderPage {
+  list: OrderItem[]
+  total: number
+  pageNum: number
+  pageSize: number
+  totalPage: number
+}
+
+/** 取消订单接口返回 */
+export interface OrderCancelResult {
+  orderId: string
+  cancelled: boolean
 }

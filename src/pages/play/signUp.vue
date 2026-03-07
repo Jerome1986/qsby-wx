@@ -8,13 +8,29 @@ import type { PlayListItem } from '@/types/Play'
 import { tripDetailGetApi } from '@/api/trip'
 import { formatTimestamp } from '@/utils/generateMonth'
 import { vaildateMoible } from '@/utils/validateMobile'
-import type { OrderSubmitParams, OrderUserInfo, DiscountType } from '@/types/OrderItem'
+import type { OrderSubmitParams, OrderUserInfo, DiscountType, InitiatorInfo } from '@/types/OrderItem'
 import PayMethod from '@/components/PayMethod.vue'
 import Voucher from '@/components/Voucher.vue'
 import { tripOrderAdd } from '@/api/order'
+import { verifySignUpApi } from '@/api/verifySignUp'
+import { userInfoGetApi } from '@/api/user'
 
 // store
 const userStore = useUserStore()
+
+// 验证是否报名
+const isVerify = ref(false)
+const isSignUp = async (targetId: string) => {
+  const res = await verifySignUpApi(
+    'trip',
+    targetId,
+    userStore.profile?._id as string
+  )
+  console.log('报名结果', res)
+
+  isVerify.value = res.data.isSignUp
+}
+onLoad((options) => isSignUp(options?.productId))
 
 // 表单数据
 const formData = ref<Partial<OrderUserInfo>>({
@@ -29,6 +45,9 @@ const detailGet = async (id: string) => {
   const res = await tripDetailGetApi(id)
   console.log('详情', res)
   detailData.value = res.data
+  initiatorInfo.mobile = detailData.value.phone as string
+  initiatorInfo.wechat = detailData.value.wechat as string
+
 }
 
 // 是否使用代金券
@@ -64,6 +83,18 @@ const realPayAmount = computed(() => {
   return Number((userFee - discountAmount.value).toFixed(2))
 })
 
+// 查询当前行程的发起人信息
+const initiatorInfo: InitiatorInfo = {
+  username: '',
+  mobile: '',
+  wechat: detailData.value.wechat as string
+}
+const initiatorInfoGet = async () => {
+  const res = await userInfoGetApi(detailData.value.userId as string)
+  initiatorInfo.username = res.data.username || res.data.nickname
+}
+
+
 // 提交报名
 const submit = async () => {
   // 校验表单
@@ -88,6 +119,11 @@ const submit = async () => {
     return
   }
 
+  if (userStore.profile?._id === detailData.value.userId) {
+    uni.showToast({ title: '不可以参加自己的项目', icon: 'none' })
+    return
+  }
+
   // 检查用户是否有openid,如果没有就跳转登录
   if (!userStore.profile?.openid) {
     uni.navigateTo({ url: `/pages/login/login?productId=${detailData.value._id}` })
@@ -106,12 +142,20 @@ const submit = async () => {
   const params: OrderSubmitParams = {
     openid: userStore.profile?.openid,
     orderType: 'play',
-    productId: detailData.value._id as string,
+    productInfo: {
+      productId: detailData.value._id as string,
+      cover: detailData.value.cover as string,
+      title: detailData.value.title as string,
+      time: detailData.value.time as string,
+      address_name: detailData.value.address_name as string,
+      event_address: detailData.value.event_address as string
+    },
     userInfo: {
       nickname: formData.value.nickname as string,
       gender: formData.value.gender as string | number,
       phone: formData.value.phone as string,
     },
+    initiatorInfo,
     totalAmount,
     commission,
     discountAmount: discountAmount.value,
@@ -134,6 +178,9 @@ const submit = async () => {
     success(res) {
       // 3.支付成功后-重新获取更新的数据（实际的更新动作由后端完成）
       console.log('支付成功', res)
+      uni.redirectTo({
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}`,
+      })
     },
     fail(err) {
       console.error('支付失败', err)
@@ -145,9 +192,10 @@ const submit = async () => {
   })
 }
 
-onLoad((options: any) => {
+onLoad(async (options: any) => {
   if (options.productId) {
-    detailGet(options.productId)
+    await detailGet(options.productId)
+    await initiatorInfoGet()
   }
   getSafeAreaBottom()
 })
@@ -194,13 +242,8 @@ onLoad((options: any) => {
       <view class="userInfo">
         <uni-forms ref="formRef" :modelValue="formData" labelWidth="140rpx">
           <uni-forms-item label="昵称" name="nickname">
-            <uni-easyinput
-              v-model="formData.nickname"
-              :inputBorder="false"
-              placeholder="代用名"
-              primaryColor="#ffd018"
-              trim
-            />
+            <uni-easyinput v-model="formData.nickname" :inputBorder="false" placeholder="代用名" primaryColor="#ffd018"
+              trim />
           </uni-forms-item>
           <uni-forms-item label="性别" name="gender">
             <radio-group @change="(e: any) => (formData.gender = e.detail.value)">
@@ -215,14 +258,8 @@ onLoad((options: any) => {
             </radio-group>
           </uni-forms-item>
           <uni-forms-item label="手机号" name="phone">
-            <uni-easyinput
-              v-model="formData.phone"
-              :inputBorder="false"
-              placeholder="请填写正确的手机号码"
-              primaryColor="#ffd018"
-              type="number"
-              trim
-            />
+            <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请填写正确的手机号码" primaryColor="#ffd018"
+              type="number" trim />
           </uni-forms-item>
         </uni-forms>
       </view>
@@ -233,21 +270,11 @@ onLoad((options: any) => {
       <!--  温馨提示  -->
       <view class="tips">
         <view class="tips-title">温馨提示：</view>
-        <view class="tips-item"
-          >1、报名成功后，请按照行程安排准时到达指定集合地点，逾期未到视为自动放弃，费用不予退还。</view
-        >
-        <view class="tips-item"
-          >2、如需取消报名，请提前24小时联系组织方，逾期取消将扣除相应手续费。</view
-        >
-        <view class="tips-item"
-          >3、活动期间请遵守组织方安排，注意人身及财产安全，如遇突发情况请及时与工作人员沟通。</view
-        >
-        <view class="tips-item"
-          >4、请确保所填写的联系方式真实有效，以便组织方及时与您取得联系。</view
-        >
-        <view class="tips-item"
-          >5、本平台仅提供信息展示及报名服务，活动最终解释权归组织方所有。</view
-        >
+        <view class="tips-item">1、报名成功后，请按照行程安排准时到达指定集合地点，逾期未到视为自动放弃，费用不予退还。</view>
+        <view class="tips-item">2、如需取消报名，请提前24小时联系组织方，逾期取消将扣除相应手续费。</view>
+        <view class="tips-item">3、活动期间请遵守组织方安排，注意人身及财产安全，如遇突发情况请及时与工作人员沟通。</view>
+        <view class="tips-item">4、请确保所填写的联系方式真实有效，以便组织方及时与您取得联系。</view>
+        <view class="tips-item">5、本平台仅提供信息展示及报名服务，活动最终解释权归组织方所有。</view>
       </view>
       <!-- 底部占位 -->
       <view class="scroll-bottom-placeholder"></view>
@@ -264,7 +291,8 @@ onLoad((options: any) => {
           <text class="value">-￥{{ detailData.commission?.toFixed(2) }}</text>
         </view>
       </view>
-      <view class="btn" @tap="submit">提交报名</view>
+      <view class="btn" @tap="submit" v-if="!isVerify">提交报名</view>
+      <view class="btn disable" v-else>已报名</view>
     </view>
   </view>
 </template>
@@ -523,11 +551,15 @@ onLoad((options: any) => {
     height: 80rpx;
     line-height: 80rpx;
     text-align: center;
-    background: #ffd018;
+    background: $qs-brandColor;
     border-radius: 40rpx;
     font-size: 30rpx;
     font-weight: bold;
     color: $qs-font-title;
+  }
+
+  .disable {
+    background: $qs-font-dec2;
   }
 }
 </style>
