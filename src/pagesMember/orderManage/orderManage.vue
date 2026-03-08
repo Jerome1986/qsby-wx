@@ -4,12 +4,11 @@ import { ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import type { OrderItem, OrderType, PageOrderStatus, PageOrderType } from '@/types/OrderItem'
 import { orderFindAll } from '@/api/order'
-import { useUserStore, useOrderStore } from '@/stores'
+import { useUserStore } from '@/stores'
 
 
 // store
 const userStore = useUserStore()
-const orderStore = useOrderStore()
 
 // 一级Tab：订单类型
 const orderTypes = [
@@ -49,6 +48,7 @@ const loading = ref(false)
 const pageNum = ref(1)
 const pageSize = ref(10)
 const finish = ref(false)
+// TODO: 分页查询
 const fetchOrders = async (orderType: PageOrderType, orderStatus: PageOrderStatus) => {
   loading.value = true
   const openid = userStore.profile?.openid as string
@@ -97,15 +97,10 @@ onLoad((options) => {
   if (options?.orderStatus) {
     currentStatus.value = options?.orderStatus
   }
-
-  fetchOrders(currentOrderType.value, currentStatus.value)
 })
 
 onShow(() => {
-  if (orderStore.orderListDirtyCount > 0) {
-    orderStore.clearOrderListDirty()
-    fetchOrders(currentOrderType.value, currentStatus.value)
-  }
+  fetchOrders(currentOrderType.value, currentStatus.value)
 })
 </script>
 

@@ -6,3 +6,19 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+declare module 'uqrcodejs' {
+  interface QRModule {
+    isBlack: boolean
+  }
+
+  class UQRCode {
+    data: string
+    size: number
+    canvasContext: any
+    modules: QRModule[][]
+    make(): void
+    drawCanvas(): void
+  }
+  export default UQRCode
+}

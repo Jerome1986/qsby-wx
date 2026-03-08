@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import UQRCode from 'uqrcodejs'
 import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info'
 import type { OrderItem, OrderType } from '@/types/OrderItem'
-import { orderFindOne, orderPay, orderCancel } from '@/api/order'
-import { useUserStore, useOrderStore } from '@/stores'
+import { orderFindOne, orderPay, orderCancel, createQrCode } from '@/api/order'
+import { useUserStore } from '@/stores'
 
 
 // store
 const userStore = useUserStore()
-const orderStore = useOrderStore()
 
 // 订单类型标签（积分为独立模块，不在此共用）
 const typeLabels: Record<OrderType, string> = {
@@ -24,11 +24,18 @@ const orderId = ref('')
 const orderType = ref<OrderType>('play')
 
 const orderDetail = ref<OrderItem>()
-const orderDetailGet = async (orderId: string) => {
-  const res = await orderFindOne(userStore.profile?.openid as string, orderId)
-  console.log(res)
-
+const orderDetailGet = async (id: string) => {
+  const res = await orderFindOne(userStore.profile?.openid as string, id)
   orderDetail.value = res.data
+  // 已支付但无核销码时，请求创建
+  if (res.data.status === 'paid' && !res.data.verifyCode) {
+    try {
+      const qrRes = await createQrCode(res.data._id, userStore.profile?.openid as string)
+      orderDetail.value = { ...orderDetail.value!, verifyCode: qrRes.data.verifyCode }
+    } catch (err) {
+      console.error('核销码创建失败', err)
+    }
+  }
 }
 
 // 是否显示发起人（行程、活动、项目）
@@ -41,14 +48,23 @@ const showRegistrant = computed(() =>
   ['play', 'activity', 'project', 'shop'].includes(orderType.value)
 )
 
-// 复制券号
-// const handleCopyCode = () => {
-//   const code = orderDetail.value.couponCode?.replace(/\s/g, '') || ''
-//   uni.setClipboardData({
-//     data: code,
-//     success: () => uni.showToast({ title: '已复制', icon: 'success' }),
-//   })
-// }
+// 核销码二维码矩阵（uqrcodejs modules，用 view 渲染，无需 canvas）
+const qrcodeModules = ref<{ isBlack: boolean }[][]>([])
+
+watch(
+  () => orderDetail.value?.verifyCode,
+  (code) => {
+    if (!code) {
+      qrcodeModules.value = []
+      return
+    }
+    const qr = new UQRCode()
+    qr.data = code
+    qr.make()
+    qrcodeModules.value = (qr as { modules: { isBlack: boolean }[][] }).modules || []
+  },
+  { immediate: true }
+)
 
 // 拨打电话
 const handleCall = () => {
@@ -86,7 +102,6 @@ const handleCancelOrder = () => {
         const cancelRes = await orderCancel(order._id, openid)
         if (cancelRes.data.cancelled && cancelRes.data.orderId === order._id) {
           uni.showToast({ icon: 'success', title: '已取消' })
-          orderStore.incrementOrderListDirty()
           uni.navigateBack()
         } else {
           uni.showToast({ icon: 'none', title: '取消失败，请重试' })
@@ -119,8 +134,8 @@ const handleGoPay = async () => {
       signType: payRes.data.signType,
       paySign: payRes.data.paySign,
       success() {
-        console.log('支付成功')
-        orderDetailGet(order._id)
+        orderStore.incrementOrderListDirty()
+        uni.navigateBack()
       },
       fail() {
         uni.showToast({ icon: 'none', title: '取消支付' })
@@ -159,21 +174,23 @@ onLoad((options?: { orderId?: string; type?: string }) => {
             <view class="title">{{ orderDetail?.productInfo.title }}</view>
             <!-- 行程/活动 -->
             <template v-if="['play', 'activity'].includes(orderDetail?.orderType as OrderType)">
-              <view class="info-row" v-if="orderDetail?.productInfo.time">
-                <text class="label">{{ orderDetail.orderType === 'play' ? '行程日期：' : '活动日期：' }}</text>
-                <text class="value">{{ orderDetail.productInfo.time }}</text>
-              </view>
-              <view class="info-row" v-if="orderDetail?.productInfo.address_name">
-                <text class="label">{{ orderDetail.orderType === 'play' ? '行程门店：' : '活动门店：' }}</text>
-                <text class="value">{{ orderDetail.productInfo.address_name }}</text>
-              </view>
-              <view class="info-row" v-if="orderDetail?.productInfo.event_address">
-                <text class="label">{{ orderDetail?.orderType === 'play' ? '行程地址：' : '活动地址：' }}</text>
-                <text class="value">{{ orderDetail?.productInfo.event_address }}</text>
-              </view>
-              <view class="price-row">
-                <text class="label">报名金额：</text>
-                <text class="price">¥{{ orderDetail?.payAmount.toFixed(2) }}元</text>
+              <view class="info-group">
+                <view class="info-row" v-if="orderDetail?.productInfo.time">
+                  <text class="label">{{ orderDetail.orderType === 'play' ? '行程日期：' : '活动日期：' }}</text>
+                  <text class="value">{{ orderDetail.productInfo.time }}</text>
+                </view>
+                <view class="info-row" v-if="orderDetail?.productInfo.address_name">
+                  <text class="label">{{ orderDetail.orderType === 'play' ? '行程门店：' : '活动门店：' }}</text>
+                  <text class="value">{{ orderDetail.productInfo.address_name }}</text>
+                </view>
+                <view class="info-row" v-if="orderDetail?.productInfo.event_address">
+                  <text class="label">{{ orderDetail?.orderType === 'play' ? '行程地址：' : '活动地址：' }}</text>
+                  <text class="value">{{ orderDetail?.productInfo.event_address }}</text>
+                </view>
+                <view class="price-row">
+                  <text class="label">报名金额：</text>
+                  <text class="price">¥{{ orderDetail?.payAmount.toFixed(2) }}元</text>
+                </view>
               </view>
             </template>
             <!-- 门店 -->
@@ -281,9 +298,25 @@ onLoad((options?: { orderId?: string; type?: string }) => {
           <view class="bar"></view>
           <text class="section-title">核销码</text>
         </view>
-        <view class="qrcode-placeholder"></view>
-        <view class="coupon-row">
-          <image src="" mode="aspectFit" />
+        <view class="qrcode-wrap" v-if="orderDetail?.verifyCode">
+          <view class="qrcode-grid" v-if="qrcodeModules.length">
+            <view
+              v-for="(row, rowI) in qrcodeModules"
+              :key="rowI"
+              class="qrcode-row"
+            >
+              <view
+                v-for="(col, colI) in row"
+                :key="colI"
+                class="qrcode-cell"
+                :class="{ black: col.isBlack }"
+              ></view>
+            </view>
+          </view>
+          <view class="verify-code-text">{{ orderDetail.verifyCode }}</view>
+        </view>
+        <view class="qrcode-placeholder" v-else>
+          <text class="placeholder-text">核销码生成中...</text>
         </view>
       </view>
 
@@ -421,7 +454,7 @@ onLoad((options?: { orderId?: string; type?: string }) => {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8rpx;
+      justify-content: space-between;
       min-width: 0;
 
       .title {
@@ -432,15 +465,27 @@ onLoad((options?: { orderId?: string; type?: string }) => {
         @include ellipsis(2);
       }
 
+      .info-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+      }
+
       .info-row {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: nowrap;
         font-size: 24rpx;
         line-height: 1.5;
 
         .label {
+          flex-shrink: 0;
           color: $qs-font-dec2;
         }
 
         .value {
+          flex: 1;
+          min-width: 0;
           color: $qs-font-dec;
           @include ellipsis(1);
         }
@@ -495,12 +540,62 @@ onLoad((options?: { orderId?: string; type?: string }) => {
 
 /* 核销码 */
 .verify-card {
+  position: relative;
+  z-index: 0;
+
+  .qrcode-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24rpx;
+
+    .qrcode-grid {
+      display: flex;
+      flex-direction: column;
+      width: 200px;
+      height: 200px;
+      background-color: #fff;
+      border-radius: 16rpx;
+      overflow: hidden;
+    }
+
+    .qrcode-row {
+      display: flex;
+      flex: 1;
+    }
+
+    .qrcode-cell {
+      flex: 1;
+      background-color: #fff;
+
+      &.black {
+        background-color: #000;
+      }
+    }
+
+    .verify-code-text {
+      margin-top: 16rpx;
+      font-size: 36rpx;
+      font-weight: bold;
+      color: $qs-font-title;
+      letter-spacing: 8rpx;
+    }
+  }
+
   .qrcode-placeholder {
     width: 320rpx;
     height: 320rpx;
     margin: 0 auto 24rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: linear-gradient(135deg, rgba($qs-brandColor, 0.3), rgba($qs-brandColor, 0.1));
     border-radius: 16rpx;
+
+    .placeholder-text {
+      font-size: 28rpx;
+      color: $qs-font-dec;
+    }
   }
 
   .coupon-row {

@@ -10,4 +10,3 @@ pinia.use(persist)
 export default pinia
 
 export * from './modules/user.ts'
-export * from './modules/order.ts'

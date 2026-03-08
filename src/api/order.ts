@@ -5,6 +5,8 @@ import type {
   OrderPage,
   OrderItem,
   OrderCancelResult,
+  CreateQrCodeResult,
+  CreateOrderFreeResult,
 } from '@/types/OrderItem'
 import type { PayResult } from '@/types/Pay'
 import { request } from '@/utils/http'
@@ -79,5 +81,30 @@ export const orderCancel = (orderId: string, openid: string) => {
     method: 'POST',
     url: '/order/cancel',
     data: { orderId, openid },
+  })
+}
+
+/**
+ * 创建核销码
+ * @param orderId - 订单ID
+ * @param openid - 用户微信ID
+ */
+export const createQrCode = (orderId: string, openid: string) => {
+  return request<CreateQrCodeResult>({
+    method: 'GET',
+    url: '/utils/qrcode',
+    data: { orderId, openid },
+  })
+}
+
+/**
+ * 当前用户抵扣完支付金额为0时，走下单流程，不用支付
+ * @param params - 订单参数
+ */
+export const createOrderFree = (params: OrderSubmitParams) => {
+  return request<CreateOrderFreeResult>({
+    method: 'POST',
+    url: '/order/createOrderFree',
+    data: { params },
   })
 }

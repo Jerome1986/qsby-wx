@@ -17,6 +17,8 @@ export type OrderPaymentMethod = 'wechat' | 'alipay' | 'bank'
 
 // 报名人信息
 export interface OrderUserInfo {
+  /** 用户ID */
+  userId: string
   /** 昵称 */
   nickname: string
   /** 性别 */
@@ -99,8 +101,10 @@ export interface OrderItem {
   payScore: number
   /** 订单状态（pending-待付款/verifying-待核销/verified-已核销/refunded-退款） */
   status: OrderStatus
-  /** 核销码--二维码链接 前端展示用 */
-  couponCode: string
+  /** 核销码 - 用于记录和手动核销 */
+  verifyCode?: string
+  /** 是否已核销 */
+  isVerified?: boolean
   /** 订单创建时间（ISO格式字符串） */
   createdAt: string
   /** 订单更新时间（ISO格式字符串，空表示未更新） */
@@ -145,4 +149,17 @@ export interface OrderPage {
 export interface OrderCancelResult {
   orderId: string
   cancelled: boolean
+}
+
+// 创建核销码接口返回
+export interface CreateQrCodeResult {
+  /** 订单ID */
+  orderId: string
+  /** 核销码 */
+  verifyCode: string
+}
+
+// 当前用户抵扣完支付金额为0时，走下单流程，不用支付接口返回
+export interface CreateOrderFreeResult {
+  orderId: string
 }

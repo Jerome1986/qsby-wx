@@ -11,13 +11,26 @@ import { vaildateMoible } from '@/utils/validateMobile'
 import type { OrderSubmitParams, OrderUserInfo, DiscountType, InitiatorInfo } from '@/types/OrderItem'
 import PayMethod from '@/components/PayMethod.vue'
 import Voucher from '@/components/Voucher.vue'
-import { tripOrderAdd } from '@/api/order'
+import { tripOrderAdd, createQrCode, createOrderFree } from '@/api/order'
 import { verifySignUpApi } from '@/api/verifySignUp'
 import { userInfoGetApi } from '@/api/user'
 
 // store
 const userStore = useUserStore()
 
+// 刷新用户信息
+const refreshUserInfo = async () => {
+  if (userStore.profile?._id) {
+    const res = await userInfoGetApi(userStore.profile?._id)
+    if (res.code === 200) {
+      userStore.setProfile(res.data)
+    }
+  }
+}
+
+onLoad(async () => {
+  await refreshUserInfo()
+})
 // 验证是否报名
 const isVerify = ref(false)
 const isSignUp = async (targetId: string) => {
@@ -151,6 +164,7 @@ const submit = async () => {
       event_address: detailData.value.event_address as string
     },
     userInfo: {
+      userId: userStore.profile?._id as string,
       nickname: formData.value.nickname as string,
       gender: formData.value.gender as string | number,
       phone: formData.value.phone as string,
@@ -164,6 +178,23 @@ const submit = async () => {
     description: detailData.value.title as string,
   }
 
+   // 如果是代金券抵扣，且支付金额抵扣完为0就走下单流程，不用支付
+  if (payAmount === 0 && params.discountType === 'voucher') {
+    try {
+      const res = await createOrderFree(params)
+      await createQrCode(res.data.orderId, userStore.profile?.openid as string).catch((err) =>
+        console.error('核销码创建失败', err)
+      )
+      await uni.redirectTo({
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&type=play`,
+      })
+    } catch (err) {
+      console.error('免支付下单失败', err)
+      uni.showToast({ icon: 'none', title: '下单失败，请重试' })
+    }
+    return
+  }
+
   console.log('提交报名参数', params)
   //  调用生成订单+支付接口
   const payRes = await tripOrderAdd(params)
@@ -175,11 +206,16 @@ const submit = async () => {
     package: payRes.data.packageValue,
     signType: payRes.data.signType,
     paySign: payRes.data.paySign,
-    success(res) {
-      // 3.支付成功后-重新获取更新的数据（实际的更新动作由后端完成）
-      console.log('支付成功', res)
-      uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}`,
+    async success() {
+      try {
+      const qrCodeRes = await createQrCode(payRes.data.orderId, userStore.profile?.openid as string)
+      console.log(qrCodeRes)
+
+      } catch (err) {
+        console.error('核销码创建失败', err)
+      }
+     await uni.redirectTo({
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=play`,
       })
     },
     fail(err) {
@@ -286,7 +322,7 @@ onLoad(async (options: any) => {
           <text class="label">实际费用</text>
           <text class="value">￥{{ realPayAmount }}</text>
         </view>
-        <view class="row discount" v-if="userStore.profile?.role === 'manager'">
+        <view class="row discount" v-if="userStore.profile?.role === 'manager'&&!useVoucher">
           <text class="label">主理人折扣</text>
           <text class="value">-￥{{ detailData.commission?.toFixed(2) }}</text>
         </view>
