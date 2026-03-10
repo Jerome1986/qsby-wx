@@ -142,7 +142,8 @@ const handleSignUpList = () => {
       <view class="scroll-bottom-placeholder" style="height: 20rpx;"></view>
       <!--   空状态   -->
       <view class="empty" v-if="!publicList.length">
-        <image class="empty-img" src="/static/images/noAny.png" mode="widthFix"></image>
+        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+          mode="widthFix"></image>
         <text class="empty-text">暂无数据</text>
       </view>
     </scroll-view>

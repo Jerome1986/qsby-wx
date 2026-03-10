@@ -4,14 +4,10 @@ input,
 scroll-view {
   box-sizing: border-box;
   /* 跨平台字体优先级优化 */
-  font-family: "PingFang SC", /* iOS/macOS 苹方-简 */
-  "Microsoft YaHei", "微软雅黑", /* Windows 微软雅黑 */
-  "Roboto", /* 安卓常见无衬线字体 */
-  -apple-system, BlinkMacSystemFont,
-  "Helvetica Neue", Helvetica, Arial,
-  sans-serif;
+  font-family: 'PingFang SC', /* iOS/macOS 苹方-简 */ 'Microsoft YaHei', '微软雅黑',
+    /* Windows 微软雅黑 */ 'Roboto', /* 安卓常见无衬线字体 */ -apple-system, BlinkMacSystemFont,
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-
 
 button::after {
   border: none;
@@ -31,7 +27,6 @@ image {
   vertical-align: middle;
   box-sizing: border-box;
 }
-
 
 // 两行省略
 @mixin ellipsis($line: 1) {
@@ -111,18 +106,16 @@ image {
 
   background: linear-gradient(
     135deg,
-  #ffe9a0 0%,      /* 明亮金黄 */
-  #fff3c4 40%,     /* 浅黄 */
-  #fffbeb 65%,     /* 奶黄白 */
-  #fffef8 80%,     /* 近乎纯白带暖调 */
-  #ffffff 100%     /* 纯白 */
+    #ffe9a0 0%,
+    /* 明亮金黄 */ #fff3c4 40%,
+    /* 浅黄 */ #fffbeb 65%,
+    /* 奶黄白 */ #fffef8 80%,
+    /* 近乎纯白带暖调 */ #ffffff 100% /* 纯白 */
   );
 }
 
 // 通用阴影（柔和立体卡片阴影）
 @mixin customShadow() {
-  box-shadow:
-    0 1rpx 2rpx rgba(0, 0, 0, 0.03),
-    0 2rpx 6rpx rgba(0, 0, 0, 0.05),
+  box-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.03), 0 2rpx 6rpx rgba(0, 0, 0, 0.05),
     0 4rpx 10rpx rgba(0, 0, 0, 0.04);
 }

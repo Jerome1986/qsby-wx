@@ -130,7 +130,7 @@ export const listDataOut = ref<ConsumptionOutItem[]>([
 // 积分订单列表数据
 export const scoreOrderItems = ref<ScoreOrderItem[]>([
   {
-    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     productName: '湖景大床房',
     address: '武昌司门口',
     scoreNum: '500积分',
@@ -138,7 +138,7 @@ export const scoreOrderItems = ref<ScoreOrderItem[]>([
     scoreStatus: 'USED',
   },
   {
-    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     productName: '湖景大床房',
     address: '武昌司门口',
     scoreNum: '500积分',
@@ -146,7 +146,7 @@ export const scoreOrderItems = ref<ScoreOrderItem[]>([
     scoreStatus: 'UNUSED',
   },
   {
-    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     productName: '湖景大床房',
     address: '武昌司门口',
     scoreNum: '500积分',
@@ -154,7 +154,7 @@ export const scoreOrderItems = ref<ScoreOrderItem[]>([
     scoreStatus: 'USED',
   },
   {
-    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     productName: '湖景大床房',
     address: '武昌司门口',
     scoreNum: '500积分',
@@ -162,7 +162,7 @@ export const scoreOrderItems = ref<ScoreOrderItem[]>([
     scoreStatus: 'USED',
   },
   {
-    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     productName: '湖景大床房',
     address: '武昌司门口',
     scoreNum: '500积分',
@@ -170,7 +170,7 @@ export const scoreOrderItems = ref<ScoreOrderItem[]>([
     scoreStatus: 'UNUSED',
   },
   {
-    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    cover: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     productName: '湖景大床房',
     address: '武昌司门口',
     scoreNum: '500积分',

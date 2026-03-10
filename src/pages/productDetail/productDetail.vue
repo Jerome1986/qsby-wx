@@ -10,19 +10,29 @@ import type { PlayListItem } from '@/types/Play'
 import { formatTimestamp } from '@/utils/generateMonth.ts'
 import { userInfoGetApi } from '@/api/user.ts'
 import type { UserItem } from '@/types/UserItem'
+import { activityDetail } from '@/api/activity'
+import type { ActivityListItem } from '@/types/Activity'
 
 // 页面标题
 const title = ref('详情')
-const tripId = ref<string>('')
+const productId = ref<string>('')
+const proType = ref('')
 
 const userStore = useUserStore()
 
 // 获取详情
-const detailData = ref<PlayListItem>({} as PlayListItem)
-const detailGet = async (id: string) => {
-  const res = await tripDetailGetApi(id)
-  console.log('详情', res)
-  detailData.value = res.data
+const detailData = ref<PlayListItem | ActivityListItem>({} as PlayListItem | ActivityListItem)
+const detailGet = async (id: string, proType: string) => {
+  let res
+  if (proType === 'activity') {
+    res = await activityDetail(id)
+    console.log('活动详情', res)
+    detailData.value = res.data
+  } else {
+    res = await tripDetailGetApi(id)
+    console.log('行程详情', res)
+    detailData.value = res.data
+  }
   await userInfoGet(res.data.userId as string)
 }
 
@@ -43,7 +53,7 @@ const handleSign = () => {
     return
   }
   uni.navigateTo({
-    url: `/pages/play/signUp?productId=${detailData.value._id}`,
+    url: `/pages/signUp/signUp?productId=${detailData.value._id}&proType=${proType.value}`,
   })
 }
 
@@ -52,8 +62,9 @@ onLoad((options: any) => {
   // 获取页面参数
   if (options) {
     title.value = options.title
-    tripId.value = options.productId
-    detailGet(tripId.value)
+    productId.value = options.productId
+    proType.value = options.proType
+    detailGet(productId.value, proType.value)
   }
   // 获取底部安全区域高度
   getSafeAreaBottom()
@@ -111,7 +122,7 @@ onShareAppMessage((res) => {
     // 来自页面内按钮
     return {
       title: detailData.value.title,
-      path: `/pages/login/login?inviterCode=${userStore.profile.referralCode}&productId=${tripId.value}`,
+      path: `/pages/login/login?inviterCode=${userStore.profile.referralCode}&productId=${productId.value}`,
       imageUrl: detailData.value.cover,
     }
   }
@@ -179,7 +190,7 @@ onShareAppMessage((res) => {
         <view class="bottom">
           <view class="signUp">已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
             detailData.maxPeople
-            }}）</view>
+          }}）</view>
           <view class="num">
             <view class="item">
               <text class="male">男</text>
@@ -209,7 +220,8 @@ onShareAppMessage((res) => {
     <view class="footerBar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
       <button class="share" open-type="share">
         <view class="icon">
-          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/share.png"></image>
+          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/share.png">
+          </image>
         </view>
         <view>分享</view>
       </button>

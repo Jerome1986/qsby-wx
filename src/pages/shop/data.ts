@@ -9,18 +9,18 @@ interface NavbarItem {
 // 页面导航配置
 export const navBarOptions: NavbarItem[] = [
   {
-    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/01.png',
-    text: '/static/images/bloggers.png',
+    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/managerRights/01.png',
+    text: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/managerRights/bloggers.png',
     type: 'bloggers',
   },
   {
-    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/02.png',
-    text: '/static/images/planners.png',
+    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/managerRights/02.png',
+    text: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/managerRights/planners.png',
     type: 'planners',
   },
   {
-    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/03.png',
-    text: '/static/images/travel.png',
+    img: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/managerRights/03.png',
+    text: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/managerRights/travel.png',
     type: 'travel',
   },
 ]

@@ -29,6 +29,8 @@ type GetPhoneNumberEvent = {
 const handleLogin = async (e: GetPhoneNumberEvent) => {
   console.log(e)
   if (!isAgreePrivacy.value) return uni.showToast({ icon: 'none', title: '同意并阅读协议条款' })
+  console.log('inviterCode', inviterCode.value)
+
   const wxRes = await wxLogin(
     freshCode.value,
     e.detail.encryptedData!,
@@ -62,8 +64,7 @@ const freshCode = ref('')
 // 获取参数-邀请码
 const inviterCode = ref('')
 const productId = ref('')
-onLoad(async (options: any) => {
-  console.log('入参', options)
+onLoad((options: any) => {
   // 进页面就重新获取code，防止过期
   uni.login({
     success: async (res) => {
@@ -80,25 +81,17 @@ onLoad(async (options: any) => {
     },
   })
 
-  // 先判断分享链接进入且是分享商品详情进入
-  if (options.inviterCode && options.productId) {
-    inviterCode.value = options.inviterCode
-    productId.value = options.productId
-  }else if(options.productId){
-    productId.value = options.productId
-  } else {
-    // 再判断二维码扫码进入
-    const scene = decodeURIComponent(options.scene || '')
-    if (scene) {
-      const parts = scene.split('=')
-      inviterCode.value = parts[1] || ''
-    }
-  }
+  console.log('立即打印 options', options.inviterCode)
 
+  // 先判断分享链接进入且是分享商品详情进入
+  inviterCode.value = options.inviterCode
+  productId.value = options.productId
+  setTimeout(() => {
+    console.log('1秒后打印 inviterCode.value', inviterCode.value, 'and', options.inviterCode)
+  }, 1000)
   // 如果依旧没有邀请码，说明没人邀请
   if (!inviterCode.value) {
     console.log('无邀请码，正常进入')
-    return
   }
 })
 </script>
@@ -122,13 +115,8 @@ onLoad(async (options: any) => {
 
       <!-- 登录按钮 -->
       <view class="login-section">
-        <button
-          class="login-btn"
-          :disabled="!isAgreePrivacy"
-          :class="{ disabled: !isAgreePrivacy }"
-          open-type="getPhoneNumber"
-          @getphonenumber="handleLogin"
-        >
+        <button class="login-btn" :disabled="!isAgreePrivacy" :class="{ disabled: !isAgreePrivacy }"
+          open-type="getPhoneNumber" @getphonenumber="handleLogin">
           一键登录
         </button>
       </view>

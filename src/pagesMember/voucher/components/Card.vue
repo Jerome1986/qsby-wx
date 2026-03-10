@@ -36,11 +36,12 @@ const progressPercent = computed(() => {
   flex-direction: column;
   align-items: center;
   padding: 40rpx;
-  background-image: url('https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/myWallet/bg.png');
+  background-image: url('https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cash/bg.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 30rpx;
+
   /*对应当前的年月*/
   .date {
     margin-bottom: 24rpx;
@@ -48,26 +49,31 @@ const progressPercent = computed(() => {
     font-size: 28rpx;
     color: #0b0a0a;
   }
+
   /*额度*/
   .amount {
     font-weight: bold;
     font-size: 54rpx;
     color: #0b0a0a;
   }
+
   /*备注说明*/
   .dec {
     font-size: 24rpx;
     color: #0b0a0a;
   }
+
   /*底部进度条和信息*/
   .bottom {
     margin-top: 40rpx;
     width: 100%;
+
     .progress {
       margin-bottom: 10rpx;
       height: 20rpx;
       background: #ffffff;
       border-radius: 10rpx;
+
       .progress-bar {
         height: 100%;
         background: #0b0a0a;
@@ -75,6 +81,7 @@ const progressPercent = computed(() => {
         transition: width 0.3s ease;
       }
     }
+
     .text {
       display: flex;
       justify-content: space-between;

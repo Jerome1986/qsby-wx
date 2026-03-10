@@ -45,20 +45,12 @@ const handelGo = (val: string) => {
       </view>
     </view>
     <!-- 积分商品   -->
-    <scroll-view
-      class="productScore"
-      :scroll-y="true"
-      @scrolltolower="handleScroll"
-      :enhanced="true"
-      :show-scrollbar="false"
-    >
+    <scroll-view class="productScore" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true"
+      :show-scrollbar="false">
       <view class="product-item" v-for="index in 10" :key="index" @tap="goDetail(index)">
         <view class="cover">
-          <image
-            class="img"
-            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-            mode="aspectFill"
-          ></image>
+          <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg"
+            mode="aspectFill"></image>
         </view>
         <view class="info">
           <view class="title">湖景大床房</view>
@@ -83,28 +75,34 @@ const handelGo = (val: string) => {
   height: 100%;
   @include page-background();
 }
+
 /*积分展示*/
 .head {
   padding: 30rpx;
   background-color: #ffffff;
   border-radius: 30rpx;
   @include customShadow();
+
   .title {
     margin-bottom: 20rpx;
     font-size: 28rpx;
     color: #0b0a0a;
   }
+
   .value {
     display: flex;
     justify-content: space-between;
+
     .score {
       font-weight: bold;
       font-size: 41rpx;
       color: #0b0a0a;
     }
+
     /*按钮区域*/
     .btn {
       display: flex;
+
       .item {
         text-align: center;
         width: 150rpx;
@@ -113,11 +111,13 @@ const handelGo = (val: string) => {
         border-radius: 24rpx;
         font-size: 24rpx;
       }
+
       .details {
         margin-right: 10rpx;
         border: 1px solid #e6b908;
         color: #ffd018;
       }
+
       .order {
         background-color: #ffd018;
         color: #121212;
@@ -125,10 +125,12 @@ const handelGo = (val: string) => {
     }
   }
 }
+
 /*积分商品*/
 .productScore {
   flex: 1;
   margin-top: 20rpx;
+
   .product-item {
     margin-bottom: 20rpx;
     display: flex;
@@ -137,9 +139,11 @@ const handelGo = (val: string) => {
     background-color: #ffffff;
     border-radius: 30rpx;
     @include customShadow();
+
     &:nth-last-child(1) {
       margin-bottom: 0;
     }
+
     /*封面*/
     .cover {
       margin-right: 20rpx;
@@ -148,6 +152,7 @@ const handelGo = (val: string) => {
       border-radius: 24rpx;
       overflow: hidden;
     }
+
     /*商品信息*/
     .info {
       flex: 1;
@@ -155,25 +160,30 @@ const handelGo = (val: string) => {
       flex-direction: column;
       justify-content: space-between;
       height: 180rpx;
+
       /*商品名称*/
       .title {
         font-size: 29rpx;
         color: #0b0a0a;
       }
+
       /*积分兑换*/
       .content {
         .needScore {
           font-size: 28rpx;
           color: #da1417;
         }
+
         .bottom {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
+
           .price {
             font-size: 21rpx;
             color: $qs-font-dec2;
           }
+
           .exchange {
             text-align: center;
             width: 150rpx;

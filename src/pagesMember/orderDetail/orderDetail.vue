@@ -7,6 +7,7 @@ import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info'
 import type { OrderItem, OrderType } from '@/types/OrderItem'
 import { orderFindOne, orderPay, orderCancel, createQrCode } from '@/api/order'
 import { useUserStore } from '@/stores'
+import { formatTimestamp } from '@/utils/generateMonth'
 
 
 // store
@@ -14,14 +15,14 @@ const userStore = useUserStore()
 
 // 订单类型标签（积分为独立模块，不在此共用）
 const typeLabels: Record<OrderType, string> = {
-  play: '趣哪游',
+  trip: '趣哪游',
   activity: '趣活动',
   shop: '门店',
   project: '项目',
 }
 
 const orderId = ref('')
-const orderType = ref<OrderType>('play')
+const orderType = ref<OrderType>('trip')
 
 const orderDetail = ref<OrderItem>()
 const orderDetailGet = async (id: string) => {
@@ -40,12 +41,12 @@ const orderDetailGet = async (id: string) => {
 
 // 是否显示发起人（行程、活动、项目）
 const showInitiator = computed(() =>
-  ['play', 'activity', 'project', 'shop'].includes(orderType.value)
+  ['trip', 'activity', 'project', 'shop'].includes(orderType.value)
 )
 
 // 是否显示报名人（行程、活动、项目）
 const showRegistrant = computed(() =>
-  ['play', 'activity', 'project', 'shop'].includes(orderType.value)
+  ['trip', 'activity', 'project', 'shop'].includes(orderType.value)
 )
 
 // 核销码二维码矩阵（uqrcodejs modules，用 view 渲染，无需 canvas）
@@ -134,7 +135,6 @@ const handleGoPay = async () => {
       signType: payRes.data.signType,
       paySign: payRes.data.paySign,
       success() {
-        orderStore.incrementOrderListDirty()
         uni.navigateBack()
       },
       fail() {
@@ -173,18 +173,18 @@ onLoad((options?: { orderId?: string; type?: string }) => {
           <view class="product-info">
             <view class="title">{{ orderDetail?.productInfo.title }}</view>
             <!-- 行程/活动 -->
-            <template v-if="['play', 'activity'].includes(orderDetail?.orderType as OrderType)">
+            <template v-if="['trip', 'activity'].includes(orderDetail?.orderType as OrderType)">
               <view class="info-group">
                 <view class="info-row" v-if="orderDetail?.productInfo.time">
-                  <text class="label">{{ orderDetail.orderType === 'play' ? '行程日期：' : '活动日期：' }}</text>
-                  <text class="value">{{ orderDetail.productInfo.time }}</text>
+                  <text class="label">{{ orderDetail.orderType === 'trip' ? '行程日期：' : '活动日期：' }}</text>
+                  <text class="value">{{ formatTimestamp(orderDetail.productInfo.time, 2) }}</text>
                 </view>
                 <view class="info-row" v-if="orderDetail?.productInfo.address_name">
-                  <text class="label">{{ orderDetail.orderType === 'play' ? '行程门店：' : '活动门店：' }}</text>
+                  <text class="label">{{ orderDetail.orderType === 'trip' ? '行程门店：' : '活动门店：' }}</text>
                   <text class="value">{{ orderDetail.productInfo.address_name }}</text>
                 </view>
                 <view class="info-row" v-if="orderDetail?.productInfo.event_address">
-                  <text class="label">{{ orderDetail?.orderType === 'play' ? '行程地址：' : '活动地址：' }}</text>
+                  <text class="label">{{ orderDetail?.orderType === 'trip' ? '行程地址：' : '活动地址：' }}</text>
                   <text class="value">{{ orderDetail?.productInfo.event_address }}</text>
                 </view>
                 <view class="price-row">
@@ -293,24 +293,17 @@ onLoad((options?: { orderId?: string; type?: string }) => {
       </view>
 
       <!-- 核销码（待付款不展示） -->
-      <view class="card verify-card" v-if="orderDetail?.status !== 'pending'">
+      <view class="card verify-card" :class="{ 'is-verified': orderDetail?.status === 'verified' }"
+        v-if="orderDetail?.status !== 'pending'">
         <view class="section-header">
           <view class="bar"></view>
           <text class="section-title">核销码</text>
+          <view class="verified-tag" v-if="orderDetail?.status === 'verified'">已核销</view>
         </view>
         <view class="qrcode-wrap" v-if="orderDetail?.verifyCode">
           <view class="qrcode-grid" v-if="qrcodeModules.length">
-            <view
-              v-for="(row, rowI) in qrcodeModules"
-              :key="rowI"
-              class="qrcode-row"
-            >
-              <view
-                v-for="(col, colI) in row"
-                :key="colI"
-                class="qrcode-cell"
-                :class="{ black: col.isBlack }"
-              ></view>
+            <view v-for="(row, rowI) in qrcodeModules" :key="rowI" class="qrcode-row">
+              <view v-for="(col, colI) in row" :key="colI" class="qrcode-cell" :class="{ black: col.isBlack }"></view>
             </view>
           </view>
           <view class="verify-code-text">{{ orderDetail.verifyCode }}</view>
@@ -542,6 +535,27 @@ onLoad((options?: { orderId?: string; type?: string }) => {
 .verify-card {
   position: relative;
   z-index: 0;
+
+  .section-header .verified-tag {
+    padding: 6rpx 16rpx;
+    font-size: 22rpx;
+    color: #999;
+    background-color: #f0f0f0;
+    border-radius: 8rpx;
+  }
+
+  &.is-verified .qrcode-wrap {
+    opacity: 0.6;
+    filter: grayscale(1);
+
+    .qrcode-grid {
+      border: 2rpx dashed #ccc;
+    }
+
+    .verify-code-text {
+      color: $qs-font-dec2;
+    }
+  }
 
   .qrcode-wrap {
     display: flex;

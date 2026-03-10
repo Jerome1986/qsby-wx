@@ -29,32 +29,16 @@ onLoad(() =>
   <view class="home-page">
     <view style="overflow: hidden; height: 100vh">
       <!-- 背景视频-->
-      <video
-        src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/homebg.mp4"
-        class="bg-video"
-        :show-progress="false"
-        :show-fullscreen-btn="false"
-        :show-bottom-progress="false"
-        :autoplay="true"
-        :loop="true"
-        :muted="true"
-        object-fit="fill"
-        :controls="false"
-        :show-play-btn="false"
-        :show-center-play-btn="false"
-        :enable-progress-gesture="false"
-      ></video>
+      <video src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/homebg.mp4" class="bg-video"
+        :show-progress="false" :show-fullscreen-btn="false" :show-bottom-progress="false" :autoplay="true" :loop="true"
+        :muted="true" object-fit="fill" :controls="false" :show-play-btn="false" :show-center-play-btn="false"
+        :enable-progress-gesture="false"></video>
     </view>
     <!--  导航列表主题  -->
     <view class="main">
       <view class="head" :style="{ height: navBarHeight + 'px' }"></view>
       <view class="nav-list">
-        <view
-          class="nav-item"
-          v-for="(item, index) in homeData"
-          :key="index"
-          @tap="handleGo(item.type)"
-        >
+        <view class="nav-item" v-for="(item, index) in homeData" :key="index" @tap="handleGo(item.type)">
           <view class="icon">
             <image :src="item.icon"></image>
           </view>
@@ -102,6 +86,7 @@ onLoad(() =>
   width: 100%;
   justify-content: space-between;
   padding: 0 24rpx;
+
   .nav-item {
     display: flex;
     justify-content: space-evenly;
@@ -110,24 +95,29 @@ onLoad(() =>
     height: 184rpx;
     background-color: rgba(255, 255, 255, 0.8);
     border-radius: 20rpx;
+
     /*图标*/
     .icon {
       width: 136rpx;
       height: 136rpx;
       overflow: hidden;
+
       image {
         width: 100%;
         height: 100%;
       }
     }
+
     /*文字*/
     .text {
       text-align: center;
+
       .dec {
         margin-bottom: 10rpx;
         color: $qs-font-dec2;
         font-size: 20rpx;
       }
+
       .title {
         font-weight: bold;
       }

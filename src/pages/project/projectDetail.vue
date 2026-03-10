@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { safeAreaBottom, getSafeAreaBottom } from '@/utils/system-info'
 import OrganizerInfo from '@/components/OrganizerInfo.vue'
+import { onLoad } from '@dcloudio/uni-app'
+import type { UserItem } from '@/types/UserItem'
 
-onMounted(() => {
+const userData = ref<UserItem>()
+
+onLoad(() => {
   getSafeAreaBottom()
 })
 
@@ -38,10 +42,8 @@ const introImages = ref([
         <!-- 上半部分：封面 + 基本信息 -->
         <view class="product-top">
           <view class="cover">
-            <image
-              mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-            ></image>
+            <image mode="aspectFill"
+              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"></image>
           </view>
           <view class="product-info">
             <view class="name">一起开一个游乐园</view>
@@ -73,7 +75,7 @@ const introImages = ref([
       </view>
 
       <!-- 发布人 -->
-      <OrganizerInfo></OrganizerInfo>
+      <OrganizerInfo :user-data="userData as UserItem"></OrganizerInfo>
 
       <!-- 项目介绍 -->
       <view class="card intro-card">
@@ -82,13 +84,7 @@ const introImages = ref([
           <text>{{ introText }}</text>
         </view>
         <view class="intro-images" v-if="introImages.length">
-          <image
-            v-for="(img, index) in introImages"
-            :key="index"
-            :src="img"
-            mode="widthFix"
-            class="intro-img"
-          ></image>
+          <image v-for="(img, index) in introImages" :key="index" :src="img" mode="widthFix" class="intro-img"></image>
         </view>
       </view>
 
@@ -100,10 +96,7 @@ const introImages = ref([
     <view class="footer-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
       <view class="share-btn" @tap="handleShare">
         <view class="icon">
-          <image
-            mode="aspectFill"
-            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/share.png"
-          ></image>
+          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/share.png"></image>
         </view>
         <text class="share-text">分享</text>
       </view>
@@ -228,6 +221,7 @@ const introImages = ref([
 /* 项目介绍卡 */
 .intro-card {
   margin-top: 24rpx;
+
   .intro-text {
     font-size: 28rpx;
     color: $qs-font-dec;
@@ -246,7 +240,7 @@ const introImages = ref([
     }
   }
 
-  .intro-text + .intro-images {
+  .intro-text+.intro-images {
     margin-top: 24rpx;
   }
 }

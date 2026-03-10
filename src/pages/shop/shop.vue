@@ -7,15 +7,15 @@ import { ref } from 'vue'
 const navBar = [
   {
     name: '民宿博主',
-    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/shop/minsu.png',
+    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/minsu.png',
   },
   {
     name: '活动策划人',
-    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/shop/cehuaren.png',
+    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/cehua.png',
   },
   {
     name: '旅行博主',
-    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/shop/lvxing.png',
+    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/lvxing.png',
   },
 ]
 
@@ -46,10 +46,9 @@ const handleRights = () => {
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!-- 顶部横幅 -->
       <view class="banner">
-        <image
-          mode="aspectFill"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/shop/shopBanner1.png"
-        ></image>
+        <image mode="aspectFill"
+          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/shopBanner2.png">
+        </image>
       </view>
       <!--  主理人权益  -->
       <view class="section">
@@ -77,16 +76,14 @@ const handleRights = () => {
       </view>
       <!--   筛选（不加padding，内部有遮罩）   -->
       <view class="filter">
-        <FilterBar :cate-data="cateData" title="所有门店" :is-icon="true"></FilterBar>
+        <FilterBar :cate-data="cateData" :sort-data="cateData" title="所有门店" :is-icon="true"></FilterBar>
       </view>
       <!--   门店列表   -->
       <view class="shopList">
         <view class="shop-item" v-for="index in 5" :key="index" @tap="handleDetail">
           <view class="cover">
-            <image
-              mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-            ></image>
+            <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg">
+            </image>
           </view>
           <view class="info">
             <view class="head">

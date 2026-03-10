@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import mpHtml from 'mp-html/dist/uni-app/components/mp-html/mp-html'
 
 const pageInfo = ref(null)
 const content = ref('')
@@ -9,12 +8,9 @@ const content = ref('')
 <template>
   <div class="article-container" v-if="pageInfo != null">
     <div class="article-content">
-      <mp-html
-        :content="content"
-        :tag-style="{
-          p: 'margin:8px 0; line-height:1.8; font-size:15px; color:#333;',
-        }"
-      />
+      <mp-html :content="content" :tag-style="{
+        p: 'margin:8px 0; line-height:1.8; font-size:15px; color:#333;',
+      }" />
     </div>
   </div>
 </template>

@@ -77,10 +77,8 @@ const change = (value: any) => {
     <view class="userInfo">
       <!-- 头像  -->
       <view class="avatar">
-        <image
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg"
-          mode="aspectFit"
-        ></image>
+        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png" mode="aspectFit">
+        </image>
       </view>
       <!-- 信息  -->
       <view class="info">
@@ -92,12 +90,9 @@ const change = (value: any) => {
     <view class="nav">
       <!-- 个人消费/  -->
       <view class="nav-item">
-        <image
-          style="width: 94rpx; height: 102rpx"
-          class="img"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/friendDetail/moneyBag.png"
-          mode="aspectFit"
-        ></image>
+        <image style="width: 94rpx; height: 102rpx" class="img"
+          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/frirend/moneyBag.png" mode="aspectFit">
+        </image>
         <view class="text">
           <view class="label">个人消费</view>
           <view class="value">2.00</view>
@@ -105,12 +100,9 @@ const change = (value: any) => {
       </view>
       <!-- 核销记录  -->
       <view class="nav-item">
-        <image
-          class="img"
-          style="width: 85rpx; height: 109rpx"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/friendDetail/hexiao.png"
-          mode="aspectFit"
-        ></image>
+        <image class="img" style="width: 85rpx; height: 109rpx"
+          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/frirend/hexiao.png" mode="aspectFit">
+        </image>
         <view class="text">
           <view class="label">已核销金额</view>
           <view class="value">20.00</view>
@@ -120,10 +112,8 @@ const change = (value: any) => {
     <!-- 没数据  -->
     <view class="consumptionDetails" v-if="false">
       <NavTitle title="消费明细"> </NavTitle>
-      <NoData
-        image-url="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/friendDetail/noData.png"
-        tips="这里啥也没有，去探索未知的新世界吧"
-      ></NoData>
+      <NoData image-url="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/frirend/noData.png"
+        tips="这里啥也没有，去探索未知的新世界吧"></NoData>
     </view>
 
     <!--  明细消费  -->
@@ -131,12 +121,7 @@ const change = (value: any) => {
       <NavTitle title="消费明细"> </NavTitle>
       <!-- 日期选择  -->
       <view class="my-select">
-        <uni-data-select
-          v-model="selectedMonth"
-          :localdata="range"
-          hideRight
-          @change="change"
-        ></uni-data-select>
+        <uni-data-select v-model="selectedMonth" :localdata="range" hideRight @change="change"></uni-data-select>
       </view>
       <!--  明细列表  -->
       <scroll-view class="list" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
@@ -157,24 +142,29 @@ const change = (value: any) => {
   height: 100%;
   @include page-background();
 }
+
 /*用户信息*/
 .userInfo {
   margin-bottom: 32rpx;
   display: flex;
   align-items: center;
+
   .avatar {
     width: 111rpx;
     height: 111rpx;
     border-radius: 50%;
     overflow: hidden;
   }
+
   .info {
     margin-left: 20rpx;
+
     .nickname {
       font-weight: bold;
       font-size: 36rpx;
       color: $qs-font-title;
     }
+
     .registerTime {
       margin-top: 8rpx;
       font-size: 24rpx;
@@ -188,6 +178,7 @@ const change = (value: any) => {
   display: flex;
   gap: 24rpx;
   height: 188rpx;
+
   .nav-item {
     flex: 1;
     display: flex;
@@ -198,18 +189,22 @@ const change = (value: any) => {
     background: #fffae6;
     border-radius: 30rpx;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
     .img {
       overflow: hidden;
     }
+
     .text {
       flex: 1;
       text-align: end;
       font-weight: bold;
+
       .label {
         font-size: 28rpx;
         color: $qs-font-title;
         @include ellipsis(1);
       }
+
       .value {
         margin-top: 20rpx;
         font-size: 40rpx;
@@ -217,6 +212,7 @@ const change = (value: any) => {
     }
   }
 }
+
 /*消费明细*/
 .consumptionDetails {
   padding: 28rpx;
@@ -226,6 +222,7 @@ const change = (value: any) => {
   background-color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 30rpx;
+
   .my-select {
     margin-top: 18rpx;
     @include customSelected();
@@ -242,20 +239,24 @@ const change = (value: any) => {
      * = 100% - 144rpx
      */
     height: calc(100% - 144rpx);
+
     .item {
       padding: 24rpx;
       margin-bottom: 20rpx;
       background: #f6f6f6;
       border-radius: 30rpx;
+
       &:last-of-type {
         margin-bottom: 0;
       }
+
       .row {
         margin-bottom: 20rpx;
         display: flex;
         align-items: center;
         justify-content: space-between;
         font-size: 28rpx;
+
         &:last-of-type {
           margin-bottom: 0;
         }
@@ -263,6 +264,7 @@ const change = (value: any) => {
         .label {
           color: $qs-font-dec2;
         }
+
         .value {
           color: $qs-font-title;
         }

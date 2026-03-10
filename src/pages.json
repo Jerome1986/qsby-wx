@@ -46,7 +46,7 @@
       }
     },
     {
-      "path": "pages/play/signUp",
+      "path": "pages/signUp/signUp",
       "style": {
         "navigationBarTitleText": "报名信息",
         "enablePullDownRefresh": false,

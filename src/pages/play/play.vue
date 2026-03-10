@@ -97,7 +97,8 @@ const handleSend = () => {
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
       <!--  发布  -->
       <view class="banner" @tap="handleSend">
-        <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/fbxc.jpg" mode="aspectFill">
+        <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/play/fbxc.jpg"
+          mode="aspectFill">
         </image>
       </view>
       <!--  title    -->
@@ -111,11 +112,12 @@ const handleSend = () => {
       </view>
       <!--   行程列表   -->
       <view class="list" v-if="tripList.length > 0">
-        <ProductCard :list="tripList"></ProductCard>
+        <ProductCard :list="tripList" pro-type="trip"></ProductCard>
       </view>
       <!--   空状态   -->
       <view class="empty" v-else>
-        <image class="empty-img" src="/static/images/noAny.png" mode="widthFix"></image>
+        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+          mode="widthFix"></image>
         <text class="empty-text">暂无数据</text>
       </view>
     </scroll-view>

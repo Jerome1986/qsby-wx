@@ -1,7 +1,7 @@
 import type { EventItem } from '@/types/PublicManagement'
 
 // 订单类型
-export type OrderType = 'play' | 'activity' | 'project' | 'shop'
+export type OrderType = 'trip' | 'activity' | 'project' | 'shop'
 
 // 页面展示订单类型
 export type PageOrderType = OrderType | 'all'
@@ -105,10 +105,14 @@ export interface OrderItem {
   verifyCode?: string
   /** 是否已核销 */
   isVerified?: boolean
+  /** 核销人ID */
+  verifiedBy?: string
+  /** 核销时间 */
+  verifiedTime?: Date
   /** 订单创建时间（ISO格式字符串） */
-  createdAt: string
+  createdAt?: string
   /** 订单更新时间（ISO格式字符串，空表示未更新） */
-  updatedAt: string
+  updatedAt?: string
 }
 
 // 订单对应的产品信息类型
@@ -129,6 +133,8 @@ export interface ProductInfo {
 
 // 订单对应的发起人信息 酒店类订单除外，默认空对象
 export interface InitiatorInfo {
+  /** 发起人ID */
+  initiatorId: string
   /** 真实姓名 */
   username: string
   /** 手机号 */
@@ -162,4 +168,10 @@ export interface CreateQrCodeResult {
 // 当前用户抵扣完支付金额为0时，走下单流程，不用支付接口返回
 export interface CreateOrderFreeResult {
   orderId: string
+}
+
+// 核销订单接口返回
+export interface WriteOrderResult {
+  out_trade_no: string
+  isVerified: boolean
 }

@@ -7,18 +7,20 @@ import type {
   OrderCancelResult,
   CreateQrCodeResult,
   CreateOrderFreeResult,
+  WriteOrderResult,
 } from '@/types/OrderItem'
 import type { PayResult } from '@/types/Pay'
+import type { UserRole } from '@/types/UserItem'
 import { request } from '@/utils/http'
 
 /**
- * 行程订单创建---支付
+ * 统一下单支付订单创建---支付
  * @param params - 订单参数
  */
-export const tripOrderAdd = (params: OrderSubmitParams) => {
+export const orderAdd = (params: OrderSubmitParams) => {
   return request<PayResult>({
     method: 'POST',
-    url: '/pay/tripPay',
+    url: '/pay/commonPay',
     data: params,
   })
 }
@@ -106,5 +108,17 @@ export const createOrderFree = (params: OrderSubmitParams) => {
     method: 'POST',
     url: '/order/createOrderFree',
     data: { params },
+  })
+}
+
+/**
+ * 核销订单
+ * @param verifyCode
+ */
+export const writeOrder = (verifyCode: string, publicUserId: string, role: UserRole) => {
+  return request<WriteOrderResult>({
+    method: 'POST',
+    url: '/order/write',
+    data: { verifyCode, publicUserId, role },
   })
 }

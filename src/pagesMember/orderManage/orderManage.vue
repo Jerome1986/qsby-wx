@@ -13,7 +13,7 @@ const userStore = useUserStore()
 // 一级Tab：订单类型
 const orderTypes = [
   { label: '全部', value: 'all' },
-  { label: '趣哪游', value: 'play' },
+  { label: '趣哪游', value: 'trip' },
   { label: '趣活动', value: 'activity' },
   { label: '商城', value: 'shop' },
   { label: '项目', value: 'project' },
@@ -85,7 +85,7 @@ const handleRefund = (item: OrderItem) => {
 // 获取订单类型标签
 const getOrderTypeLabel = (type: OrderType) => {
   const map: Record<OrderType, string> = {
-    play: '趣哪游',
+    trip: '趣哪游',
     activity: '趣活动',
     shop: '门店',
     project: '项目',
@@ -134,7 +134,8 @@ onShow(() => {
         <text>加载中...</text>
       </view>
       <view v-else-if="orderList.length === 0" class="empty">
-        <image class="empty-img" src="/static/images/noAny.png" mode="aspectFit"></image>
+        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+          mode="aspectFit"></image>
         <text class="empty-text">暂无订单</text>
       </view>
       <view v-else class="order-list">
@@ -146,11 +147,16 @@ onShow(() => {
           </view>
           <!-- 订单信息：标题、每条信息、价格+按钮 各为独立 view -->
           <view class="order-info">
+            <!-- 已核销印章 -->
+            <view class="status" v-if="item.status === 'verified'">
+              <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/hx.png"
+                mode="aspectFit" />
+            </view>
             <view class="title">{{ item.productInfo.title }}</view>
             <!-- 门店类型 -->
             <template>
               <view class="info-row" v-if="item.orderType !== 'shop'">
-                <text class="label">{{ item.orderType === 'play' ? '行程日期：' : '活动日期：' }}</text>
+                <text class="label">{{ item.orderType === 'trip' ? '行程日期：' : '活动日期：' }}</text>
                 <text class="value">{{ item.productInfo.time }}</text>
               </view>
               <view class="info-row" v-if="item.productInfo.address_name">
@@ -352,10 +358,20 @@ onShow(() => {
 
 /* 订单信息：标题、每条信息、价格+按钮 各为独立 view */
 .order-info {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  .status {
+    position: absolute;
+    right: 30rpx;
+    bottom: 70rpx;
+    width: 160rpx;
+    height: 160rpx;
+    overflow: hidden;
+  }
 
   .title {
     margin-bottom: 8rpx;

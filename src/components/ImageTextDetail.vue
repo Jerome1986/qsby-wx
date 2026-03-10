@@ -9,7 +9,7 @@ const detailList = [
   },
   {
     type: 'image',
-    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
   },
   {
     type: 'text',
@@ -18,7 +18,7 @@ const detailList = [
   },
   {
     type: 'image',
-    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
   },
   {
     type: 'text',
@@ -26,7 +26,7 @@ const detailList = [
   },
   {
     type: 'image',
-    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
   },
 ]
 </script>
@@ -42,12 +42,7 @@ const detailList = [
             {{ item.content }}
           </view>
           <!-- 图片 -->
-          <image
-            v-else-if="item.type === 'image'"
-            :src="item.content"
-            mode="widthFix"
-            class="detail-img"
-          ></image>
+          <image v-else-if="item.type === 'image'" :src="item.content" mode="widthFix" class="detail-img"></image>
         </template>
       </view>
     </view>

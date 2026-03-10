@@ -23,11 +23,8 @@ const handleGoDetail = () => {
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  发布  -->
       <view class="banner" @tap="handleSend">
-        <image
-          class="img"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/project.png"
-          mode="aspectFill"
-        ></image>
+        <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/project.png"
+          mode="aspectFill"></image>
       </view>
       <!--   title   -->
       <NavTitle title="发现有趣的项目"></NavTitle>
@@ -35,10 +32,8 @@ const handleGoDetail = () => {
       <view class="list">
         <view class="list-item" v-for="index in 10" :key="index" @tap="handleGoDetail">
           <view class="cover">
-            <image
-              mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-            ></image>
+            <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg">
+            </image>
           </view>
           <view class="info">
             <view class="name">一起开一个游乐园</view>
@@ -83,6 +78,7 @@ const handleGoDetail = () => {
 
 .content {
   flex: 1;
+
   /* 顶部横幅 */
   .banner {
     margin-bottom: 24rpx;
@@ -91,10 +87,12 @@ const handleGoDetail = () => {
     overflow: hidden;
     border-radius: 30rpx;
   }
+
   /* 项目列表 */
   .list {
     margin-top: 24rpx;
     padding-bottom: 60rpx;
+
     .list-item {
       display: flex;
       gap: 20rpx;

@@ -15,28 +15,23 @@ const handleDetail = () => {
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  封面图  -->
       <view class="cover">
-        <image
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-          mode="aspectFill"
-        ></image>
+        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg" mode="aspectFill"></image>
       </view>
       <!-- 快捷入口 -->
       <view class="nav-entry">
         <view class="nav-item">
           <view class="nav-icon">
-            <image
-              mode="aspectFit"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/shop/jieshao.png"
-            ></image>
+            <image mode="aspectFit"
+              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/jieshao.png">
+            </image>
           </view>
           <view class="nav-label">门店介绍</view>
         </view>
         <view class="nav-item">
           <view class="nav-icon">
-            <image
-              mode="aspectFit"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/shop/tuijian.png"
-            ></image>
+            <image mode="aspectFit"
+              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/tuijian.png">
+            </image>
           </view>
           <view class="nav-label">周边旅游路线推荐</view>
         </view>
@@ -52,10 +47,8 @@ const handleDetail = () => {
       <view class="product-list">
         <view class="product-item" v-for="index in 5" :key="index" @tap="handleDetail">
           <view class="product-cover">
-            <image
-              mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-            ></image>
+            <image mode="aspectFill"
+              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"></image>
           </view>
           <view class="product-info">
             <view class="product-head">
@@ -86,6 +79,7 @@ const handleDetail = () => {
 
 .content {
   flex: 1;
+
   .scroll-bottom-placeholder {
     height: 20rpx;
   }

@@ -19,14 +19,9 @@ import NavTitle from '@/components/NavTitle.vue'
         <NavTitle title="使用流程"></NavTitle>
         <view class="progress-text">购买后→联系店家→确认预约→再进店（不接受没有预约）</view>
         <view class="code">
-          <image
-            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/code.png"
-            mode="aspectFill"
-          ></image>
+          <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/code.png" mode="aspectFill"></image>
         </view>
-        <view class="number"
-          >券号 1077 0939 3724 258·<text style="color: #6897ed; font-size: 24rpx">复制</text></view
-        >
+        <view class="number">券号 1077 0939 3724 258·<text style="color: #6897ed; font-size: 24rpx">复制</text></view>
       </view>
       <!--  温馨提示  -->
       <view class="tips">
@@ -62,12 +57,14 @@ import NavTitle from '@/components/NavTitle.vue'
 
 /* 商品信息和使用期限 */
 .usedTime {
+
   /* 商品名称 */
   .productName {
     font-weight: bold;
     font-size: 28rpx;
     color: $qs-font-title;
   }
+
   /* 使用期限 */
   .time {
     margin: 16rpx 0;
@@ -78,23 +75,27 @@ import NavTitle from '@/components/NavTitle.vue'
 
 /* 使用流程 */
 .progress {
+
   /* 流程说明文字 */
   .progress-text {
     margin: 16rpx 0;
     font-size: 24rpx;
     color: $qs-font-dec;
   }
+
   /* 二维码区域 */
   .code {
     margin: 40rpx 0;
     text-align: center;
     width: 100%;
     border-radius: 20rpx;
+
     image {
       width: 216rpx;
       height: 216rpx;
     }
   }
+
   /* 券号 */
   .number {
     text-align: center;

@@ -57,5 +57,5 @@ export function formatTimestamp(
   // 默认返回年月日
   if (type === 1) return `${year}-${month}-${day}`
   // 如果不是1 就返回到秒
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+  return `${year}-${month}-${day} ${hours}:${minutes}`
 }

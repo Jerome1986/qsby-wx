@@ -28,7 +28,7 @@ onLoad((options: any) => {
     },
     {
       type: 'image',
-      content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+      content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     },
     { type: 'title', content: '权益二：流量扶持' },
     {
@@ -38,10 +38,10 @@ onLoad((options: any) => {
     },
     {
       type: 'image',
-      content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
+      content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
     },
   ]
- 
+
 })
 </script>
 <template>
@@ -57,12 +57,7 @@ onLoad((options: any) => {
             <view v-else-if="item.type === 'text'" class="detail-text">
               {{ item.content }}
             </view>
-            <image
-              v-else-if="item.type === 'image'"
-              :src="item.content"
-              mode="widthFix"
-              class="detail-img"
-            />
+            <image v-else-if="item.type === 'image'" :src="item.content" mode="widthFix" class="detail-img" />
           </template>
         </view>
       </view>

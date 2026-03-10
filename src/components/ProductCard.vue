@@ -10,7 +10,7 @@ const handleGo = (proId: string, title: string, status: EventStatus) => {
     return
   }
   uni.navigateTo({
-    url: `/pages/productDetail/productDetail?productId=${proId}&title=${title}`,
+    url: `/pages/productDetail/productDetail?productId=${proId}&title=${title}&proType=${props.proType}`,
   })
 }
 
@@ -18,6 +18,7 @@ const props = withDefaults(
   defineProps<{
     list: PlayListItem[]
     title?: string
+    proType?: string
   }>(),
   {
     list: () => [],
@@ -67,7 +68,7 @@ const props = withDefaults(
       </view>
       <!-- 状态 -->
       <view class="status" v-if="item.status === 'finished'">
-        <image src="/src/static/images/end.png" mode="aspectFit" />
+        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/end.png" mode="aspectFit" />
       </view>
     </view>
   </view>

@@ -15,7 +15,7 @@ export interface UserItem {
   /** 年龄 */
   age: string
   /** 用户角色：user 普通用户 / admin 管理员 / manager 主理人 等 */
-  role: 'user' | 'admin' | 'manager'
+  role: UserRole
   /** 注册时间 */
   registerTime: Date
   /** 主理人开始时间 */
@@ -32,6 +32,8 @@ export interface UserItem {
   myCodeUrl: string
   /** 平台积分 */
   score: number
+  /** 代金券余额 */
+  couponBalance: number
   /** 待结算余额（单位：分） */
   balance: number
   /** 用户更新头像的次数，超过1天后会重置 */
@@ -41,6 +43,9 @@ export interface UserItem {
   /** 用户的真实姓名,主理人身份实名必填 */
   username?: string
 }
+
+// 用户角色
+export type UserRole = 'user' | 'admin' | 'manager'
 
 //用户更换头像返回类型
 export interface ChangerAvatarResult {

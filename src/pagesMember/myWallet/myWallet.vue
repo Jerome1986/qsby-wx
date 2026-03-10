@@ -41,11 +41,8 @@ const handleBalance = () => {
     <view class="userMoney">
       <view class="top">
         <view class="user">
-          <image
-            class="avatar"
-            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg"
-            mode="aspectFit"
-          ></image>
+          <image class="avatar" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png"
+            mode="aspectFit"></image>
           <view class="nickname">何五年</view>
         </view>
         <view class="money">￥1888.00</view>
@@ -58,43 +55,22 @@ const handleBalance = () => {
     </view>
     <!--  切换TAB  -->
     <view class="tap">
-      <view
-        class="item"
-        :class="{ activeItem: activeTab === item.value }"
-        v-for="(item, index) in tabList"
-        :key="index"
-        @tap="handleTab(item.value)"
-        >{{ item.label }}</view
-      >
+      <view class="item" :class="{ activeItem: activeTab === item.value }" v-for="(item, index) in tabList" :key="index"
+        @tap="handleTab(item.value)">{{ item.label }}</view>
     </view>
     <!-- 日期选择  -->
     <view class="my-select">
-      <uni-data-select
-        v-model="selectedMonth"
-        :localdata="range"
-        hideRight
-        @change="change"
-      ></uni-data-select>
+      <uni-data-select v-model="selectedMonth" :localdata="range" hideRight @change="change"></uni-data-select>
     </view>
     <!--  提现记录  -->
-    <scroll-view
-      v-if="activeTab === 'cash'"
-      class="scroll-view"
-      :scroll-y="true"
-      :enhanced="true"
-      :show-scrollbar="false"
-    >
+    <scroll-view v-if="activeTab === 'cash'" class="scroll-view" :scroll-y="true" :enhanced="true"
+      :show-scrollbar="false">
       <CashRecord></CashRecord>
     </scroll-view>
 
     <!--  收入记录  -->
-    <scroll-view
-      v-if="activeTab === 'income'"
-      class="scroll-view"
-      :scroll-y="true"
-      :enhanced="true"
-      :show-scrollbar="false"
-    >
+    <scroll-view v-if="activeTab === 'income'" class="scroll-view" :scroll-y="true" :enhanced="true"
+      :show-scrollbar="false">
       <Record :fields="fields" :list-data="listData"></Record>
     </scroll-view>
   </view>
@@ -107,6 +83,7 @@ const handleBalance = () => {
   padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
+
   /*用户汇总区域*/
   .userMoney {
     display: flex;
@@ -114,43 +91,50 @@ const handleBalance = () => {
     justify-content: space-between;
     padding: 40rpx;
     height: 342rpx;
-    background-image: url('https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/myWallet/bg.png');
+    background-image: url('https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cash/bg.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 30rpx;
+
     /*用户*/
     .top {
       .user {
         margin-bottom: 36rpx;
         display: flex;
         align-items: center;
+
         .avatar {
           width: 62rpx;
           height: 62rpx;
           border-radius: 50%;
           overflow: hidden;
         }
+
         .nickname {
           margin-left: 20rpx;
           color: $qs-font-title;
         }
       }
+
       .money {
         font-weight: bold;
         font-size: 46rpx;
         color: $qs-font-title;
       }
     }
+
     /*提现区域*/
     .bottom {
       display: flex;
       align-items: center;
       justify-content: space-between;
+
       .label {
         font-size: 24rpx;
         color: $qs-font-title;
       }
+
       .btn {
         text-align: center;
         width: 170rpx;
@@ -163,6 +147,7 @@ const handleBalance = () => {
       }
     }
   }
+
   /*tab*/
   .tap {
     display: flex;
@@ -172,6 +157,7 @@ const handleBalance = () => {
     margin-top: 20rpx;
     width: 100%;
     height: 69rpx;
+
     .item {
       flex: 1;
       text-align: center;
@@ -183,16 +169,19 @@ const handleBalance = () => {
       font-weight: bold;
       color: #1a1a1a;
     }
+
     .activeItem {
       background-color: $qs-brandColor;
     }
   }
+
   /*日期选择*/
   .my-select {
     width: 100%;
     margin: 20rpx 0;
     @include customSelected();
   }
+
   .scroll-view {
     flex: 1;
   }

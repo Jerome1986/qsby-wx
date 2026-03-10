@@ -3,10 +3,8 @@
 <template>
   <view class="list" v-for="index in 6" :key="index">
     <view class="image">
-      <image
-        src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/myWallet/hongbao.png"
-        mode="aspectFit"
-      ></image>
+      <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cash/hongbao.png" mode="aspectFit">
+      </image>
     </view>
     <view class="right">
       <view class="title">
@@ -34,17 +32,21 @@
   background: #ffffff;
   border-radius: 30rpx;
   @include customShadow();
+
   &:last-of-type {
     margin-bottom: 0;
   }
+
   .image {
     margin-right: 20rpx;
     width: 85rpx;
     height: 83rpx;
     overflow: hidden;
   }
+
   .right {
     flex: 1;
+
     .title {
       margin-bottom: 10rpx;
       display: flex;
@@ -52,6 +54,7 @@
       font-size: 30rpx;
       color: #0b0a0a;
     }
+
     .content {
       display: flex;
       justify-content: space-between;

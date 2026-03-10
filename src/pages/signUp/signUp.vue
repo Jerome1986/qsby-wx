@@ -8,12 +8,14 @@ import type { PlayListItem } from '@/types/Play'
 import { tripDetailGetApi } from '@/api/trip'
 import { formatTimestamp } from '@/utils/generateMonth'
 import { vaildateMoible } from '@/utils/validateMobile'
-import type { OrderSubmitParams, OrderUserInfo, DiscountType, InitiatorInfo } from '@/types/OrderItem'
+import type { OrderSubmitParams, OrderUserInfo, DiscountType, InitiatorInfo, OrderType } from '@/types/OrderItem'
 import PayMethod from '@/components/PayMethod.vue'
 import Voucher from '@/components/Voucher.vue'
-import { tripOrderAdd, createQrCode, createOrderFree } from '@/api/order'
+import { createQrCode, createOrderFree, orderAdd } from '@/api/order'
 import { verifySignUpApi } from '@/api/verifySignUp'
 import { userInfoGetApi } from '@/api/user'
+import { activityDetail } from '@/api/activity'
+import type { PublicType } from '@/types/PublicManagement'
 
 // store
 const userStore = useUserStore()
@@ -22,6 +24,8 @@ const userStore = useUserStore()
 const refreshUserInfo = async () => {
   if (userStore.profile?._id) {
     const res = await userInfoGetApi(userStore.profile?._id)
+    console.log('刷新的用户信息', res.data)
+
     if (res.code === 200) {
       userStore.setProfile(res.data)
     }
@@ -33,9 +37,10 @@ onLoad(async () => {
 })
 // 验证是否报名
 const isVerify = ref(false)
-const isSignUp = async (targetId: string) => {
+const isSignUp = async (targetId: string, proType: OrderType) => {
+
   const res = await verifySignUpApi(
-    'trip',
+    proType as PublicType,
     targetId,
     userStore.profile?._id as string
   )
@@ -43,7 +48,11 @@ const isSignUp = async (targetId: string) => {
 
   isVerify.value = res.data.isSignUp
 }
-onLoad((options) => isSignUp(options?.productId))
+onLoad((options) => {
+  proType.value = options?.proType
+
+  isSignUp(options?.productId, proType.value as OrderType)
+})
 
 // 表单数据
 const formData = ref<Partial<OrderUserInfo>>({
@@ -54,13 +63,19 @@ const formData = ref<Partial<OrderUserInfo>>({
 
 // 获取详情
 const detailData = ref<PlayListItem>({} as PlayListItem)
-const detailGet = async (id: string) => {
-  const res = await tripDetailGetApi(id)
-  console.log('详情', res)
+const detailGet = async (id: string, proType: OrderType) => {
+  let res
+  if (proType === 'activity') {
+    res = await activityDetail(id)
+    console.log('活动详情', res)
+  } else {
+    res = await tripDetailGetApi(id)
+    console.log('详情', res)
+  }
   detailData.value = res.data
+
   initiatorInfo.mobile = detailData.value.phone as string
   initiatorInfo.wechat = detailData.value.wechat as string
-
 }
 
 // 是否使用代金券
@@ -71,17 +86,17 @@ const discountAmount = computed(() => {
   const userFee = detailData.value.userFee || 0
 
   // 非主理人无抵扣
-  if (userStore.profile?.role !== 'manager') {
-    return 0
-  }
+  // if (userStore.profile?.role !== 'manager') {
+  //   return 0
+  // }
 
   const commission = detailData.value.commission || 0
-  const balance = userStore.profile?.balance || 0
+  const couponBalance = userStore.profile?.couponBalance || 0
 
   // 代金券和主理人折扣二选一，不可叠加
-  if (useVoucher.value && balance > 0) {
+  if (useVoucher.value && couponBalance > 0) {
     // 使用代金券抵扣，最多抵扣原价
-    return Number(Math.min(balance, userFee).toFixed(2))
+    return Number(Math.min(couponBalance, userFee).toFixed(2))
   } else if (commission > 0) {
     // 使用主理人折扣
     return Number(commission.toFixed(2))
@@ -98,6 +113,7 @@ const realPayAmount = computed(() => {
 
 // 查询当前行程的发起人信息
 const initiatorInfo: InitiatorInfo = {
+  initiatorId: '',
   username: '',
   mobile: '',
   wechat: detailData.value.wechat as string
@@ -105,6 +121,7 @@ const initiatorInfo: InitiatorInfo = {
 const initiatorInfoGet = async () => {
   const res = await userInfoGetApi(detailData.value.userId as string)
   initiatorInfo.username = res.data.username || res.data.nickname
+  initiatorInfo.initiatorId = res.data._id
 }
 
 
@@ -154,7 +171,7 @@ const submit = async () => {
   // 准备提交参数
   const params: OrderSubmitParams = {
     openid: userStore.profile?.openid,
-    orderType: 'play',
+    orderType: proType.value as OrderType,
     productInfo: {
       productId: detailData.value._id as string,
       cover: detailData.value.cover as string,
@@ -178,7 +195,7 @@ const submit = async () => {
     description: detailData.value.title as string,
   }
 
-   // 如果是代金券抵扣，且支付金额抵扣完为0就走下单流程，不用支付
+  // 如果是代金券抵扣，且支付金额抵扣完为0就走下单流程，不用支付
   if (payAmount === 0 && params.discountType === 'voucher') {
     try {
       const res = await createOrderFree(params)
@@ -197,7 +214,7 @@ const submit = async () => {
 
   console.log('提交报名参数', params)
   //  调用生成订单+支付接口
-  const payRes = await tripOrderAdd(params)
+  const payRes = await orderAdd(params)
   console.log('支付返回结果', payRes)
   // 2.通过后端返回参数、发起前端微信支付
   wx.requestPayment({
@@ -208,13 +225,13 @@ const submit = async () => {
     paySign: payRes.data.paySign,
     async success() {
       try {
-      const qrCodeRes = await createQrCode(payRes.data.orderId, userStore.profile?.openid as string)
-      console.log(qrCodeRes)
+        const qrCodeRes = await createQrCode(payRes.data.orderId, userStore.profile?.openid as string)
+        console.log(qrCodeRes)
 
       } catch (err) {
         console.error('核销码创建失败', err)
       }
-     await uni.redirectTo({
+      await uni.redirectTo({
         url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=play`,
       })
     },
@@ -228,9 +245,11 @@ const submit = async () => {
   })
 }
 
+const proType = ref<OrderType>()
 onLoad(async (options: any) => {
+  // console.log(options)
   if (options.productId) {
-    await detailGet(options.productId)
+    await detailGet(options.productId, proType.value as OrderType)
     await initiatorInfoGet()
   }
   getSafeAreaBottom()
@@ -302,7 +321,7 @@ onLoad(async (options: any) => {
       <!-- 支付方式 -->
       <PayMethod />
       <!-- 代金券 -->
-      <Voucher :amount="userStore.profile?.balance ?? 0" v-model:useVoucher="useVoucher" />
+      <Voucher :amount="userStore.profile?.couponBalance ?? 0" v-model:useVoucher="useVoucher" />
       <!--  温馨提示  -->
       <view class="tips">
         <view class="tips-title">温馨提示：</view>
@@ -322,7 +341,7 @@ onLoad(async (options: any) => {
           <text class="label">实际费用</text>
           <text class="value">￥{{ realPayAmount }}</text>
         </view>
-        <view class="row discount" v-if="userStore.profile?.role === 'manager'&&!useVoucher">
+        <view class="row discount" v-if="userStore.profile?.role === 'manager' && !useVoucher">
           <text class="label">主理人折扣</text>
           <text class="value">-￥{{ detailData.commission?.toFixed(2) }}</text>
         </view>

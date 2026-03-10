@@ -9,28 +9,28 @@ const signupList = ref([
     name: '何无念',
     gender: 'male',
     phone: '13555555555',
-    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg',
+    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
   },
   {
     id: 2,
     name: '何无念',
     gender: 'female',
     phone: '13555555555',
-    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg',
+    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
   },
   {
     id: 3,
     name: '何无念',
     gender: 'male',
     phone: '13555555555',
-    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg',
+    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
   },
   {
     id: 4,
     name: '何无念',
     gender: 'male',
     phone: '13555555555',
-    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testAvatar/jerome.jpg',
+    avatar: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
   },
 ])
 
@@ -51,25 +51,15 @@ const handleCall = (phone: string) => {
           <!-- 序号 -->
           <view class="index">{{ index + 1 }}</view>
           <!-- 头像 -->
-          <image
-            class="avatar"
-            :src="
-              item.avatar ||
-              'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/avatar/default.png'
-            "
-            mode="aspectFill"
-          ></image>
+          <image class="avatar" :src="item.avatar ||
+            'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'
+            " mode="aspectFill"></image>
           <!-- 用户信息 -->
           <view class="user-info">
             <view class="name-row">
               <text class="name">{{ item.name }}</text>
-              <image
-                class="gender-icon"
-                :src="
-                  item.gender === 'male' ? '/static/images/male.png' : '/static/images/female.png'
-                "
-                mode="aspectFit"
-              ></image>
+              <image class="gender-icon" :src="item.gender === 'male' ? 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/male.png' : 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/female.png'
+                " mode="aspectFit"></image>
             </view>
             <text class="phone">{{ item.phone }}</text>
           </view>

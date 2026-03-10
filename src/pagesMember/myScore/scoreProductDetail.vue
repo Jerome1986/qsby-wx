@@ -15,10 +15,7 @@ import BottomActionBar from '@/components/BottomActionBar.vue'
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  封面图  -->
       <view class="cover">
-        <image
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-          mode="aspectFill"
-        ></image>
+        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg" mode="aspectFill"></image>
       </view>
       <!--  商品名称  -->
       <view class="productInfo">
@@ -49,12 +46,14 @@ import BottomActionBar from '@/components/BottomActionBar.vue'
 
 .content {
   flex: 1;
+
   /*封面图*/
   .cover {
     height: 400rpx;
     border-radius: 20rpx;
     overflow: hidden;
   }
+
   /*产品信息*/
   .productInfo {
     margin-top: 20rpx;

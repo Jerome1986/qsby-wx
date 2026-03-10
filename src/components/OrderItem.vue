@@ -26,10 +26,8 @@ const goDetail = () => {
     </view>
     <!--  状态图标   -->
     <view class="statusIcon" v-show="order.scoreStatus === 'USED'">
-      <image
-        src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/used.png"
-        mode="aspectFill"
-      ></image>
+      <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/status/used.png" mode="aspectFill">
+      </image>
     </view>
   </view>
 </template>
@@ -43,9 +41,11 @@ const goDetail = () => {
   background: #ffffff;
   border-radius: 30rpx;
   @include customShadow();
+
   &:nth-last-child(1) {
     box-shadow: none;
   }
+
   /*封面图*/
   .cover {
     margin-right: 24rpx;
@@ -54,6 +54,7 @@ const goDetail = () => {
     border-radius: 20rpx;
     overflow: hidden;
   }
+
   /*订单文字信息*/
   .orderInfo {
     .productName {
@@ -62,6 +63,7 @@ const goDetail = () => {
       font-size: 28rpx;
       color: $qs-font-title;
     }
+
     .content {
       margin-bottom: 8rpx;
       display: flex;
@@ -75,6 +77,7 @@ const goDetail = () => {
       }
     }
   }
+
   /*订单状态图标*/
   .statusIcon {
     position: absolute;

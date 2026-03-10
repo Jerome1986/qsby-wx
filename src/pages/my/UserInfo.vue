@@ -31,7 +31,7 @@ const handleEditInfo = () => {
     <!-- 头像 -->
     <view class="avatarInfo">
       <view class="avatarUrl">
-        <image src="../../static/my/avatar.png" mode="aspectFit" />
+        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png" mode="aspectFit" />
       </view>
       <view class="editInfo">编辑资料</view>
     </view>
@@ -49,9 +49,8 @@ const handleEditInfo = () => {
     <view class="avatarInfo" @tap="handleEditInfo">
       <view class="avatarUrl">
         <image
-          :src="userStore.profile.avatarUrl || '../../static/my/avatar.png'"
-          mode="aspectFit"
-        />
+          :src="userStore.profile.avatarUrl ?? 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
+          mode="aspectFit" />
       </view>
       <view class="editInfo">编辑资料</view>
     </view>
@@ -64,7 +63,8 @@ const handleEditInfo = () => {
       </view>
       <!-- 主理人标识 -->
       <view class="role" v-if="userStore.profile?.role === 'manager'">
-        <image class="role-bg" src="../../static/my/roleBg.png" mode="aspectFit" />
+        <image class="role-bg" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/roleBg.png"
+          mode="aspectFit" />
       </view>
     </view>
   </view>

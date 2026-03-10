@@ -132,50 +132,28 @@ const handleLoginOut = () => {
     <!-- 表单区域 -->
     <view class="form-box">
       <view class="up-pic" @tap="handleChangeAvatar">
-        <image
-          class="avatar-img"
-          :src="userStore.profile?.avatarUrl || '/static/my/avatar.png'"
-          mode="aspectFill"
-        />
+        <image class="avatar-img"
+          :src="userStore.profile?.avatarUrl || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
+          mode="aspectFill" />
         <view class="tip-label">更换头像</view>
       </view>
 
       <uni-forms :modelValue="formData" labelWidth="60px">
         <uni-forms-item label="昵称" name="nickname">
-          <uni-easyinput
-            type="text"
-            v-model="formData.nickname"
-            placeholder="请输入昵称"
-            primaryColor="#ffd018"
-            trim
-          />
+          <uni-easyinput type="text" v-model="formData.nickname" placeholder="请输入昵称" primaryColor="#ffd018" trim />
         </uni-forms-item>
 
         <uni-forms-item label="年龄" name="age">
-          <uni-easyinput
-            type="text"
-            v-model="formData.age"
-            placeholder="请输入年龄"
-            primaryColor="#ffd018"
-            trim
-          />
+          <uni-easyinput type="text" v-model="formData.age" placeholder="请输入年龄" primaryColor="#ffd018" trim />
         </uni-forms-item>
 
         <uni-forms-item label="性别" name="gender">
           <view class="gender-selector">
-            <view
-              class="gender-btn"
-              :class="{ active: formData.gender === 1 }"
-              @tap="formData.gender = 1"
-            >
+            <view class="gender-btn" :class="{ active: formData.gender === 1 }" @tap="formData.gender = 1">
               <text class="gender-icon">👨</text>
               <text class="gender-text">男</text>
             </view>
-            <view
-              class="gender-btn"
-              :class="{ active: formData.gender === 2 }"
-              @tap="formData.gender = 2"
-            >
+            <view class="gender-btn" :class="{ active: formData.gender === 2 }" @tap="formData.gender = 2">
               <text class="gender-icon">👩</text>
               <text class="gender-text">女</text>
             </view>
