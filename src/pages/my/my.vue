@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
+import { onLoad, onShareAppMessage, onShow } from '@dcloudio/uni-app'
 import { navBarHeight, getNavBarHeight } from '@/utils/system-info.ts'
 import UserInfo from './UserInfo.vue'
 import Order from '@/pages/my/Order.vue'
@@ -17,6 +17,9 @@ const userStore = useUserStore()
 onLoad(() => {
   // 获取导航栏高度
   getNavBarHeight()
+})
+
+onShow(() => {
   if (userStore.profile?._id) {
     // 获取用户信息
     userInfoGet(userStore.profile._id)
@@ -45,17 +48,6 @@ onShareAppMessage((res) => {
   }
 })
 
-// 监听用户信息变化，自动刷新界面显示
-watch(
-  () => userStore.profile,
-  (newProfile) => {
-    if (newProfile) {
-      console.log('用户信息已更新，界面会自动反映最新数据')
-      // 由于使用了响应式数据，界面会自动更新，无需额外操作
-    }
-  },
-  { deep: true },
-)
 
 // 扫码核销
 const openCode = () => {

@@ -1,21 +1,30 @@
 <script setup lang="ts">
+import type { VoucherBill } from '@/types/UserBalanceFlow';
 import { ref, computed } from 'vue'
 
 const total = ref(1000)
-const current = 600
+const props = withDefaults(defineProps<{
+  currentData?: VoucherBill
+}>(), {
+  currentData: () => ({
+    month: '',
+    used: 0,
+    balance: 0,
+  }),
+})
 
 //进度条
 const progressPercent = computed(() => {
-  return Math.min((current / total.value) * 100, 100)
+  return Math.min((props.currentData?.used / total.value) * 100, 100)
 })
 </script>
 
 <template>
   <view class="card">
     <!--  当前年月  -->
-    <view class="date">2026年11月</view>
+    <view class="date">{{ currentData.month.replace('-', '年') + '月' }}</view>
     <!--   当前年月对应的额度   -->
-    <view class="amount">￥1000.00</view>
+    <view class="amount">￥{{ currentData.balance }}</view>
     <view class="dec">仅限本月使用，逾期未用自动清理</view>
     <view class="bottom">
       <!--  进度条  -->
@@ -23,7 +32,7 @@ const progressPercent = computed(() => {
         <div class="progress-bar" :style="{ width: progressPercent + '%' }"></div>
       </view>
       <view class="text">
-        <view class="used">已使用￥{{ current }}</view>
+        <view class="used">已使用￥{{ props.currentData?.used ?? 0 }}</view>
         <view class="total">总￥{{ total }}</view>
       </view>
     </view>

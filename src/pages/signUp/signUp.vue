@@ -86,9 +86,9 @@ const discountAmount = computed(() => {
   const userFee = detailData.value.userFee || 0
 
   // 非主理人无抵扣
-  // if (userStore.profile?.role !== 'manager') {
-  //   return 0
-  // }
+  if (userStore.profile?.role !== 'manager') {
+    return 0
+  }
 
   const commission = detailData.value.commission || 0
   const couponBalance = userStore.profile?.couponBalance || 0
@@ -162,10 +162,10 @@ const submit = async () => {
 
   // 确定抵扣类型
   const getDiscountType = () => {
-    if (userStore.profile?.role !== 'manager') return 'none'
-    if (useVoucher.value && (userStore.profile?.balance || 0) > 0) return 'voucher'
+    if (userStore.profile?.role !== 'manager') return 'cash'
+    if (useVoucher.value && (userStore.profile?.couponBalance || 0) > 0) return 'voucher'
     if (commission > 0) return 'commission'
-    return 'none'
+    return 'cash'
   }
 
   // 准备提交参数
@@ -197,13 +197,17 @@ const submit = async () => {
 
   // 如果是代金券抵扣，且支付金额抵扣完为0就走下单流程，不用支付
   if (payAmount === 0 && params.discountType === 'voucher') {
+    console.log('提交参数', params)
+
     try {
       const res = await createOrderFree(params)
-      await createQrCode(res.data.orderId, userStore.profile?.openid as string).catch((err) =>
+      console.log('创建订单', res)
+
+      await createQrCode(res.data?.orderId, userStore.profile?.openid as string).catch((err) =>
         console.error('核销码创建失败', err)
       )
       await uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&type=play`,
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&type=trip`,
       })
     } catch (err) {
       console.error('免支付下单失败', err)

@@ -1,4 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import type { VoucherBill } from '@/types/UserBalanceFlow';
+
+const props = withDefaults(defineProps<{
+  historyVoucher: VoucherBill[]
+}>(), {
+  historyVoucher: () => []
+})
+</script>
 
 <template>
   <!-- 表头 -->
@@ -9,16 +17,14 @@
   </view>
   <!-- 表格数据 -->
   <view class="table-body">
-    <view class="table-row" v-for="index in 6" :key="index">
-      <view class="td">2020-10-20</view>
-      <view class="td">￥100.00</view>
-      <view class="td red">￥900.00</view>
+    <view class="table-row" v-for="(item, index) in historyVoucher" :key="index">
+      <view class="td">{{ item.month }}</view>
+      <view class="td">￥{{ item.used }}</view>
+      <view class="td red">￥{{ item.balance }}</view>
     </view>
   </view>
   <!--   提示   -->
-  <view class="tips"
-    >注：代金券仅限本月使用，逾期未用自动清理 已过期代金券不可恢复，详细规划请查看使用说明</view
-  >
+  <view class="tips">注：代金券仅限本月使用，逾期未用自动清理 已过期代金券不可恢复，详细规划请查看使用说明</view>
 </template>
 
 <style scoped lang="scss">

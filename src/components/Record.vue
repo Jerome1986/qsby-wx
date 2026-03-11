@@ -1,26 +1,23 @@
 <script setup lang="ts">
+/** 按点路径取值，支持嵌套如 productInfo.address_name */
+const getByPath = (obj: any, path: string): unknown => {
+  if (!obj || !path) return undefined
+  return path.split('.').reduce((o, k) => o?.[k], obj)
+}
+
 defineProps<{
   listData: any
-  fields: any
+  fields: { label: string; key: string }[]
   showTitle?: boolean // 是否显示标题样式（第一行加粗）
 }>()
 </script>
 
 <template>
-  <view
-    class="item"
-    :class="{ 'title-mode': showTitle }"
-    v-for="(item, index) in listData"
-    :key="index"
-  >
-    <view
-      class="row"
-      v-for="(field, fieldIndex) in fields"
-      :key="field.key"
-      :class="{ 'row-title': showTitle && fieldIndex === 0 }"
-    >
+  <view class="item" :class="{ 'title-mode': showTitle }" v-for="(item, index) in listData" :key="index">
+    <view class="row" v-for="(field, fieldIndex) in fields" :key="field.key"
+      :class="{ 'row-title': showTitle && fieldIndex === 0 }">
       <view class="label">{{ field.label }}</view>
-      <view class="value">{{ item[field.key] }}</view>
+      <view class="value">{{ getByPath(item, field.key) ?? '' }}</view>
     </view>
   </view>
 </template>
@@ -33,16 +30,19 @@ defineProps<{
   background: #ffffff;
   border-radius: 30rpx;
   @include customShadow();
+
   &:last-of-type {
     margin-bottom: 0;
     box-shadow: none;
   }
+
   .row {
     margin-bottom: 20rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 28rpx;
+
     &:last-of-type {
       margin-bottom: 0;
     }
@@ -50,12 +50,14 @@ defineProps<{
     .label {
       color: $qs-font-dec2;
     }
+
     .value {
       color: $qs-font-title;
     }
 
     /* 标题行样式（第一行加粗） */
     &.row-title {
+
       .label,
       .value {
         font-weight: bold;

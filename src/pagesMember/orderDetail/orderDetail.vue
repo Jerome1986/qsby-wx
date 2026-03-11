@@ -334,7 +334,8 @@ onLoad((options?: { orderId?: string; type?: string }) => {
     </view>
 
     <!-- 底部：待核销 - 申请退款 -->
-    <view class="footer-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }" v-if="orderDetail?.status === 'paid'">
+    <view class="footer-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }"
+      v-if="orderDetail?.status === 'paid' && orderDetail.discountType !== 'voucher'">
       <view class="refund-btn" @tap="handleRefund">申请退款</view>
     </view>
   </view>

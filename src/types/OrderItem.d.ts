@@ -32,7 +32,7 @@ export interface OrderUserInfo {
 }
 
 // 抵扣类型
-export type DiscountType = 'none' | 'voucher' | 'commission'
+export type DiscountType = 'cash' | 'voucher' | 'commission' | 'points'
 
 // 订单提交参数
 export interface OrderSubmitParams {
@@ -78,6 +78,8 @@ export interface OrderItem {
   productInfo: ProductInfo
   /** 用户信息嵌套对象(报名人信息) */
   userInfo: {
+    /** 用户对应的ID */
+    userId: string
     /** 用户昵称 */
     nickname: string
     /** 性别（1-男/2-女/0-未知） */
@@ -93,7 +95,7 @@ export interface OrderItem {
   commission: number
   /** 优惠金额（抵扣金额，单位：元） */
   discountAmount: number
-  /** 优惠类型（voucher-优惠券/discount-直减/redpacket-红包） */
+  /** 优惠类型（'cash' | 'voucher' | 'commission' | 'points'） */
   discountType: DiscountType
   /** 实际支付金额（单位：元，0表示免支付） */
   payAmount: number

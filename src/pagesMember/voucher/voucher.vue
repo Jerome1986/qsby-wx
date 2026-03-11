@@ -3,6 +3,35 @@ import Card from './components/Card.vue'
 import NavTitle from '@/components/NavTitle.vue'
 import Table from './components/Table.vue'
 import NavHead from '@/components/NavHead.vue'
+import { useUserStore } from '@/stores'
+import { filterVoucherFlow } from '@/api/voucher'
+import { onLoad } from '@dcloudio/uni-app'
+import { ref } from 'vue'
+import type { VoucherBill } from '@/types/UserBalanceFlow'
+import { getCurrentMonth } from '@/utils/generateMonth'
+
+// store
+const userStore = useUserStore()
+const currentVoucher = ref<VoucherBill>()  // 当前年月
+const historyVoucher = ref<VoucherBill[]>([]) // 最近半年历史代金券账单
+// 获取半年代金券流水
+const voucherBillGet = async (userId: string) => {
+  const res = await filterVoucherFlow(userId)
+  console.log(res)
+  const currentTime = getCurrentMonth()
+  console.log(currentTime)
+
+  //当前年月代金券使用流水明细
+  currentVoucher.value = res.data.find(item => item.month === currentTime)
+  //最近半年代金券使用流水明细
+  historyVoucher.value = res.data.filter(item => item.month !== currentTime)
+}
+
+onLoad(async () => {
+  if (userStore.profile?._id) {
+    await voucherBillGet(userStore.profile._id)
+  }
+})
 
 const goDetail = () => {
   uni.navigateTo({
@@ -14,7 +43,7 @@ const goDetail = () => {
   <view class="voucher">
     <NavHead title="代金券" :show-back="true"></NavHead>
     <!--  代金券卡片信息  -->
-    <Card></Card>
+    <Card :current-data="currentVoucher"></Card>
     <!--  title    -->
     <view class="title">
       <NavTitle title="代金券"></NavTitle>
@@ -23,7 +52,7 @@ const goDetail = () => {
     <!--  月份汇总列表--只显示最近半年   -->
     <view class="list">
       <!--  汇总表格组件  -->
-      <Table></Table>
+      <Table :historyVoucher="historyVoucher"></Table>
     </view>
   </view>
 </template>
@@ -41,6 +70,7 @@ const goDetail = () => {
   margin: 30rpx 0;
   display: flex;
   justify-content: space-between;
+
   .dec {
     padding: 8rpx 16rpx;
     text-align: center;

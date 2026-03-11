@@ -185,7 +185,7 @@ onShow(() => {
                   </template>
                 </template>
               </view>
-              <view class="btn-wrap" v-if="item.status === 'paid'">
+              <view class="btn-wrap" v-if="item.status === 'paid' && item.discountType !== 'voucher'">
                 <view class="btn refund-btn" @tap.stop="handleRefund(item)">退款</view>
               </view>
             </view>
