@@ -67,19 +67,28 @@ const getStatus = (status: CashWithdrawStatus) => statusMap[status] ?? statusMap
   }
 
   .image {
+    flex-shrink: 0;
     margin-right: 20rpx;
     width: 85rpx;
     height: 83rpx;
     overflow: hidden;
+
+    image {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   .right {
     flex: 1;
+    min-width: 0;
 
     .title {
       margin-bottom: 10rpx;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      min-width: 0;
       font-size: 30rpx;
       color: #0b0a0a;
 
@@ -114,13 +123,36 @@ const getStatus = (status: CashWithdrawStatus) => statusMap[status] ?? statusMap
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+
+      .amount {
+        flex-shrink: 0;
+        flex-grow: 0;
+        min-width: 120rpx;
+        margin-left: 16rpx;
+        text-align: right;
+      }
     }
 
     .content {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      min-width: 0;
       font-size: 24rpx;
       color: #919191;
+
+      .balance {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .time {
+        flex-shrink: 0;
+        margin-left: 16rpx;
+      }
     }
   }
 }
