@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/** 按点路径取值，支持嵌套如 productInfo.address_name */
-const getByPath = (obj: any, path: string): unknown => {
-  if (!obj || !path) return undefined
-  return path.split('.').reduce((o, k) => o?.[k], obj)
-}
+import { formatFieldValue } from '@/utils/formatField';
 
 defineProps<{
   listData: any
@@ -17,7 +13,7 @@ defineProps<{
     <view class="row" v-for="(field, fieldIndex) in fields" :key="field.key"
       :class="{ 'row-title': showTitle && fieldIndex === 0 }">
       <view class="label">{{ field.label }}</view>
-      <view class="value">{{ getByPath(item, field.key) ?? '' }}</view>
+      <view class="value">{{ formatFieldValue(field, item) ?? '' }}</view>
     </view>
   </view>
 </template>
@@ -30,11 +26,6 @@ defineProps<{
   background: #ffffff;
   border-radius: 30rpx;
   @include customShadow();
-
-  &:last-of-type {
-    margin-bottom: 0;
-    box-shadow: none;
-  }
 
   .row {
     margin-bottom: 20rpx;

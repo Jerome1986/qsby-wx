@@ -3,11 +3,12 @@ import NavTitle from '@/components/NavTitle.vue'
 import NoData from '@/components/NoData.vue'
 import NavHead from '@/components/NavHead.vue'
 import { useUserStore } from '@/stores'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { FriendData } from '@/types/Friend'
 import { friendListApi } from '@/api/friend'
 import { onLoad } from '@dcloudio/uni-app'
 import { formatTimestamp } from '@/utils/generateMonth'
+import type { UserItem } from '@/types/UserItem'
 
 const userStore = useUserStore()
 
@@ -30,6 +31,11 @@ const friendDataGet = async (userId: string) => {
   }
 }
 
+// 团队消费金额
+const teamTotal = computed(() => {
+  return friendData.value.reduce((sum, item) => sum + item.totalConsumption, 0)
+})
+
 const handleScroll = () => {
   console.log('触底')
   if (finish.value) return
@@ -37,9 +43,9 @@ const handleScroll = () => {
 }
 
 // 跳转好友详情
-const handleDetail = (id: string) => {
+const handleDetail = (item: FriendData) => {
   uni.navigateTo({
-    url: `/pagesMember/myFriend/friendDetail?userId=${id}`,
+    url: `/pagesMember/myFriend/friendDetail?userId=${item._id}&totalConsumption=${item.totalConsumption}`,
   })
 }
 
@@ -64,7 +70,7 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
           src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/friend/box.png" mode="aspectFit"></image>
         <view class="text">
           <view class="label">团队消费金额</view>
-          <view class="value">0</view>
+          <view class="value">{{ teamTotal }}</view>
         </view>
       </view>
     </view>
@@ -77,7 +83,7 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
         tips="你还没有邀请好友哟~" v-if="!friendData.length"></NoData>
       <!--  列表项  -->
       <view class="list" v-else>
-        <view class="item" v-for="(item) in friendData" :key="item._id" @tap="handleDetail(item._id)">
+        <view class="item" v-for="(item) in friendData" :key="item._id" @tap="handleDetail(item)">
           <image class="avatar" mode="aspectFit" :src="item.avatarUrl"></image>
           <view class="info">
             <view class="nickname">
@@ -91,10 +97,13 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
             <view class="consumption">个人消费 {{ item.totalConsumption ?? 0 }}</view>
           </view>
           <view class="right">
-            <image class="roleIcon"
+            <image v-if="item.role === 'user'" class="roleIcon"
               src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/friend/role1.png" mode="aspectFit">
             </image>
-            <view class="payTimes">消费次数 {{ item.totalConsumptionTimes ?? 0 }}</view>
+            <image v-if="item.role === 'manager'" class="roleIcon"
+              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/friend/role2.png" mode="aspectFit">
+            </image>
+            <view class="payTimes">消费次数 {{ item.totalCount ?? 0 }}</view>
           </view>
         </view>
       </view>

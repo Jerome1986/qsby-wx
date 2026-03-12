@@ -1,135 +1,142 @@
 <script setup lang="ts">
 import NavTitle from '@/components/NavTitle.vue'
 import { ref } from 'vue'
-import { generateMonthOptions, getCurrentMonth } from '@/utils/generateMonth.ts'
-import NoData from '@/components/NoData.vue'
+import { formatTimestamp, generateMonthOptions, getCurrentMonth } from '@/utils/generateMonth.ts'
+import NavHead from '@/components/NavHead.vue'
+import { onLoad } from '@dcloudio/uni-app'
+import { friendDetailOrderApi } from '@/api/friend'
+import type { UserItem } from '@/types/UserItem'
+import type { OrderItem } from '@/types/OrderItem'
+import { formatFieldValue } from '@/utils/formatField'
 
-// 消费明细数据类型
-interface ConsumptionItem {
-  buyerName: string
-  amount: string
-  orderTime: string
-  productName: string
-  orderNo: string
-  commission: string
-  [key: string]: string // 索引签名，允许用字符串索引
+// ========== 页面状态（来自路由或接口） ==========
+const userId = ref('')
+const totalConsumption = ref(0) // 个人消费金额，来自上一页传参
+const totalCount = ref(0) // 已核销金额/次数，来自上一页传参
+const userInfo = ref<UserItem>() // 好友用户信息，首次请求时从接口获取
+const friendData = ref<OrderItem[]>([]) // 好友消费订单列表
+
+// ========== 分页与加载状态 ==========
+const pageNum = ref(1)
+const pageSize = ref(10)
+const finish = ref(false) // 是否已加载完所有页
+
+/** 获取好友详情订单列表（按月份分页） */
+const friendOrderGet = async (userId: string, time: string) => {
+  if (finish.value) return
+  const res = await friendDetailOrderApi(userId, time, pageNum.value, pageSize.value)
+  console.log(res)
+  if (!userInfo.value) {
+    userInfo.value = res.data.userInfo
+  }
+  friendData.value.push(...res.data.list)
+  totalCount.value = res.data.total
+  if (pageNum.value < res.data.totalPage) {
+    pageNum.value++
+  } else {
+    finish.value = true
+  }
 }
 
-// 定义字段配置
-const fields: { label: string; key: keyof ConsumptionItem }[] = [
-  { label: '购买人', key: 'buyerName' },
-  { label: '产品金额', key: 'amount' },
-  { label: '下单时间', key: 'orderTime' },
-  { label: '产品名称', key: 'productName' },
-  { label: '订单编号', key: 'orderNo' },
-  { label: '产品佣金', key: 'commission' },
-]
+// ========== 生命周期：页面加载 ==========
+onLoad((options) => {
+  console.log(options)
+  if (options) {
+    userId.value = options.userId ?? ''
+    totalConsumption.value = Number(options.totalConsumption) || 0
+  }
+  friendOrderGet(userId.value, selectedMonth.value)
+})
 
-// 列表数据（后期从接口获取）
-const listData = ref<ConsumptionItem[]>([
-  {
-    buyerName: '何**',
-    amount: '4950.00',
-    orderTime: '2026-2-08 17:16',
-    productName: '12.27体验冬日里的庐山2天1晚',
-    orderNo: 'OD_2025112700286605',
-    commission: '100元',
-  },
-  {
-    buyerName: '何**',
-    amount: '4950.00',
-    orderTime: '2026-2-08 17:16',
-    productName: '12.27体验冬日里的庐山2天1晚',
-    orderNo: 'OD_2025112700286605',
-    commission: '100元',
-  },
-  {
-    buyerName: '何**',
-    amount: '4950.00',
-    orderTime: '2026-2-08 17:16',
-    productName: '12.27体验冬日里的庐山2天1晚',
-    orderNo: 'OD_2025112700286605',
-    commission: '100元',
-  },
-  {
-    buyerName: '何**',
-    amount: '4950.00',
-    orderTime: '2026-2-08 17:16',
-    productName: '12.27体验冬日里的庐山2天1晚',
-    orderNo: 'OD_2025112700286605',
-    commission: '100元',
-  },
-  // ... 更多数据
-])
-
-// 默认选择当前月份
+// ========== 月份选择 ==========
 const selectedMonth = ref(getCurrentMonth())
-
 const range = ref(generateMonthOptions())
+
+/** 切换月份时重置分页并重新请求 */
 const change = (value: any) => {
+  pageNum.value = 1
+  finish.value = false
+  friendData.value = []
   selectedMonth.value = value
   console.log('选择的月份', selectedMonth.value)
+  friendOrderGet(userId.value, selectedMonth.value)
 }
+
+// ========== 消费明细展示配置 ==========
+/** 字段配置，key 支持点路径（如 productInfo.title） */
+const fields: { label: string; key: string }[] = [
+  { label: '产品金额', key: 'totalAmount' },
+  { label: '下单时间', key: 'createdAt' },
+  { label: '产品名称', key: 'productInfo.title' },
+  { label: '订单编号', key: 'out_trade_no' },
+]
+
+
 </script>
 <template>
   <view class="friendDetail">
-    <!--  用户信息  -->
+    <NavHead title="好友详情" :show-back="true"></NavHead>
+
+    <!-- 区域1：好友用户信息（头像、昵称、注册时间） -->
     <view class="userInfo">
       <!-- 头像  -->
       <view class="avatar">
-        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png" mode="aspectFit">
+        <image :src="userInfo?.avatarUrl" mode="aspectFit">
         </image>
       </view>
       <!-- 信息  -->
       <view class="info">
-        <view class="nickname">何无念</view>
-        <view class="registerTime">注册时间：2022-12-09</view>
+        <view class="nickname">{{ userInfo?.nickname }}</view>
+        <view class="registerTime">注册时间：{{ formatTimestamp(userInfo?.registerTime, 2) }}</view>
       </view>
     </view>
-    <!--  个人消费/核销记录  -->
+
+    <!-- 区域2：统计卡片（个人消费、已核销金额，数据来自路由传参） -->
     <view class="nav">
-      <!-- 个人消费/  -->
+      <!-- 个人消费 -->
       <view class="nav-item">
         <image style="width: 94rpx; height: 102rpx" class="img"
           src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/frirend/moneyBag.png" mode="aspectFit">
         </image>
         <view class="text">
           <view class="label">个人消费</view>
-          <view class="value">2.00</view>
+          <view class="value">{{ totalConsumption.toFixed(2) }}</view>
         </view>
       </view>
-      <!-- 核销记录  -->
+      <!-- 已核销金额 -->
       <view class="nav-item">
         <image class="img" style="width: 85rpx; height: 109rpx"
           src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/frirend/hexiao.png" mode="aspectFit">
         </image>
         <view class="text">
-          <view class="label">已核销金额</view>
-          <view class="value">20.00</view>
+          <view class="label">已核销订单</view>
+          <view class="value">{{ totalCount }}</view>
         </view>
       </view>
     </view>
-    <!-- 没数据  -->
-    <view class="consumptionDetails" v-if="false">
-      <NavTitle title="消费明细"> </NavTitle>
-      <NoData image-url="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/frirend/noData.png"
-        tips="这里啥也没有，去探索未知的新世界吧"></NoData>
-    </view>
 
-    <!--  明细消费  -->
-    <view class="consumptionDetails" v-else>
+    <!-- 区域3：消费明细（按月份筛选订单列表） -->
+    <view class="consumptionDetails">
       <NavTitle title="消费明细"> </NavTitle>
-      <!-- 日期选择  -->
+      <!-- 月份选择器 -->
       <view class="my-select">
         <uni-data-select v-model="selectedMonth" :localdata="range" hideRight @change="change"></uni-data-select>
       </view>
-      <!--  明细列表  -->
+      <!-- 订单明细列表 / 空状态 -->
       <scroll-view class="list" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-        <view class="item" v-for="(item, index) in listData" :key="index">
-          <view class="row" v-for="field in fields" :key="field.key">
-            <view class="label">{{ field.label }}</view>
-            <view class="value">{{ item[field.key] }}</view>
+        <template v-if="friendData.length">
+          <view class="item" v-for="(item, index) in friendData" :key="index">
+            <view class="row" v-for="field in fields" :key="field.key">
+              <view class="label">{{ field.label }}</view>
+              <view class="value">{{ formatFieldValue(field, item) }}</view>
+            </view>
           </view>
+        </template>
+        <!-- 无数据时展示 -->
+        <view v-else class="empty">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="widthFix"></image>
+          <text class="empty-text">暂无数据</text>
         </view>
       </scroll-view>
     </view>
@@ -137,13 +144,14 @@ const change = (value: any) => {
 </template>
 
 <style scoped lang="scss">
+/* 页面容器 */
 .friendDetail {
   padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
 }
 
-/*用户信息*/
+/* 区域1：用户信息 */
 .userInfo {
   margin-bottom: 32rpx;
   display: flex;
@@ -173,7 +181,7 @@ const change = (value: any) => {
   }
 }
 
-/*导航功能-个人消费、核销金额*/
+/* 区域2：统计卡片 */
 .nav {
   display: flex;
   gap: 24rpx;
@@ -213,7 +221,7 @@ const change = (value: any) => {
   }
 }
 
-/*消费明细*/
+/* 区域3：消费明细 */
 .consumptionDetails {
   padding: 28rpx;
   margin-top: 20rpx;
@@ -228,7 +236,7 @@ const change = (value: any) => {
     @include customSelected();
   }
 
-  /*明细列表*/
+  /* 明细列表 / 空状态 */
   .list {
     margin-top: 20rpx;
     width: 100%;
@@ -239,6 +247,24 @@ const change = (value: any) => {
      * = 100% - 144rpx
      */
     height: calc(100% - 144rpx);
+
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+
+      .empty-img {
+        width: 480rpx;
+      }
+
+      .empty-text {
+        margin-top: 24rpx;
+        font-size: 28rpx;
+        color: $qs-font-dec;
+      }
+    }
 
     .item {
       padding: 24rpx;

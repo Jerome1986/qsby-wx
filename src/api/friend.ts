@@ -1,4 +1,4 @@
-import type { FriendListPageResult } from '@/types/Friend'
+import type { FriendDetailOrderResult, FriendListPageResult } from '@/types/Friend'
 import { request } from '@/utils/http'
 
 /**
@@ -12,5 +12,25 @@ export const friendListApi = (userId: string, pageNum: number, pageSize: number)
     method: 'GET',
     url: '/friend/findAll',
     data: { userId, pageNum, pageSize },
+  })
+}
+
+/**
+ * 好友详情订单
+ * @param userId - 用户ID
+ * @param time - 时间（年月）
+ * @param pageNum - 页码
+ * @param pageSize - 条数
+ */
+export const friendDetailOrderApi = (
+  userId: string,
+  time: string,
+  pageNum: number,
+  pageSize: number,
+) => {
+  return request<FriendDetailOrderResult>({
+    method: 'GET',
+    url: '/friend/detial',
+    data: { userId, time, pageNum, pageSize },
   })
 }

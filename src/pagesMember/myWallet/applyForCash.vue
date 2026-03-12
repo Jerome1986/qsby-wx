@@ -1,23 +1,40 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import NavHead from '@/components/NavHead.vue'
+import type { ApplyForCashFormData } from '@/types/Cash'
+import { validateApplyForCashForm } from './dataCofing'
+import { cashWithdrawApi } from '@/api/myWallet'
+import { useUserStore } from '@/stores'
 
-const formData = ref({
+const userStore = useUserStore()
+
+const formData = ref<ApplyForCashFormData>({
+  userId: userStore.profile?._id ?? '',
   name: '',
   bankCard: '',
   openBank: '',
   mobile: '',
+  amount: 0,
 })
 
 // 提交状态
 const isSuccess = ref(false)
 
 // 处理提交
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  formData.value.amount = Number(formData.value.amount) || 0
+  const balance = userStore.profile?.balance ?? 0
+  const errorMsg = validateApplyForCashForm(formData.value, balance)
+  if (errorMsg) return uni.showToast({ icon: 'none', title: errorMsg })
+
   console.log('提交的数据', formData.value)
-  // todo 数据验证 调用提交接口
-  // 提交成功
-  isSuccess.value = true
+  // 调用提交接口
+  const res = await cashWithdrawApi(formData.value)
+  if (res.code === 200) {
+    // 提交成功
+    isSuccess.value = true
+    uni.showToast({ icon: 'success', title: '申请成功' })
+  }
 }
 
 // 回首页
@@ -49,12 +66,16 @@ const goHome = () => {
             <uni-easyinput :inputBorder="false" v-model="formData.mobile" placeholder="请输入手机号" trim
               primaryColor="#ffd018" />
           </uni-forms-item>
+          <uni-forms-item name="amount" label="提现金额">
+            <uni-easyinput :inputBorder="false" v-model="formData.amount" type="number" placeholder="请输入提现金额（100的整数倍）"
+              primaryColor="#ffd018" />
+          </uni-forms-item>
         </uni-forms>
       </view>
       <!-- 账户余额  -->
       <view class="balance">
         <view class="label">账户余额</view>
-        <view class="value">￥0.00</view>
+        <view class="value">￥{{ userStore.profile?.balance ?? 0 }}</view>
       </view>
       <!-- 提交  -->
       <view class="submit">

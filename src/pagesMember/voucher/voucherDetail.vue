@@ -77,6 +77,7 @@ const handleScroll = () => {
           mode="widthFix"></image>
         <text class="empty-text">暂无数据</text>
       </view>
+      <view style="height: 40rpx;"></view>
     </scroll-view>
   </view>
 </template>

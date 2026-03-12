@@ -39,23 +39,43 @@ function padZero(num: number): string {
   return num < 10 ? '0' + num : String(num)
 }
 type DateFormatType = 1 | 2
+
+/** 将各种格式转为可解析的时间戳/字符串，供 Date 解析 */
+function normalizeTimestamp(val: unknown): string | number | Date | null {
+  if (val == null) return null
+  if (val instanceof Date) return val
+  // MongoDB Extended JSON: { $date: "2026-03-10T15:53:45.123Z" } 或 { $date: { $numberLong: "1739050000000" } }
+  if (typeof val === 'object' && val !== null && '$date' in val) {
+    const d = (val as { $date: string | { $numberLong: string } }).$date
+    if (typeof d === 'string') return d
+    if (typeof d === 'object' && d !== null && '$numberLong' in d) {
+      return Number((d as { $numberLong: string }).$numberLong)
+    }
+  }
+  if (typeof val === 'number') {
+    // 秒级时间戳（10 位）转毫秒
+    if (val < 1e12 && val > 0) return val * 1000
+    return val
+  }
+  if (typeof val === 'string') return val
+  return null
+}
+
 export function formatTimestamp(
-  timestamp: number | string | Date,
+  timestamp: number | string | Date | unknown,
   type: DateFormatType = 1,
 ): string {
-  const date = timestamp instanceof Date ? timestamp : new Date(timestamp)
-  // 非法时间戳返回空字符串，避免异常
+  const normalized = normalizeTimestamp(timestamp)
+  if (normalized == null) return ''
+  const date = normalized instanceof Date ? normalized : new Date(normalized)
   if (isNaN(date.getTime())) return ''
 
   const year = date.getFullYear()
-  const month = padZero(date.getMonth() + 1) // 月份是从0开始的，所以需要+1
+  const month = padZero(date.getMonth() + 1)
   const day = padZero(date.getDate())
   const hours = padZero(date.getHours())
   const minutes = padZero(date.getMinutes())
-  const seconds = padZero(date.getSeconds())
 
-  // 默认返回年月日
   if (type === 1) return `${year}-${month}-${day}`
-  // 如果不是1 就返回到秒
   return `${year}-${month}-${day} ${hours}:${minutes}`
 }
