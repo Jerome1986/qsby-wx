@@ -1,6 +1,6 @@
 import type { EventItem } from '@/types/PublicManagement'
 
-// 趣哪游页面返回类型
+// 活动页面返回类型
 export type ActivityListItem = Partial<EventItem>
 
 // 分页返回

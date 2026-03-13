@@ -7,7 +7,7 @@ export interface SubmitFormData extends PublicFormData {
   userId: string
 }
 
-// 行程分类类型
+// 分类类型
 export interface BaseTypeItem {
   /** mongoDB id */
   _id: string
@@ -25,7 +25,7 @@ export interface TripTypeItem extends BaseTypeItem {}
 export interface ActivityTypeItem extends BaseTypeItem {}
 
 // 发布行程状态类型
-export type PublicStatus = 'pending' | 'active' | 'finished' | 'cancelled'
+export type PublicStatus = 'pending' | 'active' | 'finished'
 
 // 发布行程接口返回类型
 export interface PublicTripResponse {

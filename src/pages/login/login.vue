@@ -51,6 +51,13 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
         })
         return
       }
+      // 如果携带了项目链接直接跳转项目详情
+      if (projectId.value) {
+        await uni.redirectTo({
+          url: `/pages/project/projectDetail?projectId=${projectId.value}`,
+        })
+        return
+      }
       // 如果没有就跳转首页
       await uni.switchTab({
         url: '/pages/home/home',
@@ -61,9 +68,10 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
 
 // 刷新CODE
 const freshCode = ref('')
-// 获取参数-邀请码
+// 获取参数-邀请码、商品ID、项目ID（多页面统一）
 const inviterCode = ref('')
 const productId = ref('')
+const projectId = ref('')
 onLoad((options: any) => {
   // 进页面就重新获取code，防止过期
   uni.login({
@@ -83,9 +91,10 @@ onLoad((options: any) => {
 
   console.log('立即打印 options', options.inviterCode)
 
-  // 先判断分享链接进入且是分享商品详情进入
+  // 先判断分享链接进入且是分享商品/项目详情进入（多页面统一）
   inviterCode.value = options.inviterCode
   productId.value = options.productId
+  projectId.value = options.projectId
   setTimeout(() => {
     console.log('1秒后打印 inviterCode.value', inviterCode.value, 'and', options.inviterCode)
   }, 1000)

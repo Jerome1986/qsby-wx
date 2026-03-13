@@ -1,142 +1,238 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { safeAreaBottom, getSafeAreaBottom } from '@/utils/system-info'
 import OrganizerInfo from '@/components/OrganizerInfo.vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { projectAllCateGetApi, projectDetailGetApi } from '@/api/project'
+import { userInfoGetApi } from '@/api/user'
+import { useUserStore } from '@/stores'
+import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
+import type { ProjectItem } from '@/types/Project'
 import type { UserItem } from '@/types/UserItem'
 
-const userData = ref<UserItem>()
+const userStore = useUserStore()
+const projectId = ref('')
+const detailData = ref<ProjectItem | null>(null)
+const userData = ref<UserItem | null>(null)
+const loading = ref(true)
 
-onLoad(() => {
+// 分类映射
+const industryMap = ref<Record<string, string>>({})
+const modeMap = ref<Record<string, string>>({})
+const scaleMap = ref<Record<string, string>>({})
+const industryName = computed(() =>
+  detailData.value ? industryMap.value[detailData.value.industry] ?? '-' : '-',
+)
+const modeName = computed(() =>
+  detailData.value ? modeMap.value[detailData.value.cooperationMode] ?? '-' : '-',
+)
+const scaleName = computed(() =>
+  detailData.value ? scaleMap.value[detailData.value.cooperationScale] ?? '-' : '-',
+)
+
+const fetchDetail = async () => {
+  if (!projectId.value) {
+    loading.value = false
+    return
+  }
+  loading.value = true
+  try {
+    const [projectRes, cateRes] = await Promise.all([
+      projectDetailGetApi(projectId.value),
+      projectAllCateGetApi(),
+    ])
+    detailData.value = projectRes.data
+    industryMap.value = Object.fromEntries(cateRes.data.typeList.map((item) => [item._id, item.name]))
+    modeMap.value = Object.fromEntries(cateRes.data.modeList.map((item) => [item._id, item.name]))
+    scaleMap.value = Object.fromEntries(cateRes.data.scaleList.map((item) => [item._id, item.name]))
+    if (detailData.value?.userId) {
+      const userRes = await userInfoGetApi(detailData.value.userId)
+      userData.value = userRes.data
+    }
+  } catch {
+    detailData.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+onLoad((options) => {
   getSafeAreaBottom()
+  projectId.value = options?.projectId ?? ''
+  fetchDetail()
 })
 
-// 分享
-const handleShare = () => {
-  // TODO: 分享逻辑
+// 打开地图
+const handleOpenMap = () => {
+  const d = detailData.value
+  if (!d?.latitude || !d?.longitude) {
+    uni.showToast({ icon: 'none', title: '暂无位置信息' })
+    return
+  }
+  uni.openLocation({
+    latitude: d.latitude,
+    longitude: d.longitude,
+    name: d.address_name ?? d.event_address ?? '项目位置',
+    address: d.event_address ?? '',
+  })
+}
+
+// 复制微信
+const handleCopyWx = () => {
+  const wx = detailData.value?.wechat
+  if (!wx) return
+  uni.setClipboardData({
+    data: wx,
+    success: () => uni.showToast({ icon: 'success', title: '已复制微信号' }),
+  })
+}
+
+// 拨打电话
+const handleCallPhone = () => {
+  const phone = detailData.value?.phone
+  if (!phone) return
+  uni.makePhoneCall({ phoneNumber: phone })
 }
 
 // 跳转项目发布支付页面
 const handleUnlock = () => {
   uni.navigateTo({
-    url: '/pages/project/checkProject',
+    url: `/pages/project/checkProject?projectId=${projectId.value}`,
   })
 }
 
-// 项目介绍
-const introText = ref(
-  '12.27体验冬日里的庐山，内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案内容文案。',
-)
-const introImages = ref([
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg',
-])
+onShareAppMessage((res) => {
+  const title = detailData.value?.title ?? '有趣的项目'
+  const imageUrl = detailData.value?.cover
+  // 来自页面内按钮且已登录：先跳登录页（新用户可绑定邀请关系），登录后自动跳项目详情
+  if (res.from === 'button' && userStore.profile) {
+    return {
+      title,
+      path: `/pages/login/login?inviterCode=${userStore.profile.referralCode}&projectId=${projectId.value}`,
+      imageUrl,
+    }
+  }
+  // 默认分享（如右上角菜单）：直接跳项目详情
+  const query = `projectId=${projectId.value}${userStore.profile?.referralCode ? `&inviterCode=${userStore.profile.referralCode}` : ''}`
+  return {
+    title,
+    path: `/pages/project/projectDetail?${query}`,
+    imageUrl,
+  }
+})
 </script>
 <template>
   <view class="projectDetail">
     <NavHead title="项目详情" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!-- 产品信息 + 位置信息 -->
-      <view class="card product-card">
-        <!-- 上半部分：封面 + 基本信息 -->
-        <view class="product-top">
-          <view class="cover">
-            <image mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"></image>
+      <view v-if="loading" class="loading">加载中...</view>
+      <template v-else-if="detailData">
+        <!-- 产品信息 + 位置信息（恢复原布局） -->
+        <view class="product-card">
+          <view class="product-top">
+            <view class="cover">
+              <image mode="aspectFill"
+                :src="detailData.cover || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg'">
+              </image>
+            </view>
+            <view class="product-info">
+              <view class="name">{{ detailData.title }}</view>
+              <view class="detail-item">
+                <text class="label">行业类别：</text>
+                <text class="value">{{ industryName }}</text>
+              </view>
+              <view class="detail-item">
+                <text class="label">合作方式：</text>
+                <text class="value">{{ modeName }}</text>
+              </view>
+              <view class="detail-item">
+                <text class="label">合作规模：</text>
+                <text class="value">{{ scaleName }}</text>
+              </view>
+            </view>
           </view>
-          <view class="product-info">
-            <view class="name">一起开一个游乐园</view>
-            <view class="detail-item">
-              <text class="label">行业类别：</text>
-              <text class="value">餐饮美食</text>
+          <!-- 位置信息 -->
+          <view class="location-row" v-if="detailData.address_name || detailData.event_address" @tap="handleOpenMap">
+            <view class="location-left">
+              <view class="loc-name">{{ detailData.address_name || '项目位置' }}</view>
+              <view class="loc-address">{{ detailData.event_address || '' }}</view>
             </view>
-            <view class="detail-item">
-              <text class="label">合作方式：</text>
-              <text class="value">资源合作</text>
-            </view>
-            <view class="detail-item">
-              <text class="label">合作规模：</text>
-              <text class="value">50W-100W</text>
+            <view class="location-right">
+              <text class="iconfont icon-address"></text>
+              <text class="map-text">地图</text>
             </view>
           </view>
         </view>
-        <!-- 下半部分：位置信息 -->
-        <view class="location-row">
-          <view class="location-left">
-            <view class="loc-name">千宿百院创业孵化基地</view>
-            <view class="loc-address">湖北省武汉市洪山区地址信息地址地址（信息）</view>
-          </view>
-          <view class="location-right">
-            <text class="iconfont icon-address"></text>
-            <text class="map-text">地图</text>
-          </view>
-        </view>
-      </view>
 
-      <!-- 发布人 -->
-      <OrganizerInfo :user-data="userData as UserItem"></OrganizerInfo>
+        <!-- 组织方 -->
+        <OrganizerInfo v-if="userData" :userData="userData" @copyWx="handleCopyWx"
+          @callPhone="handleCallPhone"></OrganizerInfo>
 
-      <!-- 项目介绍 -->
-      <view class="card intro-card">
-        <view class="section-title">项目介绍</view>
-        <view class="intro-text" v-if="introText">
-          <text>{{ introText }}</text>
+        <!-- 项目介绍（与 productDetail activity 同步） -->
+        <view class="activity">
+          <view class="title">项目介绍</view>
+          <view class="content" v-if="detailData.introduction">{{ detailData.introduction }}</view>
+          <view class="images" v-for="(item, index) in (detailData.images || [])" :key="index">
+            <image mode="widthFix" :src="item"></image>
+          </view>
+          <view v-if="!detailData.introduction && !detailData.images?.length" class="empty-tip">暂无介绍</view>
         </view>
-        <view class="intro-images" v-if="introImages.length">
-          <image v-for="(img, index) in introImages" :key="index" :src="img" mode="widthFix" class="intro-img"></image>
-        </view>
-      </view>
+      </template>
+      <view v-else class="empty">项目不存在</view>
 
       <!-- 底部占位 -->
-      <view style="height: 140rpx"></view>
+      <view class="scroll-bottom-placeholder"></view>
     </scroll-view>
 
-    <!-- 底部操作栏 -->
-    <view class="footer-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
-      <view class="share-btn" @tap="handleShare">
+    <!-- 底部操作区（与 productDetail footerBar 同步） -->
+    <view class="footerBar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
+      <button class="share" open-type="share">
         <view class="icon">
-          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/xc/share.png"></image>
+          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/share.png"></image>
         </view>
-        <text class="share-text">分享</text>
-      </view>
-      <view class="unlock-btn" @tap="handleUnlock">查看项目发布人</view>
+        <view>分享</view>
+      </button>
+      <view class="sign" @tap="handleUnlock">查看项目发布人</view>
     </view>
   </view>
 </template>
 
 <style scoped lang="scss">
+/* 页面容器（与 productDetail 同步） */
 .projectDetail {
   display: flex;
   flex-direction: column;
+  padding: 24rpx 24rpx 180rpx;
   height: 100%;
   @include page-background();
 }
 
+/* 内容区域 scroll */
 .content {
   flex: 1;
-  padding: 24rpx;
+
+  .scroll-bottom-placeholder {
+    height: 20rpx;
+  }
 }
 
-/* 通用卡片 */
-.card {
-  background-color: #ffffff;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  margin-bottom: 24rpx;
-  @include customShadow();
+.loading,
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 0;
+  font-size: 28rpx;
+  color: $qs-font-dec;
 }
 
-/* 区块标题 */
-.section-title {
-  font-size: 30rpx;
-  font-weight: bold;
-  color: $qs-font-title;
-  margin-bottom: 24rpx;
-}
-
-/* 产品信息卡（含位置） */
+/* 产品信息 + 位置信息卡片（恢复原布局） */
 .product-card {
+  padding: 24rpx;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  @include customShadow();
+
   .product-top {
     display: flex;
     gap: 20rpx;
@@ -145,7 +241,7 @@ const introImages = ref([
 
     .cover {
       width: 192rpx;
-      height: 192rpx;
+      height: 215rpx;
       border-radius: 10rpx;
       overflow: hidden;
       flex-shrink: 0;
@@ -156,7 +252,7 @@ const introImages = ref([
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 192rpx;
+      height: 215rpx;
 
       .name {
         font-size: 32rpx;
@@ -173,7 +269,6 @@ const introImages = ref([
     }
   }
 
-  /* 位置信息（下边框下方） */
   .location-row {
     display: flex;
     justify-content: space-between;
@@ -218,69 +313,80 @@ const introImages = ref([
   }
 }
 
-/* 项目介绍卡 */
-.intro-card {
+/* 活动介绍卡片（与 productDetail activity 同步） */
+.activity {
   margin-top: 24rpx;
+  padding: 24rpx;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  @include customShadow();
 
-  .intro-text {
+  .title {
     font-size: 28rpx;
-    color: $qs-font-dec;
-    line-height: 1.8;
+    font-weight: bold;
+    color: $qs-font-title;
+    margin-bottom: 20rpx;
   }
 
-  .intro-images {
-    display: flex;
-    flex-direction: column;
-    gap: 16rpx;
+  .content {
+    font-size: 26rpx;
+    color: $qs-font-dec;
+    line-height: 1.8;
+    margin-bottom: 20rpx;
+  }
 
-    .intro-img {
+  .images {
+    margin-top: 16rpx;
+
+    image {
       width: 100%;
-      height: auto;
-      border-radius: 10rpx;
+      border-radius: 16rpx;
     }
   }
 
-  .intro-text+.intro-images {
-    margin-top: 24rpx;
+  .empty-tip {
+    font-size: 26rpx;
+    color: $qs-font-dec;
   }
 }
 
-/* 底部操作栏 */
-.footer-bar {
+/* 底部操作区域（与 productDetail footerBar 同步） */
+.footerBar {
   position: fixed;
-  bottom: 0;
   left: 0;
-  right: 0;
+  bottom: 0;
+  width: 100%;
   display: flex;
-  align-items: center;
-  padding: 16rpx 24rpx;
-  background-color: #ffffff;
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20rpx 24rpx;
+  background: #ffffff;
+  border-top: 1px solid #f1f1f1;
 
-  .share-btn {
+  .share {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-right: 30rpx;
+    font-size: 24rpx;
+    color: $qs-font-dec;
+    background-color: transparent;
+    padding: 0;
+    border: none;
 
     .icon {
       width: 46rpx;
       height: 39rpx;
       margin-bottom: 4rpx;
     }
-
-    .share-text {
-      font-size: 24rpx;
-      color: $qs-font-dec;
-    }
   }
 
-  .unlock-btn {
+  .sign {
     flex: 1;
+    margin-left: 40rpx;
     height: 80rpx;
     line-height: 80rpx;
     text-align: center;
-    background-color: $qs-brandColor;
+    background: #ffd018;
     border-radius: 40rpx;
     font-size: 30rpx;
     font-weight: bold;

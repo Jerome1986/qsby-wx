@@ -1,67 +1,109 @@
 <script setup lang="ts">
+import { projectAllCateGetApi, projectSendApi } from '@/api/project'
 import NavHead from '@/components/NavHead.vue'
+import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
-import type { UploadChangeEvent } from 'wot-design-uni/components/wd-upload/types'
+import type { ProjectFormData } from '@/types/Project'
+import type { UploadChangeEvent, UploadFileItem } from 'wot-design-uni/components/wd-upload/types'
+import { useUserStore } from '@/stores'
+import { validateProjectForm } from './verifySendParams'
+
+const userStore = useUserStore()
 
 // 表单数据
-const formData = ref({
+const formData = ref<ProjectFormData>({
   title: '',
   industry: '',
   cooperationMode: '',
   cooperationScale: '',
-  address: '',
+  address_name: '',
+  event_address: '',
+  latitude: undefined,
+  longitude: undefined,
   wechat: '',
   phone: '',
   introduction: '',
 })
 
-// 上传封面图
+// 上传封面图（本地预览 + 上传获取 URL）
 const cover = ref('')
 const handleUpdateCover = () => {
   uni.chooseImage({
     count: 1,
     success: (res) => {
       cover.value = res.tempFilePaths[0]
+      const name = 'cover' + Date.now()
+      uni.uploadFile({
+        url: 'https://x9zmst6evg.sealoshzh.site/upload/images',
+        filePath: res.tempFilePaths[0],
+        name,
+        success: (uploadRes) => {
+          formData.value.cover = uploadRes.data as string
+        },
+      })
     },
   })
 }
 
-// 行业类别选项
-const industryOptions = ref([
-  { value: 1, text: '餐饮美食' },
-  { value: 2, text: '教育培训' },
-  { value: 3, text: '零售百货' },
-  { value: 4, text: '文旅娱乐' },
-  { value: 5, text: '科技互联网' },
-  { value: 6, text: '其他' },
-])
-
+// 行业类别选项（value 为分类 _id）
+const industryOptions = ref<{ value: string, text: string }[]>([])
 // 合作方式选项
-const modeOptions = ref([
-  { value: 1, text: '资源合作' },
-  { value: 2, text: '技术合作' },
-  { value: 3, text: '联合运营' },
-  { value: 4, text: '其他' },
-])
-
+const modeOptions = ref<{ value: string, text: string }[]>([])
 // 合作规模选项
-const scaleOptions = ref([
-  { value: 1, text: '10W以下' },
-  { value: 2, text: '10W-50W' },
-  { value: 3, text: '50W-100W' },
-  { value: 4, text: '100W以上' },
-])
-
-// 去填写项目介绍
-const handleEditIntro = () => {
-  // TODO: 跳转项目介绍编辑页
+const scaleOptions = ref<{ value: string, text: string }[]>([])
+const projectTypeGet = async () => {
+  const res = await projectAllCateGetApi()
+  industryOptions.value = res.data.typeList.map(item => ({
+    value: item._id,
+    text: item.name
+  }))
+  modeOptions.value = res.data.modeList.map(item => ({
+    value: item._id,
+    text: item.name
+  }))
+  scaleOptions.value = res.data.scaleList.map(item => ({
+    value: item._id,
+    text: item.name
+  }))
 }
 
+onLoad(() => projectTypeGet())
+
+// 地图选点
+const changeLocal = () => {
+  uni.chooseLocation({
+    success: (res) => {
+      formData.value.address_name = res.name
+      formData.value.event_address = res.address
+      formData.value.latitude = res.latitude
+      formData.value.longitude = res.longitude
+    },
+    fail: () => {
+      uni.showToast({ icon: 'none', title: '地图打开失败' })
+    },
+  })
+}
+
+// 项目介绍：点击「去填写」展开输入框
+const showIntroInput = ref(false)
+
 // 项目图片上传
-const fileList = ref<any[]>([])
+const fileList = ref<UploadFileItem[]>([])
 const action: string = 'https://x9zmst6evg.sealoshzh.site/upload/images'
 const handleChange = (e: UploadChangeEvent) => {
   fileList.value = e.fileList
+}
+
+/** 从 fileList 每项的 response 中提取图片链接 */
+const getImagesFromFileList = (list: UploadFileItem[]): string[] => {
+  return list
+    .map((file) => {
+      const res = file.response
+      if (typeof res === 'string') return res
+      if (res && typeof res === 'object' && 'data' in res) return (res as { data: string }).data
+      return ''
+    })
+    .filter(Boolean)
 }
 
 // 是否同意提交须知
@@ -73,17 +115,38 @@ const handleNotice = () => {
 }
 
 // 提交审核
-const handleSubmit = () => {
-  if (!cover.value) {
-    return uni.showToast({ title: '请上传封面图片', icon: 'none' })
+const handleSubmit = async () => {
+  const userId = userStore.profile?._id
+  if (!validateProjectForm({
+    cover: cover.value,
+    formData: formData.value,
+    agreed: agreed.value,
+    userId,
+  })) return
+
+  const images = getImagesFromFileList(fileList.value)
+  const submitData = {
+    userId: userId as string,
+    cover: formData.value.cover,
+    title: formData.value.title,
+    industry: formData.value.industry,
+    cooperationMode: formData.value.cooperationMode,
+    cooperationScale: formData.value.cooperationScale,
+    address_name: formData.value.address_name,
+    event_address: formData.value.event_address,
+    latitude: formData.value.latitude,
+    longitude: formData.value.longitude,
+    wechat: formData.value.wechat,
+    phone: formData.value.phone,
+    introduction: formData.value.introduction ?? '',
+    images,
   }
-  if (!formData.value.title) {
-    return uni.showToast({ title: '请输入项目标题', icon: 'none' })
+  console.log('提交前的参数', submitData)
+  const res = await projectSendApi(submitData)
+  if (res.code === 200) {
+    uni.showToast({ icon: 'success', title: '已提交审核', mask: true })
+    uni.navigateBack()
   }
-  if (!agreed.value) {
-    return uni.showToast({ title: '请先阅读并同意提交须知', icon: 'none' })
-  }
-  // TODO: 提交逻辑
 }
 </script>
 
@@ -112,78 +175,53 @@ const handleSubmit = () => {
       <view class="formCard">
         <uni-forms ref="formRef" :modelValue="formData" labelWidth="160rpx">
           <uni-forms-item label="项目标题" name="title">
-            <uni-easyinput
-              v-model="formData.title"
-              :inputBorder="false"
-              placeholder="请输入项目主题"
-              primaryColor="#ffd018"
-              trim
-            />
+            <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入项目主题" primaryColor="#ffd018"
+              trim />
           </uni-forms-item>
           <uni-forms-item label="行业类别" name="industry">
-            <uni-data-select
-              v-model="formData.industry"
-              :localdata="industryOptions"
-              placeholder="请选择"
-            ></uni-data-select>
+            <uni-data-select v-model="formData.industry" :localdata="industryOptions"
+              placeholder="请选择"></uni-data-select>
           </uni-forms-item>
           <uni-forms-item label="合作方式" name="cooperationMode">
-            <uni-data-select
-              v-model="formData.cooperationMode"
-              :localdata="modeOptions"
-              placeholder="请选择"
-            ></uni-data-select>
+            <uni-data-select v-model="formData.cooperationMode" :localdata="modeOptions"
+              placeholder="请选择"></uni-data-select>
           </uni-forms-item>
           <uni-forms-item label="合作规模" name="cooperationScale">
-            <uni-data-select
-              v-model="formData.cooperationScale"
-              :localdata="scaleOptions"
-              placeholder="请选择合作规模"
-            ></uni-data-select>
+            <uni-data-select v-model="formData.cooperationScale" :localdata="scaleOptions"
+              placeholder="请选择合作规模"></uni-data-select>
           </uni-forms-item>
-          <uni-forms-item label="项目地址" name="address">
-            <uni-easyinput
-              v-model="formData.address"
-              :inputBorder="false"
-              placeholder="请输入项目地址"
-              primaryColor="#ffd018"
-              trim
-            />
-          </uni-forms-item>
-          <uni-forms-item label="联系微信" name="wechat">
-            <uni-easyinput
-              v-model="formData.wechat"
-              :inputBorder="false"
-              placeholder="请输入项目联系微信"
-              primaryColor="#ffd018"
-              trim
-            />
-          </uni-forms-item>
-          <uni-forms-item label="联系电话" name="phone">
-            <uni-easyinput
-              v-model="formData.phone"
-              :inputBorder="false"
-              placeholder="请输入项目联系电话"
-              primaryColor="#ffd018"
-              type="number"
-              trim
-            />
-          </uni-forms-item>
-          <uni-forms-item label="项目介绍" name="introduction">
-            <view class="intro-row" @tap="handleEditIntro">
-              <text class="intro-btn">去填写</text>
+          <!-- 行程地点 -->
+          <uni-forms-item label="行程地点" name="address_name">
+            <view class="location-row">
+              <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择行程地点"
+                primaryColor="#ffd018" disabled trim />
+              <view class="search-btn" @tap="changeLocal">搜索</view>
             </view>
           </uni-forms-item>
+          <!-- 行程地址 -->
+          <uni-forms-item label="行程地址" name="event_address">
+            <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请选择行程地址"
+              primaryColor="#ffd018" trim />
+          </uni-forms-item>
+          <uni-forms-item label="联系微信" name="wechat">
+            <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入项目联系微信" primaryColor="#ffd018"
+              trim />
+          </uni-forms-item>
+          <uni-forms-item label="联系电话" name="phone">
+            <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入项目联系电话" primaryColor="#ffd018"
+              type="number" trim />
+          </uni-forms-item>
+          <uni-forms-item label="项目介绍" name="introduction">
+            <view class="intro-row" v-show="!showIntroInput" @tap="showIntroInput = true">
+              <text class="intro-placeholder">去填写</text>
+            </view>
+          </uni-forms-item>
+          <wd-textarea v-if="showIntroInput" v-model="formData.introduction" placeholder="请输入项目介绍" :maxlength="500" />
         </uni-forms>
         <!-- 项目图片上传 -->
         <view class="uploadSection">
-          <wd-upload
-            :file-list="fileList"
-            image-mode="aspectFill"
-            :action="action"
-            :limit="6"
-            @change="handleChange"
-          ></wd-upload>
+          <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6" multiple
+            @change="handleChange"></wd-upload>
         </view>
         <!-- 免责声明勾选 -->
         <view class="agreement" @tap="agreed = !agreed">
@@ -337,14 +375,31 @@ const handleSubmit = () => {
   }
 }
 
-/* 项目介绍行 */
+/* 行程地点行 */
+.location-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+
+  .search-btn {
+    flex-shrink: 0;
+    margin-left: 16rpx;
+    padding: 8rpx 24rpx;
+    background: $qs-brandColor;
+    border-radius: 24rpx;
+    font-size: 24rpx;
+    color: $qs-font-title;
+  }
+}
+
+/* 项目介绍行（参考 public 行程需求） */
 .intro-row {
   flex: 1;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 
-  .intro-btn {
+  .intro-placeholder {
     padding: 8rpx 24rpx;
     background: $qs-brandColor;
     border-radius: 24rpx;
