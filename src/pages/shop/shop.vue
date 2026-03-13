@@ -104,6 +104,7 @@ const handleRights = () => {
 
 <style scoped lang="scss">
 .shop {
+  padding: 24rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -114,14 +115,9 @@ const handleRights = () => {
   flex: 1;
 }
 
-/* 带左右padding的区块 */
-.section {
-  padding: 0 24rpx;
-}
 
 /* 顶部横幅 */
 .banner {
-  padding: 0 24rpx;
   margin-bottom: 24rpx;
   height: 188rpx;
   border-radius: 30rpx;
@@ -198,7 +194,6 @@ const handleRights = () => {
 
 /* 门店列表 */
 .shopList {
-  padding: 0 24rpx;
 
   .shop-item {
     display: flex;

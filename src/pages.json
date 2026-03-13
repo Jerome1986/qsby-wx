@@ -212,7 +212,9 @@
           "path": "setting/setting",
           "style": {
             "navigationBarTitleText": "设置",
-            "enablePullDownRefresh": false
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
           }
         },
         {
@@ -363,6 +365,15 @@
           "path": "orderDetail/orderDetail",
           "style": {
             "navigationBarTitleText": "订单详情",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "message/message",
+          "style": {
+            "navigationBarTitleText": "消息",
             "enablePullDownRefresh": false,
             "navigationBarBackgroundColor": "#fff4b9",
             "navigationStyle": "custom"

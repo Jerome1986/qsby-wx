@@ -95,7 +95,9 @@ export const utilsJumpMap: Record<myUtilsType, () => void> = {
     console.log('分享')
   },
   group: () => {},
-  message: () => {},
+  message: () => {
+    uni.navigateTo({ url: '/pagesMember/message/message' })
+  },
   suggestion: () => {
     uni.navigateTo({ url: '/pagesMember/suggestion/suggestion' })
   },

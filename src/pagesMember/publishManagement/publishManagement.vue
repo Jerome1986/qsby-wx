@@ -96,10 +96,15 @@ const handleSignUpList = () => {
       <view class="tabItem" v-for="(item, index) in tagList" :key="item.id"
         :class="{ activeTabItem: activeIndex === index }" @tap="handleTab(item.value as PublicType, index)">{{
           item.label }}</view>
+      <view
+        class="tab-indicator"
+        :style="{ left: `calc(${activeIndex * 33.333}% + (33.333% - 48rpx) / 2)` }"
+      ></view>
     </view>
-    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
-      <view class="orderItem" v-for="item in publicList" :key="item._id">
-        <view class="card-body">
+    <view class="list-wrapper">
+      <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
+        <view class="orderItem" v-for="item in publicList" :key="item._id">
+          <view class="card-body">
           <!-- 封面区域 -->
           <view class="left">
             <image class="cover" :src="item.cover" mode="aspectFill"></image>
@@ -127,26 +132,27 @@ const handleSignUpList = () => {
               <text class="label">行程人数：</text>
               <text class="value">{{ item.revenue }}人</text>
             </view>
+            </view>
+          </view>
+          <!-- 底部按钮 -->
+          <view class="card-footer">
+            <view class="edit-btn" @tap="handleEdit(item._id)">重新编辑行程</view>
+            <view class="footer-right">
+              <view class="action-btn primary" @tap="handleSignUpList">查看报名列表</view>
+              <view class="action-btn">删除</view>
+            </view>
           </view>
         </view>
-        <!-- 底部按钮 -->
-        <view class="card-footer">
-          <view class="edit-btn" @tap="handleEdit(item._id)">重新编辑行程</view>
-          <view class="footer-right">
-            <view class="action-btn primary" @tap="handleSignUpList">查看报名列表</view>
-            <view class="action-btn">删除</view>
-          </view>
+        <!-- 底部占位，防止阴影被裁剪 -->
+        <view class="scroll-bottom-placeholder" style="height: 20rpx;"></view>
+        <!--   空状态   -->
+        <view class="empty" v-if="!publicList.length">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="widthFix"></image>
+          <text class="empty-text">暂无数据</text>
         </view>
-      </view>
-      <!-- 底部占位，防止阴影被裁剪 -->
-      <view class="scroll-bottom-placeholder" style="height: 20rpx;"></view>
-      <!--   空状态   -->
-      <view class="empty" v-if="!publicList.length">
-        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
-          mode="widthFix"></image>
-        <text class="empty-text">暂无数据</text>
-      </view>
-    </scroll-view>
+      </scroll-view>
+    </view>
 
   </view>
 </template>
@@ -165,12 +171,19 @@ const handleSignUpList = () => {
 
 /*标签*/
 .tabList {
-  padding: 24rpx 0;
+  position: relative;
+  padding: 24rpx 0 24rpx;
   display: flex;
   justify-content: space-around;
-  border-bottom: 1px solid #cdcdcd;
+  background-color: #fff;
+  border-radius: 30rpx;
+  @include customShadow();
 
   .tabItem {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    text-align: center;
     color: $qs-font-dec;
   }
 
@@ -178,12 +191,36 @@ const handleSignUpList = () => {
     color: $qs-font-title;
     font-weight: bold;
   }
+
+  .tab-indicator {
+    position: absolute;
+    bottom: 12rpx;
+    left: 0;
+    width: 48rpx;
+    height: 6rpx;
+    background-color: $qs-brandColor;
+    border-radius: 6rpx;
+    transition: left 0.25s ease;
+  }
+}
+
+/* 列表区域容器 */
+.list-wrapper {
+  margin-top: 24rpx;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 24rpx;
+  background-color: #fff;
+  border-radius: 30rpx;
+  @include customShadow();
 }
 
 /* 行程单列表 */
 .content {
-  margin-top: 24rpx;
   flex: 1;
+  width: 100%;
 
   /* 空状态 */
   .empty {

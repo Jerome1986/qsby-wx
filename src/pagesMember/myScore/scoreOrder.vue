@@ -27,24 +27,17 @@ const handleScroll = () => {
     <!--  tab  -->
     <view class="tabList">
       <!--  订单类型  -->
+      <view class="tabItem" :class="{ activeTab: activeTabIndex === index }" v-for="(item, index) in tabList"
+        :key="item.value" @tap="changeTab(index)">{{ item.label }}</view>
       <view
-        class="tabItem"
-        :class="{ activeTab: activeTabIndex === index }"
-        v-for="(item, index) in tabList"
-        :key="item.value"
-        @tap="changeTab(index)"
-        >{{ item.label }}</view
-      >
+        class="tab-indicator"
+        :style="{ left: `calc(${activeTabIndex * 33.333}% + (33.333% - 48rpx) / 2)` }"
+      ></view>
     </view>
     <!-- 订单列表   -->
-    <scroll-view
-      class="list"
-      :scroll-y="true"
-      @scrolltolower="handleScroll"
-      :enhanced="true"
-      :show-scrollbar="false"
-    >
+    <scroll-view class="list" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true" :show-scrollbar="false">
       <OrderItem :list-data="scoreOrderItems" :fields="fieldsScoreOrder"></OrderItem>
+      <view style="height: 40rpx;"></view>
     </scroll-view>
   </view>
 </template>
@@ -59,18 +52,36 @@ const handleScroll = () => {
 }
 
 .tabList {
+  position: relative;
+  padding: 30rpx 0 24rpx;
   display: flex;
   justify-content: space-between;
+  background-color: #fff;
+  border-radius: 30rpx;
+  @include customShadow();
+
   .tabItem {
-    padding-bottom: 30rpx;
+    position: relative;
+    z-index: 1;
     text-align: center;
     flex: 1;
     color: $qs-font-dec;
-    border-bottom: 1px solid #cdcdcd;
   }
+
   .activeTab {
     font-weight: bold;
     color: $qs-font-title;
+  }
+
+  .tab-indicator {
+    position: absolute;
+    bottom: 12rpx;
+    left: 0;
+    width: 48rpx;
+    height: 6rpx;
+    background-color: $qs-brandColor;
+    border-radius: 6rpx;
+    transition: left 0.25s ease;
   }
 }
 

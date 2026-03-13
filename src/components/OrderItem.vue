@@ -42,10 +42,6 @@ const goDetail = () => {
   border-radius: 30rpx;
   @include customShadow();
 
-  &:nth-last-child(1) {
-    box-shadow: none;
-  }
-
   /*封面图*/
   .cover {
     margin-right: 24rpx;

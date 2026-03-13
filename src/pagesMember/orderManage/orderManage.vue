@@ -15,7 +15,7 @@ const orderTypes = [
   { label: '全部', value: 'all' },
   { label: '趣哪游', value: 'trip' },
   { label: '趣活动', value: 'activity' },
-  { label: '商城', value: 'shop' },
+  { label: '门店', value: 'shop' },
   { label: '项目', value: 'project' },
 ] as const
 
@@ -257,7 +257,7 @@ onShow(() => {
   position: relative;
   font-size: 26rpx;
   color: $qs-font-dec;
-  padding-bottom: 8rpx;
+  padding-bottom: 14rpx;
   font-weight: 500;
 
   &.active {

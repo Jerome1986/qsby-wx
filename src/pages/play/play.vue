@@ -127,11 +127,11 @@ const handleSend = () => {
 <style scoped lang="scss">
 /* 页面容器 */
 .play {
+  padding: 24rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
   @include page-background();
-  /* 渐变背景 */
 }
 
 /* 内容区域 */

@@ -54,7 +54,6 @@
     "optimization": {
       "subPackages": true
     },
-    "runmode": "liberate",
     "setting": {
       "urlCheck": false
     },

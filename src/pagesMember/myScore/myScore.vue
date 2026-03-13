@@ -63,6 +63,7 @@ const handelGo = (val: string) => {
           </view>
         </view>
       </view>
+      <view style="height:40rpx;"></view>
     </scroll-view>
   </view>
 </template>

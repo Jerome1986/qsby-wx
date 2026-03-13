@@ -86,6 +86,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   z-index: 999;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
 
   .status-bar {
     width: 100%;

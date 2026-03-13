@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores'
 import { changeAvatarApi, updateUserInfoApi } from '@/api/user.ts'
 import { onLoad } from '@dcloudio/uni-app'
 import { userInfoGet } from '@/composables/userInfo.ts'
+import NavHead from '@/components/NavHead.vue'
 
 // store
 const userStore = useUserStore()
@@ -129,6 +130,7 @@ const handleLoginOut = () => {
 <!-- 设置页面 -->
 <template>
   <view class="container">
+    <NavHead title="设置" :showBack="true"></NavHead>
     <!-- 表单区域 -->
     <view class="form-box">
       <view class="up-pic" @tap="handleChangeAvatar">
@@ -178,9 +180,9 @@ const handleLoginOut = () => {
 
 <style scoped lang="scss">
 .container {
-  min-height: 100vh;
-  background-color: #f8f8f8;
-  padding: 24rpx 20rpx;
+  padding: 24rpx 24rpx 60rpx 24rpx;
+  height: 100%;
+  @include page-background();
 }
 
 /* 表单容器 */

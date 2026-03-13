@@ -138,6 +138,7 @@ const fields: { label: string; key: string }[] = [
             mode="widthFix"></image>
           <text class="empty-text">暂无数据</text>
         </view>
+        <view style="height: 40rpx;"></view>
       </scroll-view>
     </view>
   </view>
@@ -146,6 +147,8 @@ const fields: { label: string; key: string }[] = [
 <style scoped lang="scss">
 /* 页面容器 */
 .friendDetail {
+  display: flex;
+  flex-direction: column;
   padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
@@ -223,10 +226,12 @@ const fields: { label: string; key: string }[] = [
 
 /* 区域3：消费明细 */
 .consumptionDetails {
-  padding: 28rpx;
+  display: flex;
+  flex-direction: column;
+  padding: 24rpx;
   margin-top: 20rpx;
   width: 100%;
-  height: calc(100% - 188rpx - 111rpx - 50rpx);
+  flex: 1;
   background-color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 30rpx;
@@ -238,22 +243,16 @@ const fields: { label: string; key: string }[] = [
 
   /* 明细列表 / 空状态 */
   .list {
+    flex: 1;
     margin-top: 20rpx;
     width: 100%;
-    /*
-     * 高度计算：
-     * 100% - 上padding(28rpx) - NavTitle(40rpx) - my-select(18rpx+38rpx)
-     *      - list的margin-top(20rpx)
-     * = 100% - 144rpx
-     */
-    height: calc(100% - 144rpx);
 
     .empty {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 60vh;
+      height: calc(100% - 40rpx);
 
       .empty-img {
         width: 480rpx;
