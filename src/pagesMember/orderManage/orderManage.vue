@@ -185,7 +185,8 @@ onShow(() => {
                   </template>
                 </template>
               </view>
-              <view class="btn-wrap" v-if="item.status === 'paid' && item.discountType !== 'voucher'">
+              <view class="btn-wrap"
+                v-if="item.status === 'paid' && item.discountType !== 'voucher' && item.orderType !== 'project'">
                 <view class="btn refund-btn" @tap.stop="handleRefund(item)">退款</view>
               </view>
             </view>
@@ -199,6 +200,7 @@ onShow(() => {
 
 <style scoped lang="scss">
 .orderManage {
+  padding: 24rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -207,7 +209,7 @@ onShow(() => {
 
 /* 筛选区域 */
 .filter-section {
-  margin: 0 24rpx 24rpx;
+  margin-bottom: 24rpx;
   padding: 24rpx;
   background-color: #ffffff;
   border-radius: 24rpx;
@@ -281,7 +283,6 @@ onShow(() => {
 /* 内容区域 */
 .content {
   flex: 1;
-  padding: 0 24rpx;
 }
 
 .loading {

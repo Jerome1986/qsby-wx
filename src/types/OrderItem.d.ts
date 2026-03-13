@@ -42,6 +42,18 @@ export interface OrderSubmitParams {
   orderType: OrderType
   /** 产品信息嵌套对象 */
   productInfo: ProductInfo
+  /** 项目扩展：行业类别名称（仅 orderType === 'project'） */
+  industryCategory?: string
+  /** 项目扩展：合作方式名称 */
+  cooperationMode?: string
+  /** 项目扩展：合作规模名称 */
+  cooperationScale?: string
+  /** 项目扩展：基地/地点名称 */
+  baseName?: string
+  /** 项目扩展：基地/详细地址 */
+  baseAddress?: string
+  /** 项目扩展：查看费用（元） */
+  viewFee?: number
   /** 报名人信息 */
   userInfo: OrderUserInfo
   /** 发起人信息 */
@@ -115,6 +127,18 @@ export interface OrderItem {
   createdAt?: string
   /** 订单更新时间（ISO格式字符串，空表示未更新） */
   updatedAt?: string
+  /** 项目扩展：行业类别名称（仅 orderType === 'project'） */
+  industryCategory?: string
+  /** 项目扩展：合作方式名称 */
+  cooperationMode?: string
+  /** 项目扩展：合作规模名称 */
+  cooperationScale?: string
+  /** 项目扩展：基地/地点名称 */
+  baseName?: string
+  /** 项目扩展：基地/详细地址 */
+  baseAddress?: string
+  /** 项目扩展：查看费用（元） */
+  viewFee?: number
 }
 
 // 订单对应的产品信息类型
@@ -125,8 +149,8 @@ export interface ProductInfo {
   cover: string
   /** 产品名称 */
   title: string
-  /** 产品时间 行程、活动等 */
-  time: string
+  /** 产品时间 行程、活动等，项目不包括时间，长期有效 */
+  time?: string
   /** 产品对应的门店名称 */
   address_name: string
   /** 产品对应的门店地址 */

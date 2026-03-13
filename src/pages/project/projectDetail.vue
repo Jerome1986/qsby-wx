@@ -9,6 +9,9 @@ import { useUserStore } from '@/stores'
 import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
 import type { ProjectItem } from '@/types/Project'
 import type { UserItem } from '@/types/UserItem'
+import { verifySignUpApi } from '@/api/verifySignUp'
+import type { OrderType } from '@/types/OrderItem'
+import type { PublicType } from '@/types/PublicManagement'
 
 const userStore = useUserStore()
 const projectId = ref('')
@@ -56,9 +59,24 @@ const fetchDetail = async () => {
   }
 }
 
+// 验证是否报名
+const isVerify = ref(false)
+const isSignUp = async (targetId: string, proType: OrderType) => {
+
+  const res = await verifySignUpApi(
+    proType as PublicType,
+    targetId,
+    userStore.profile?._id as string
+  )
+  console.log('报名结果', res)
+
+  isVerify.value = res.data.isSignUp
+}
+
 onLoad((options) => {
   getSafeAreaBottom()
   projectId.value = options?.projectId ?? ''
+  isSignUp(projectId.value, 'project')
   fetchDetail()
 })
 
@@ -80,7 +98,11 @@ const handleOpenMap = () => {
 // 复制微信
 const handleCopyWx = () => {
   const wx = detailData.value?.wechat
-  if (!wx) return
+  if (!wx || !isVerify.value) {
+    uni.showToast({ icon: 'none', title: '当前无权限，请先获取再复制' })
+    return
+  }
+
   uni.setClipboardData({
     data: wx,
     success: () => uni.showToast({ icon: 'success', title: '已复制微信号' }),
@@ -90,7 +112,10 @@ const handleCopyWx = () => {
 // 拨打电话
 const handleCallPhone = () => {
   const phone = detailData.value?.phone
-  if (!phone) return
+  if (!phone || !isVerify.value) {
+    uni.showToast({ icon: 'none', title: '当前无权限，请先获取再联系' })
+    return
+  }
   uni.makePhoneCall({ phoneNumber: phone })
 }
 
@@ -165,8 +190,8 @@ onShareAppMessage((res) => {
         </view>
 
         <!-- 组织方 -->
-        <OrganizerInfo v-if="userData" :userData="userData" @copyWx="handleCopyWx"
-          @callPhone="handleCallPhone"></OrganizerInfo>
+        <OrganizerInfo v-if="userData" :userData="userData" @copyWx="handleCopyWx" @callPhone="handleCallPhone">
+        </OrganizerInfo>
 
         <!-- 项目介绍（与 productDetail activity 同步） -->
         <view class="activity">
@@ -188,11 +213,13 @@ onShareAppMessage((res) => {
     <view class="footerBar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
       <button class="share" open-type="share">
         <view class="icon">
-          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/share.png"></image>
+          <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/share.png">
+          </image>
         </view>
         <view>分享</view>
       </button>
-      <view class="sign" @tap="handleUnlock">查看项目发布人</view>
+      <view v-if="!isVerify" class="sign" @tap="handleUnlock">获取项目发布人</view>
+      <view class="sign disable" v-else>已获取</view>
     </view>
   </view>
 </template>
@@ -391,6 +418,10 @@ onShareAppMessage((res) => {
     font-size: 30rpx;
     font-weight: bold;
     color: $qs-font-title;
+  }
+
+  .disable {
+    background: $qs-font-dec2;
   }
 }
 </style>

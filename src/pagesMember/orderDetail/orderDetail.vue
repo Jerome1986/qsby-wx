@@ -28,8 +28,8 @@ const orderDetail = ref<OrderItem>()
 const orderDetailGet = async (id: string) => {
   const res = await orderFindOne(userStore.profile?.openid as string, id)
   orderDetail.value = res.data
-  // 已支付但无核销码时，请求创建
-  if (res.data.status === 'paid' && !res.data.verifyCode) {
+  // 已支付但无核销码且不为项目订单时，请求创建
+  if (res.data.status === 'paid' && !res.data.verifyCode && res.data.orderType !== 'project') {
     try {
       const qrRes = await createQrCode(res.data._id, userStore.profile?.openid as string)
       orderDetail.value = { ...orderDetail.value!, verifyCode: qrRes.data.verifyCode }
@@ -209,8 +209,8 @@ onLoad((options?: { orderId?: string; type?: string }) => {
               </view>
             </template> -->
             <!-- 项目 -->
-            <!-- <template v-else-if="orderDetail.orderType === 'project'">
-              <view class="info-row" >
+            <template v-else-if="orderDetail?.orderType === 'project'">
+              <view class="info-row" v-if="orderDetail.industryCategory">
                 <text class="label">行业类别：</text>
                 <text class="value">{{ orderDetail.industryCategory }}</text>
               </view>
@@ -222,19 +222,19 @@ onLoad((options?: { orderId?: string; type?: string }) => {
                 <text class="label">合作规模：</text>
                 <text class="value">{{ orderDetail.cooperationScale }}</text>
               </view>
-              <view class="info-row" v-if="orderDetail.baseName">
+              <view class="info-row" v-if="orderDetail.baseName || orderDetail?.productInfo?.address_name">
                 <text class="label">基地名称：</text>
-                <text class="value">{{ orderDetail.baseName }}</text>
+                <text class="value">{{ orderDetail.baseName || orderDetail?.productInfo?.address_name }}</text>
               </view>
-              <view class="info-row" v-if="orderDetail.baseAddress">
+              <view class="info-row" v-if="orderDetail.baseAddress || orderDetail?.productInfo?.event_address">
                 <text class="label">地址：</text>
-                <text class="value">{{ orderDetail.baseAddress }}</text>
+                <text class="value">{{ orderDetail.baseAddress || orderDetail?.productInfo?.event_address }}</text>
               </view>
-              <view class="price-row" v-if="orderDetail.viewFee !== undefined">
+              <view class="price-row" v-if="(orderDetail.viewFee ?? orderDetail?.payAmount) !== undefined">
                 <text class="label">查看费用：</text>
-                <text class="price">¥{{ orderDetail.viewFee.toFixed(2) }}</text>
+                <text class="price">¥{{ (orderDetail.viewFee ?? orderDetail?.payAmount ?? 0).toFixed(2) }}</text>
               </view>
-            </template> -->
+            </template>
           </view>
         </view>
       </view>
@@ -294,7 +294,7 @@ onLoad((options?: { orderId?: string; type?: string }) => {
 
       <!-- 核销码（待付款不展示） -->
       <view class="card verify-card" :class="{ 'is-verified': orderDetail?.status === 'verified' }"
-        v-if="orderDetail?.status !== 'pending'">
+        v-if="orderDetail?.status !== 'pending' && orderDetail?.orderType !== 'project'">
         <view class="section-header">
           <view class="bar"></view>
           <text class="section-title">核销码</text>
@@ -335,7 +335,7 @@ onLoad((options?: { orderId?: string; type?: string }) => {
 
     <!-- 底部：待核销 - 申请退款 -->
     <view class="footer-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }"
-      v-if="orderDetail?.status === 'paid' && orderDetail.discountType !== 'voucher'">
+      v-if="orderDetail?.status === 'paid' && orderDetail.discountType !== 'voucher' && orderDetail.orderType !== 'project'">
       <view class="refund-btn" @tap="handleRefund">申请退款</view>
     </view>
   </view>

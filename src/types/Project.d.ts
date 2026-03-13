@@ -44,6 +44,10 @@ export interface ProjectItem {
   introduction: string
   /** 项目图片 */
   images: string[]
+  /** 项目报名人 */
+  signUpList: string[]
+  /** 查看价格--默认9.9，后期后台设定每个项目的查看价格 */
+  viewFee: number
   /** 发布状态 */
   status: ProjectStatus
   /** 创建时间 */

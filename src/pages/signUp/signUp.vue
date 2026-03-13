@@ -236,7 +236,7 @@ const submit = async () => {
         console.error('核销码创建失败', err)
       }
       await uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=play`,
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=${proType.value}`,
       })
     },
     fail(err) {
@@ -251,7 +251,7 @@ const submit = async () => {
 
 const proType = ref<OrderType>()
 onLoad(async (options: any) => {
-  // console.log(options)
+  console.log(options)
   if (options.productId) {
     await detailGet(options.productId, proType.value as OrderType)
     await initiatorInfoGet()

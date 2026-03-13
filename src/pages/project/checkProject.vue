@@ -1,24 +1,91 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { ref, onMounted } from 'vue'
+import { computed, ref } from 'vue'
 import { safeAreaBottom, getSafeAreaBottom } from '@/utils/system-info'
+import { projectAllCateGetApi, projectDetailGetApi } from '@/api/project'
+import type { ProjectItem } from '@/types/Project'
+import { onLoad } from '@dcloudio/uni-app'
+import { useUserStore } from '@/stores'
+import type { InitiatorInfo, OrderSubmitParams, OrderType, OrderUserInfo } from '@/types/OrderItem'
+import { userInfoGetApi } from '@/api/user'
+import { orderAdd } from '@/api/order'
 
-onMounted(() => {
+const userStore = useUserStore()
+
+const projectId = ref('')
+const detailData = ref<ProjectItem | null>(null)
+const loading = ref(true)
+
+const fetchDetail = async () => {
+  if (!projectId.value) {
+    loading.value = false
+    return
+  }
+  loading.value = true
+  try {
+    const res = await projectDetailGetApi(projectId.value)
+    detailData.value = res.data
+  } catch {
+    detailData.value = null
+  } finally {
+    loading.value = false
+  }
+
+  console.log('详情', detailData.value);
+
+  // 发起人的手机号码和微信最好已详情为准，因为这些信息可以发布的时候手动填
+  initiatorInfo.mobile = detailData.value?.phone as string
+  initiatorInfo.wechat = detailData.value?.wechat as string
+}
+
+
+const proType = ref<OrderType>('project')
+onLoad(async (options) => {
+  console.log(options)
   getSafeAreaBottom()
+  projectId.value = options?.projectId ?? ''
+  await fetchDetail()
+  await initiatorInfoGet()
 })
+
 
 // 表单数据
-const formData = ref({
-  nickname: '',
-  gender: '1',
-  phone: '',
+const formData = ref<Partial<OrderUserInfo>>({
+  nickname: userStore.profile?.nickname ?? '',
+  gender: userStore.profile?.gender ?? 1,
+  phone: userStore.profile?.mobile ?? '',
 })
+
+// 实际支付金额
+const realPayAmount = computed(() => {
+  return detailData.value?.viewFee || 0
+})
+
+// 查询当前行程的发起人信息
+const initiatorInfo: InitiatorInfo = {
+  initiatorId: '',
+  username: '',
+  mobile: '',
+  wechat: detailData.value?.wechat as string
+}
+const initiatorInfoGet = async () => {
+  console.log(detailData.value?.userId)
+  const res = await userInfoGetApi(detailData.value?.userId as string)
+  console.log('发起人信息', res)
+
+  initiatorInfo.username = res.data.username || res.data.nickname
+  initiatorInfo.initiatorId = res.data._id
+}
 
 // 是否同意免责声明
 const agreed = ref(false)
 
 // 提交查看
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  const payAmount = Number(realPayAmount.value)
+  if (!detailData.value) {
+    return uni.showToast({ title: '项目不存在', icon: 'none' })
+  }
   if (!formData.value.nickname) {
     return uni.showToast({ title: '请输入昵称', icon: 'none' })
   }
@@ -28,7 +95,72 @@ const handleSubmit = () => {
   if (!agreed.value) {
     return uni.showToast({ title: '请先阅读并同意免责声明', icon: 'none' })
   }
-  // TODO: 提交支付逻辑
+
+  // 获取项目分类名称映射
+  const cateRes = await projectAllCateGetApi()
+  const industryMap = Object.fromEntries(cateRes.data.typeList.map((i) => [i._id, i.name]))
+  const modeMap = Object.fromEntries(cateRes.data.modeList.map((i) => [i._id, i.name]))
+  const scaleMap = Object.fromEntries(cateRes.data.scaleList.map((i) => [i._id, i.name]))
+
+  const params: OrderSubmitParams = {
+    openid: userStore.profile?.openid as string,
+    orderType: 'project',
+    productInfo: {
+      productId: detailData.value._id as string,
+      cover: detailData.value.cover as string,
+      title: detailData.value.title as string,
+      address_name: detailData.value.address_name ?? '',
+      event_address: detailData.value.event_address ?? detailData.value.address ?? '',
+    },
+    userInfo: {
+      userId: userStore.profile?._id as string,
+      nickname: formData.value.nickname as string,
+      gender: formData.value.gender as string | number,
+      phone: formData.value.phone as string,
+    },
+    initiatorInfo,
+    commission: 0,
+    totalAmount: detailData.value.viewFee,
+    discountAmount: 0,
+    discountType: 'cash',
+    payAmount,
+    description: detailData.value.title as string,
+    industryCategory: industryMap[detailData.value.industry] ?? '-',
+    cooperationMode: modeMap[detailData.value.cooperationMode] ?? '-',
+    cooperationScale: scaleMap[detailData.value.cooperationScale] ?? '-',
+    baseName: detailData.value.address_name ?? '',
+    baseAddress: detailData.value.event_address ?? detailData.value.address ?? '',
+    viewFee: detailData.value.viewFee,
+  }
+  // 提交支付逻辑
+  console.log('提交报名参数', params)
+  // 调用生成订单+支付接口
+  const payRes = await orderAdd(params)
+  console.log('支付返回结果', payRes)
+  // 2.通过后端返回参数、发起前端微信支付
+  wx.requestPayment({
+    timeStamp: payRes.data.timeStamp,
+    nonceStr: payRes.data.nonceStr,
+    package: payRes.data.packageValue,
+    signType: payRes.data.signType,
+    paySign: payRes.data.paySign,
+    async success() {
+      console.log(proType.value)
+
+      await uni.redirectTo({
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=${proType.value}`,
+      })
+
+      await uni.showToast({ icon: 'none', title: '支付成功' })
+    },
+    fail(err) {
+      console.error('支付失败', err)
+      uni.showToast({
+        icon: 'none',
+        title: '取消支付',
+      })
+    },
+  })
 }
 
 // 温馨提示
@@ -48,80 +180,78 @@ const handleDisclaimer = () => {
   <view class="checkProject">
     <NavHead title="查看项目" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!-- 产品信息卡 -->
-      <view class="card product-card">
-        <view class="product-top">
-          <view class="cover">
-            <image
-              mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"
-            ></image>
-          </view>
-          <view class="product-info">
-            <view class="name">一起开一个游乐园</view>
-            <view class="info-row">
-              <text class="iconfont icon-fangzi"></text>
-              <text class="text">千宿百院创业孵化基地</text>
+      <view v-if="loading" class="loading">加载中...</view>
+      <template v-else-if="detailData">
+        <!-- 产品信息卡 -->
+        <view class="card product-card">
+          <view class="product-top">
+            <view class="cover">
+              <image mode="aspectFill"
+                :src="detailData.cover || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg'">
+              </image>
             </view>
-            <view class="info-row">
-              <text class="iconfont icon-address"></text>
-              <text class="text">湖北省武汉市洪山区地址信息</text>
+            <view class="product-info">
+              <view class="name">{{ detailData.title }}</view>
+              <view class="info-row" v-if="detailData.address_name">
+                <text class="iconfont icon-fangzi"></text>
+                <text class="text">{{ detailData.address_name }}</text>
+              </view>
+              <view class="info-row" v-if="detailData.event_address || detailData.address">
+                <text class="iconfont icon-address"></text>
+                <text class="text">{{ detailData.event_address || detailData.address || '-' }}</text>
+              </view>
             </view>
           </view>
+          <!-- 查看费用 -->
+          <view class="fee-row">
+            <text class="fee-label">查看费用</text>
+            <text class="fee-price">¥{{ detailData.viewFee ?? 9.9 }}</text>
+          </view>
         </view>
-        <!-- 查看费用 -->
-        <view class="fee-row">
-          <text class="fee-label">查看费用</text>
-          <text class="fee-price">¥9.9</text>
+
+        <!-- 报名人信息标题 -->
+        <view class="form-title">报名人信息</view>
+
+        <!-- 表单卡片 -->
+        <view class="card form-card">
+          <uni-forms label-width="160rpx" label-align="left">
+            <uni-forms-item label="昵称" name="nickname">
+              <uni-easyinput v-model="formData.nickname" placeholder="代用名" :inputBorder="false" />
+            </uni-forms-item>
+            <uni-forms-item label="性别" name="gender">
+              <radio-group @change="(e: any) => (formData.gender = e.detail.value)">
+                <label class="radio-label">
+                  <radio value="男" :checked="formData.gender === 1" color="#ffd018" />
+                  <text>男</text>
+                </label>
+                <label class="radio-label">
+                  <radio value="女" :checked="formData.gender === 2" color="#ffd018" />
+                  <text>女</text>
+                </label>
+              </radio-group>
+            </uni-forms-item>
+            <uni-forms-item label="手机号" name="phone">
+              <uni-easyinput v-model="formData.phone" placeholder="请填写正确的手机号码" type="number" :inputBorder="false" />
+            </uni-forms-item>
+          </uni-forms>
         </view>
-      </view>
 
-      <!-- 报名人信息标题 -->
-      <view class="form-title">报名人信息</view>
-
-      <!-- 表单卡片 -->
-      <view class="card form-card">
-        <uni-forms label-width="160rpx" label-align="left">
-          <uni-forms-item label="昵称" name="nickname">
-            <uni-easyinput v-model="formData.nickname" placeholder="代用名" :inputBorder="false" />
-          </uni-forms-item>
-          <uni-forms-item label="性别" name="gender">
-            <radio-group @change="(e: any) => (formData.gender = e.detail.value)">
-              <label class="radio-label">
-                <radio value="1" :checked="formData.gender === '1'" color="#ffd018" />
-                <text>男</text>
-              </label>
-              <label class="radio-label">
-                <radio value="2" :checked="formData.gender === '2'" color="#ffd018" />
-                <text>女</text>
-              </label>
-            </radio-group>
-          </uni-forms-item>
-          <uni-forms-item label="手机号" name="phone">
-            <uni-easyinput
-              v-model="formData.phone"
-              placeholder="13561517777"
-              type="number"
-              :inputBorder="false"
-            />
-          </uni-forms-item>
-        </uni-forms>
-      </view>
-
-      <!-- 温馨提示 -->
-      <view class="card tips-card">
-        <view class="tips-title">温馨提示：</view>
-        <view class="tips-item" v-for="(tip, index) in tipsList" :key="index">
-          <text>{{ index + 1 }}. {{ tip }}</text>
+        <!-- 温馨提示 -->
+        <view class="card tips-card">
+          <view class="tips-title">温馨提示：</view>
+          <view class="tips-item" v-for="(tip, index) in tipsList" :key="index">
+            <text>{{ index + 1 }}. {{ tip }}</text>
+          </view>
         </view>
-      </view>
 
-      <!-- 免责声明勾选 -->
-      <view class="agreement" @tap="agreed = !agreed">
-        <radio :checked="agreed" color="#ffd018" style="transform: scale(0.7)" />
-        <text class="agree-text">我已仔细阅读并同意</text>
-        <text class="agree-link" @tap.stop="handleDisclaimer">《免责声明》</text>
-      </view>
+        <!-- 免责声明勾选 -->
+        <view class="agreement" @tap="agreed = !agreed">
+          <radio :checked="agreed" color="#ffd018" style="transform: scale(0.7)" />
+          <text class="agree-text">我已仔细阅读并同意</text>
+          <text class="agree-link" @tap.stop="handleDisclaimer">《免责声明》</text>
+        </view>
+      </template>
+      <view v-else class="empty">项目不存在</view>
 
       <!-- 底部占位 -->
       <view style="height: 140rpx"></view>
@@ -131,7 +261,7 @@ const handleDisclaimer = () => {
     <view class="footer-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
       <view class="fee-info">
         <text class="fee-text">费用</text>
-        <text class="fee-amount">¥9.9</text>
+        <text class="fee-amount">¥{{ detailData?.viewFee ?? 9.9 }}</text>
       </view>
       <view class="submit-btn" @tap="handleSubmit">提交查看</view>
     </view>
@@ -149,6 +279,14 @@ const handleDisclaimer = () => {
 .content {
   flex: 1;
   padding: 24rpx;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 80rpx 0;
+  font-size: 28rpx;
+  color: $qs-font-dec;
 }
 
 /* 通用卡片 */
