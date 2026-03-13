@@ -50,3 +50,12 @@ export const tripDetailGetApi = (tripId: string) => {
     data: { tripId },
   })
 }
+
+/** 编辑行程（占位） */
+export const tripEditApi = (data: SubmitFormData & { _id: string }) => {
+  return request<{ code: number; message: string }>({
+    method: 'POST',
+    url: '/trip/edit',
+    data,
+  })
+}

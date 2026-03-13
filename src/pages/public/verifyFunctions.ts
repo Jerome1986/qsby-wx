@@ -1,7 +1,10 @@
 import type { PublicFormData } from '@/types/Public'
 
-// 表单校验
-export const validatePublicForm = (form: PublicFormData): boolean => {
+/**
+ * 表单校验
+ * @param isEditMode - 编辑模式下放宽时间校验（允许修改已过期行程）
+ */
+export const validatePublicForm = (form: PublicFormData, isEditMode = false): boolean => {
   // 1️⃣ 基础必填校验
   if (!form.cover) {
     uni.showToast({ icon: 'none', title: '请上传封面图' })
@@ -82,8 +85,8 @@ export const validatePublicForm = (form: PublicFormData): boolean => {
     return false
   }
 
-  // 4️⃣ 时间校验（不能早于当前时间）
-  if (new Date(form.time).getTime() < Date.now()) {
+  // 4️⃣ 时间校验（新增时不能早于当前；编辑时允许修改已过期行程）
+  if (!isEditMode && new Date(form.time).getTime() < Date.now()) {
     uni.showToast({ icon: 'none', title: '行程时间不能早于当前时间' })
     return false
   }

@@ -57,3 +57,12 @@ export const activityDetail = (activityId: string) => {
     data: { activityId },
   })
 }
+
+/** 编辑活动（占位） */
+export const activityEditApi = (data: SubmitFormData & { _id: string }) => {
+  return request<{ code: number; message: string }>({
+    method: 'POST',
+    url: '/activity/edit',
+    data,
+  })
+}

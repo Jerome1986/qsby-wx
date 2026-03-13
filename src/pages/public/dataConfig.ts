@@ -4,7 +4,7 @@ export const initFormData = () => {
     cover: '', // 封面
     title: '', // 行程主题
     type: '', // 行程类型
-    time: '', // 行程时间（时间戳）
+    time: '', // 行程时间（提交时由 pickerTime 写入）
     address_name: '', // 行程地点--地图上的商户名
     event_address: '', // 行程地址--地图上的具体位置
     latitude: 0, // 纬度

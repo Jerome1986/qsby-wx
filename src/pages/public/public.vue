@@ -1,140 +1,28 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { ref } from 'vue'
-import type { UploadChangeEvent, UploadFileItem } from 'wot-design-uni/components/wd-upload/types'
-import { displayFormat, minDate } from '@/utils/generateMonth.ts'
+import { displayFormat, minDate } from '@/utils/generateMonth'
 import { onLoad } from '@dcloudio/uni-app'
-import { sendTripApi, tripTypeGetAllApi } from '@/api/trip.ts'
-import { initFormData } from '@/pages/public/dataConfig.ts'
-import type { PublicFormData } from '@/types/Public'
-import { useUserStore } from '@/stores'
-import { validatePublicForm } from '@/pages/public/verifyFunctions.ts'
-import { activitySendApi, activityTypeFindAll } from '@/api/activity'
+import { usePublicForm } from '@/pages/public/usePublicForm'
 
-// 定义store
-const userStore = useUserStore()
+const {
+  formData,
+  title,
+  isEditMode,
+  cover,
+  typeOptions,
+  showRequirementInput,
+  pickerTime,
+  fileList,
+  action,
+  handleUpdateCover,
+  changeLocal,
+  handleChange,
+  handleSubmit,
+  init,
+} = usePublicForm()
 
-// 表单数据
-const formData = ref<PublicFormData>(initFormData())
-const title = ref('发布')
-
-// 上传封面图
-const cover = ref('')
-const handleUpdateCover = () => {
-  uni.chooseImage({
-    count: 1,
-    success: (res) => {
-      cover.value = res.tempFilePaths[0]
-      const name = 'cover' + Date.now()
-      uni.uploadFile({
-        url: 'https://x9zmst6evg.sealoshzh.site/upload/images',
-        filePath: res.tempFilePaths[0],
-        name,
-        success: async (uploadFileRes) => {
-          console.log(uploadFileRes.data)
-          formData.value.cover = uploadFileRes.data
-        },
-      })
-    },
-  })
-}
-
-// 搜索地点函数
-const changeLocal = () => {
-  uni.chooseLocation({
-    success: (res) => {
-      console.log('地点', res)
-      formData.value.address_name = res.name
-      formData.value.event_address = res.address
-      formData.value.latitude = res.latitude
-      formData.value.longitude = res.longitude
-    },
-    fail: (error) => {
-      console.log('地图错误信息', error)
-      uni.showToast({ icon: 'fail', title: '地图打开失败' })
-    },
-  })
-}
-
-// 行程类型选项
-const typeOptions = ref<{ value: string; text: string }[]>([])
-
-// 获取行程类型
-const tripTypeGet = async () => {
-  const res = await tripTypeGetAllApi()
-  console.log('分类', res)
-  typeOptions.value = res.data.map((item) => ({
-    value: item._id,
-    text: item.name,
-  }))
-}
-
-// 获取活动类型
-const activityTypeGet = async () => {
-  console.log('活动分类')
-  const res = await activityTypeFindAll()
-  typeOptions.value = res.data.map((item) => ({
-    value: item._id,
-    text: item.name,
-  }))
-}
-
-// 行程需求输入框显示
-const showRequirementInput = ref(false)
-
-// 行程图片上传
-const fileList = ref<UploadFileItem[]>([])
-const action: string = 'https://x9zmst6evg.sealoshzh.site/upload/images'
-const handleChange = (e: UploadChangeEvent) => {
-  fileList.value = e.fileList
-  console.log('上传后的文件', fileList.value)
-}
-
-// 提交审核
-const handleSubmit = async () => {
-  // 提取已上传的图片
-  formData.value.images = fileList.value.map((file) => file.response) as string[]
-  //  表单校验
-  const validate = validatePublicForm(formData.value)
-  if (!validate) return
-  console.log('表单', formData.value, '用户ID', userStore.profile?._id, '发布类型', sendType.value)
-  // 行程发布提交逻辑
-  if (userStore.profile?._id && sendType.value === 'trip') {
-    const submitData = { userId: userStore.profile?._id, ...formData.value }
-    const res = await sendTripApi(submitData)
-    console.log(res)
-    if (res.code === 200) {
-      await uni.showToast({ icon: 'success', title: '已发布', mask: true })
-      await uni.switchTab({ url: '/pages/home/home' })
-    }
-    // 活动发布提交逻辑
-  } else if (userStore.profile?._id && sendType.value === 'activity') {
-    console.log('发布活动', userStore.profile._id, sendType.value)
-
-    const submitData = { userId: userStore.profile?._id, ...formData.value }
-    const res = await activitySendApi(submitData)
-    console.log(res)
-    if (res.code === 200) {
-      await uni.showToast({ icon: 'success', title: '已发布', mask: true })
-      await uni.switchTab({ url: '/pages/home/home' })
-    }
-  }
-}
-
-// 获取页面参数用来区分不同发布类型
-const sendType = ref('')
 onLoad((options) => {
-  console.log('用户ID', userStore.profile?._id)
-  console.log('页面参数', options)
-  if (options?.sendType && options?.sendType === 'trip') {
-    title.value = '发布行程'
-    sendType.value = options?.sendType
-    tripTypeGet()
-  } else if (options?.sendType && options?.sendType === 'activity') {
-    title.value = '发布活动'
-    sendType.value = options?.sendType
-    activityTypeGet()
-  }
+  init(options ?? {})
 })
 </script>
 <template>
@@ -174,8 +62,8 @@ onLoad((options) => {
           <!-- 行程时间 -->
           <uni-forms-item label="行程时间" name="time">
             <view class="time">
-              <wd-datetime-picker v-model="formData.time as string" :min-date="minDate" :displayFormat="displayFormat"
-                label="" placeholder="请选择行程开始日期" confirmButtonText="选择" />
+              <wd-datetime-picker v-model="pickerTime" :min-date="minDate" :displayFormat="displayFormat" label=""
+                placeholder="请选择行程开始日期" confirmButtonText="选择" />
             </view>
           </uni-forms-item>
           <!-- 行程地点 -->
@@ -250,13 +138,13 @@ onLoad((options) => {
         <view class="contentUpdateImage-header">
           <text>行程图片</text>
         </view>
-        <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6"
+        <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6" multiple
           @change="handleChange"></wd-upload>
         <view class="contentUpdateImage-tip">最多上传6张，支持JPG、PNG格式</view>
       </view>
-      <!-- 提交审核 -->
+      <!-- 提交 -->
       <view class="submit">
-        <view class="submit-btn" @tap="handleSubmit">提交审核</view>
+        <view class="submit-btn" @tap="handleSubmit">{{ isEditMode ? '保存修改' : '提交审核' }}</view>
       </view>
       <!-- 底部占位 -->
       <view class="scroll-bottom-placeholder"></view>
