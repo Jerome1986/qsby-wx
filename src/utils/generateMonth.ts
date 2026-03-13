@@ -41,7 +41,7 @@ function padZero(num: number): string {
 type DateFormatType = 1 | 2
 
 /** 将各种格式转为可解析的时间戳/字符串，供 Date 解析 */
-function normalizeTimestamp(val: unknown): string | number | Date | null {
+export function normalizeTimestamp(val: unknown): string | number | Date | null {
   if (val == null) return null
   if (val instanceof Date) return val
   // MongoDB Extended JSON: { $date: "2026-03-10T15:53:45.123Z" } 或 { $date: { $numberLong: "1739050000000" } }

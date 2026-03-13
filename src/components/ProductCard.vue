@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import type { PlayListItem } from '@/types/Play'
-import type { EventStatus } from '@/types/PublicManagement';
-import { formatTimestamp } from '@/utils/generateMonth.ts'
+import type { EventStatus } from '@/types/PublicManagement'
+import { formatTimestamp, normalizeTimestamp } from '@/utils/generateMonth.ts'
+
+// 当前时间是否已超过指定时间（活动已结束）：先格式化/规范化时间，再判断
+const isTimePassed = (time?: unknown) => {
+  const normalized = normalizeTimestamp(time)
+  if (normalized == null) return false
+  const date = normalized instanceof Date ? normalized : new Date(normalized)
+  if (isNaN(date.getTime())) return false
+  return date.getTime() < Date.now()
+}
 
 // 跳转页面时根据类型来设置动态标题
-const handleGo = (proId: string, title: string, status: EventStatus) => {
-  if (status === 'finished') {
+const handleGo = (proId: string, title: string, status: EventStatus, time: string) => {
+  if (status === 'finished' || isTimePassed(time)) {
     uni.showToast({ icon: 'none', title: '该活动已结束', mask: true })
     return
   }
@@ -28,7 +37,7 @@ const props = withDefaults(
 
 <template>
   <view class="productCard" v-for="item in list" :key="item._id"
-    @tap="handleGo(item._id as string, item.address_name as string, item.status as EventStatus)">
+    @tap="handleGo(item._id as string, item.address_name as string, item.status as EventStatus, item.time as string)">
     <!--   封面   -->
     <view class="cover-wrap">
       <image class="cover" :src="item.cover" mode="aspectFill"></image>
@@ -62,12 +71,12 @@ const props = withDefaults(
         <!-- 右侧价格和按钮 -->
         <view class="right">
           <view class="price">￥{{ item.userFee }}</view>
-          <view class="btn activeBtn" v-if="item.status === 'active'">我要报名</view>
+          <view class="btn activeBtn" v-if="item.status === 'active' && !isTimePassed(item.time)">我要报名</view>
           <view class="btn endBtn" v-else>已结束</view>
         </view>
       </view>
-      <!-- 状态 -->
-      <view class="status" v-if="item.status === 'finished'">
+      <!-- 状态：活动已结束且当前时间已超过创建时间时显示 -->
+      <view class="status" v-if="item.status === 'finished' || isTimePassed(item.time)">
         <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/end.png" mode="aspectFit" />
       </view>
     </view>

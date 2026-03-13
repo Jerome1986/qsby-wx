@@ -1,5 +1,5 @@
 import { request } from '@/utils/http.ts'
-import type { PublicResponse, SubmitFormData, TripTypeItem } from '@/types/Public'
+import type { PublicTripResponse, SubmitFormData, TripTypeItem } from '@/types/Public'
 import type { PlayListItem, PlayListPageResponse, SortType } from '@/types/Play'
 
 // 获取行程分类
@@ -12,7 +12,7 @@ export const tripTypeGetAllApi = () => {
 
 // 发布行程
 export const sendTripApi = (data: SubmitFormData) => {
-  return request<PublicResponse>({
+  return request<PublicTripResponse>({
     method: 'POST',
     url: '/trip/add',
     data,

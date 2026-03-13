@@ -54,7 +54,7 @@ const buildActivityTestData = (): EventItem[] => {
   ]
   const statuses: Array<'pending' | 'active' | 'finished' | 'cancelled'> = [
     'active', 'active', 'pending', 'active', 'finished', 'active', 'active',
-    'pending', 'active', 'active', 'active', 'finished', 'active', 'cancelled',
+    'pending', 'active', 'active', 'active', 'finished', 'active',
   ]
 
   return Array.from({ length: 14 }, (_, i) => {
@@ -171,11 +171,7 @@ const handleTest = async () => {
 <template>
   <view class="test">
     <view @tap="handleTest">测试</view>
-    <view
-      class="submit-btn"
-      :class="{ disabled: submitting }"
-      @tap="handleSubmitActivityTest"
-    >
+    <view class="submit-btn" :class="{ disabled: submitting }" @tap="handleSubmitActivityTest">
       {{ submitting ? '提交中...' : '提交14组活动测试数据' }}
     </view>
   </view>
@@ -185,6 +181,7 @@ const handleTest = async () => {
 .test {
   padding: 24rpx;
 }
+
 .submit-btn {
   margin-top: 24rpx;
   padding: 24rpx;
@@ -192,6 +189,7 @@ const handleTest = async () => {
   background: #07c160;
   color: #fff;
   border-radius: 12rpx;
+
   &.disabled {
     opacity: 0.6;
   }

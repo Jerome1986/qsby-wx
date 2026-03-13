@@ -1,7 +1,7 @@
 // 发布管理页面TAB类型，根据该类型请求列表数据
 export type PublicType = 'trip' | 'activity' | 'project'
 // 发布状态
-export type EventStatus = 'pending' | 'active' | 'finished' | 'cancelled'
+export type EventStatus = 'pending' | 'active' | 'finished'
 // 发布行程和活动列表数据类型
 export interface EventItem {
   /** mongoId */

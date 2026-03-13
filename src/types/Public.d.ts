@@ -27,8 +27,14 @@ export interface ActivityTypeItem extends BaseTypeItem {}
 // 发布行程状态类型
 export type PublicStatus = 'pending' | 'active' | 'finished' | 'cancelled'
 
-// 发布接口返回类型
-export interface PublicResponse {
+// 发布行程接口返回类型
+export interface PublicTripResponse {
   tripId: string
+  status: PublicStatus
+}
+
+// 发布活动接口返回类型
+export interface PublicActivityResponse {
+  activityId: string
   status: PublicStatus
 }

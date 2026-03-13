@@ -1,6 +1,6 @@
 import type { ActivityListItem, ActivityPageResponse } from '@/types/Activity'
 import type { SortType } from '@/types/Play'
-import type { ActivityTypeItem } from '@/types/Public'
+import type { ActivityTypeItem, PublicActivityResponse, SubmitFormData } from '@/types/Public'
 import { request } from '@/utils/http'
 
 /**
@@ -10,6 +10,18 @@ export const activityTypeFindAll = () => {
   return request<ActivityTypeItem[]>({
     method: 'GET',
     url: '/activity/typeFindAll',
+  })
+}
+
+/**
+ * 发布活动
+ * @param data - 表单参数
+ */
+export const activitySendApi = (data: SubmitFormData) => {
+  return request<PublicActivityResponse>({
+    method: 'POST',
+    url: '/activity/add',
+    data,
   })
 }
 

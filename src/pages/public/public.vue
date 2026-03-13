@@ -9,12 +9,14 @@ import { initFormData } from '@/pages/public/dataConfig.ts'
 import type { PublicFormData } from '@/types/Public'
 import { useUserStore } from '@/stores'
 import { validatePublicForm } from '@/pages/public/verifyFunctions.ts'
+import { activitySendApi, activityTypeFindAll } from '@/api/activity'
 
 // 定义store
 const userStore = useUserStore()
 
 // 表单数据
 const formData = ref<PublicFormData>(initFormData())
+const title = ref('发布')
 
 // 上传封面图
 const cover = ref('')
@@ -57,10 +59,20 @@ const changeLocal = () => {
 // 行程类型选项
 const typeOptions = ref<{ value: string; text: string }[]>([])
 
-// 根据页面参数获取不同的行程类型
+// 获取行程类型
 const tripTypeGet = async () => {
   const res = await tripTypeGetAllApi()
   console.log('分类', res)
+  typeOptions.value = res.data.map((item) => ({
+    value: item._id,
+    text: item.name,
+  }))
+}
+
+// 获取活动类型
+const activityTypeGet = async () => {
+  console.log('活动分类')
+  const res = await activityTypeFindAll()
   typeOptions.value = res.data.map((item) => ({
     value: item._id,
     text: item.name,
@@ -85,11 +97,22 @@ const handleSubmit = async () => {
   //  表单校验
   const validate = validatePublicForm(formData.value)
   if (!validate) return
-  console.log('表单', formData.value)
+  console.log('表单', formData.value, '用户ID', userStore.profile?._id, '发布类型', sendType.value)
   // 行程发布提交逻辑
-  if (userStore.profile?._id && sendType.value === 'play') {
+  if (userStore.profile?._id && sendType.value === 'trip') {
     const submitData = { userId: userStore.profile?._id, ...formData.value }
     const res = await sendTripApi(submitData)
+    console.log(res)
+    if (res.code === 200) {
+      await uni.showToast({ icon: 'success', title: '已发布', mask: true })
+      await uni.switchTab({ url: '/pages/home/home' })
+    }
+    // 活动发布提交逻辑
+  } else if (userStore.profile?._id && sendType.value === 'activity') {
+    console.log('发布活动', userStore.profile._id, sendType.value)
+
+    const submitData = { userId: userStore.profile?._id, ...formData.value }
+    const res = await activitySendApi(submitData)
     console.log(res)
     if (res.code === 200) {
       await uni.showToast({ icon: 'success', title: '已发布', mask: true })
@@ -101,16 +124,22 @@ const handleSubmit = async () => {
 // 获取页面参数用来区分不同发布类型
 const sendType = ref('')
 onLoad((options) => {
+  console.log('用户ID', userStore.profile?._id)
   console.log('页面参数', options)
-  if (options?.sendType && options?.sendType === 'play') {
+  if (options?.sendType && options?.sendType === 'trip') {
+    title.value = '发布行程'
     sendType.value = options?.sendType
     tripTypeGet()
+  } else if (options?.sendType && options?.sendType === 'activity') {
+    title.value = '发布活动'
+    sendType.value = options?.sendType
+    activityTypeGet()
   }
 })
 </script>
 <template>
   <view class="public">
-    <NavHead title="发布行程" :show-back="true"></NavHead>
+    <NavHead :title="title" :show-back="true"></NavHead>
 
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  上传封面图    -->
@@ -134,161 +163,86 @@ onLoad((options) => {
         <uni-forms ref="formRef" :modelValue="formData" labelWidth="160rpx">
           <!-- 行程主题 -->
           <uni-forms-item label="行程主题" name="title">
-            <uni-easyinput
-              v-model="formData.title"
-              :inputBorder="false"
-              placeholder="请输入行程主题"
-              primaryColor="#ffd018"
-              trim
-            />
+            <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入行程主题" primaryColor="#ffd018"
+              trim />
           </uni-forms-item>
           <!-- 行程类型 -->
           <uni-forms-item label="行程类型" name="type">
-            <uni-data-select
-              v-model="formData.type"
-              :localdata="typeOptions"
-              placeholder="请选择"
-              mode="none"
-            ></uni-data-select>
+            <uni-data-select v-model="formData.type" :localdata="typeOptions" placeholder="请选择"
+              mode="none"></uni-data-select>
           </uni-forms-item>
           <!-- 行程时间 -->
           <uni-forms-item label="行程时间" name="time">
             <view class="time">
-              <wd-datetime-picker
-                v-model="formData.time as string"
-                :min-date="minDate"
-                :displayFormat="displayFormat"
-                label=""
-                placeholder="请选择行程开始日期"
-                confirmButtonText="选择"
-              />
+              <wd-datetime-picker v-model="formData.time as string" :min-date="minDate" :displayFormat="displayFormat"
+                label="" placeholder="请选择行程开始日期" confirmButtonText="选择" />
             </view>
           </uni-forms-item>
           <!-- 行程地点 -->
           <uni-forms-item label="行程地点" name="location">
             <view class="location-row">
-              <uni-easyinput
-                v-model="formData.address_name"
-                :inputBorder="false"
-                placeholder="请选择行程地点"
-                primaryColor="#ffd018"
-                disabled
-                trim
-              />
+              <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择行程地点"
+                primaryColor="#ffd018" disabled trim />
               <view class="search-btn" @tap="changeLocal">搜索</view>
             </view>
           </uni-forms-item>
           <!-- 行程地址 -->
           <uni-forms-item label="行程地址" name="address">
-            <uni-easyinput
-              v-model="formData.event_address"
-              :inputBorder="false"
-              placeholder="请输入行程地址"
-              primaryColor="#ffd018"
-              trim
-            />
+            <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请输入行程地址"
+              primaryColor="#ffd018" trim />
           </uni-forms-item>
           <!-- 联系微信 -->
           <uni-forms-item label="联系微信" name="wechat">
-            <uni-easyinput
-              v-model="formData.wechat"
-              :inputBorder="false"
-              placeholder="请输入行程联系微信"
-              primaryColor="#ffd018"
-              trim
-            />
+            <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入行程联系微信" primaryColor="#ffd018"
+              trim />
           </uni-forms-item>
           <!-- 联系电话 -->
           <uni-forms-item label="联系电话" name="phone">
-            <uni-easyinput
-              v-model="formData.phone"
-              :inputBorder="false"
-              placeholder="请输入行程联系电话"
-              primaryColor="#ffd018"
-              type="number"
-              trim
-            />
+            <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入行程联系电话" primaryColor="#ffd018"
+              type="number" trim />
           </uni-forms-item>
           <!-- 人数限制 -->
           <uni-forms-item label="人数限制" name="maxPeople">
             <view class="number-input">
-              <uni-easyinput
-                v-model="formData.maxPeople"
-                :inputBorder="false"
-                placeholder="请输入最高人数"
-                primaryColor="#ffd018"
-                trim
-                type="number"
-              />
+              <uni-easyinput v-model="formData.maxPeople" :inputBorder="false" placeholder="请输入最高人数"
+                primaryColor="#ffd018" trim type="number" />
               <text class="unit">人</text>
             </view>
           </uni-forms-item>
           <!-- 男士报名 -->
           <uni-forms-item label="男士报名" name="maleCount">
             <view class="number-input">
-              <uni-easyinput
-                v-model="formData.maleCount"
-                :inputBorder="false"
-                placeholder="可手动输入已报名男士数量"
-                primaryColor="#ffd018"
-                trim
-                type="number"
-              />
+              <uni-easyinput v-model="formData.maleCount" :inputBorder="false" placeholder="可手动输入已报名男士数量"
+                primaryColor="#ffd018" trim type="number" />
               <text class="unit">人</text>
             </view>
           </uni-forms-item>
           <!-- 女士报名 -->
           <uni-forms-item label="女士报名" name="femaleCount">
             <view class="number-input">
-              <uni-easyinput
-                v-model="formData.femaleCount"
-                :inputBorder="false"
-                placeholder="可手动输入已报名女士数量"
-                primaryColor="#ffd018"
-                trim
-                type="number"
-              />
+              <uni-easyinput v-model="formData.femaleCount" :inputBorder="false" placeholder="可手动输入已报名女士数量"
+                primaryColor="#ffd018" trim type="number" />
               <text class="unit">人</text>
             </view>
           </uni-forms-item>
           <!-- 用户报名费用 -->
           <uni-forms-item label="报名费用" name="userFee">
-            <uni-easyinput
-              v-model="formData.userFee"
-              :inputBorder="false"
-              placeholder="请输入报名费用"
-              primaryColor="#ffd018"
-              type="number"
-              trim
-            />
+            <uni-easyinput v-model="formData.userFee" :inputBorder="false" placeholder="请输入报名费用" primaryColor="#ffd018"
+              type="number" trim />
           </uni-forms-item>
           <!-- 主理人佣金 -->
           <uni-forms-item label="主理人佣金" name="commission">
-            <uni-easyinput
-              v-model="formData.commission"
-              :inputBorder="false"
-              placeholder="请输入主理人佣金"
-              primaryColor="#ffd018"
-              type="number"
-              trim
-            />
+            <uni-easyinput v-model="formData.commission" :inputBorder="false" placeholder="请输入主理人佣金"
+              primaryColor="#ffd018" type="number" trim />
           </uni-forms-item>
           <!-- 行程需求 -->
           <uni-forms-item label="行程需求" name="requirement">
-            <view
-              class="requirement-row"
-              v-show="!showRequirementInput"
-              @tap="showRequirementInput = true"
-            >
+            <view class="requirement-row" v-show="!showRequirementInput" @tap="showRequirementInput = true">
               <text class="requirement-placeholder">去填写</text>
             </view>
           </uni-forms-item>
-          <wd-textarea
-            v-if="showRequirementInput"
-            v-model="formData.requirement"
-            placeholder="请输入行程需求"
-            :maxlength="500"
-          />
+          <wd-textarea v-if="showRequirementInput" v-model="formData.requirement" placeholder="请输入行程需求"
+            :maxlength="500" />
         </uni-forms>
       </view>
       <!-- 行程图片上传 -->
@@ -296,13 +250,8 @@ onLoad((options) => {
         <view class="contentUpdateImage-header">
           <text>行程图片</text>
         </view>
-        <wd-upload
-          :file-list="fileList"
-          image-mode="aspectFill"
-          :action="action"
-          :limit="6"
-          @change="handleChange"
-        ></wd-upload>
+        <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6"
+          @change="handleChange"></wd-upload>
         <view class="contentUpdateImage-tip">最多上传6张，支持JPG、PNG格式</view>
       </view>
       <!-- 提交审核 -->
@@ -443,10 +392,12 @@ onLoad((options) => {
     .uni-stat-box {
       background-color: transparent;
     }
+
     .uni-select {
       .uni-select__input-text {
         font-size: 28rpx;
       }
+
       .uni-select__input-placeholder {
         color: $qs-font-dec2;
       }
@@ -457,13 +408,16 @@ onLoad((options) => {
 /* 时间选择器 */
 .time {
   flex: 1;
+
   :deep(.wd-datetime-picker__cell) {
     width: 100%;
     background-color: transparent;
   }
+
   :deep(.wd-datetime-picker__action) {
     color: $qs-font-title;
   }
+
   :deep(.wd-cell__wrapper) {
     padding: 0;
   }

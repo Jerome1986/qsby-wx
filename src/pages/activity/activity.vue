@@ -79,7 +79,7 @@ const handleSelectedSort = (currentSortId: SortType) => {
 
 const handleSend = () => {
   uni.navigateTo({
-    url: '/pages/public/public',
+    url: `/pages/public/public?sendType=activity`,
   })
 }
 </script>
@@ -112,6 +112,7 @@ const handleSend = () => {
           mode="widthFix"></image>
         <text class="empty-text">暂无数据</text>
       </view>
+      <view style="height: 40rpx;"></view>
     </scroll-view>
   </view>
 </template>
@@ -132,7 +133,6 @@ const handleSend = () => {
 
   /* 顶部横幅 */
   .banner {
-    padding: 0 24rpx;
     width: 100%;
     height: 240rpx;
 
@@ -143,7 +143,6 @@ const handleSend = () => {
 
   /* 页面标题 */
   .title {
-    padding: 0 24rpx;
     margin: 24rpx 0;
     color: $qs-font-title;
     font-weight: bold;
@@ -151,7 +150,6 @@ const handleSend = () => {
 
   /* 行程列表 */
   .list {
-    padding: 0 24rpx 60rpx;
     margin-top: 24rpx;
   }
 
