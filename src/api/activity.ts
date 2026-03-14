@@ -1,4 +1,5 @@
 import type { ActivityListItem, ActivityPageResponse } from '@/types/Activity'
+import type { DelResult } from '@/types/Gobal'
 import type { SortType } from '@/types/Play'
 import type { ActivityTypeItem, PublicActivityResponse, SubmitFormData } from '@/types/Public'
 import { request } from '@/utils/http'
@@ -58,11 +59,24 @@ export const activityDetail = (activityId: string) => {
   })
 }
 
-/** 编辑活动（占位） */
+/** 编辑活动 */
 export const activityEditApi = (data: SubmitFormData & { _id: string }) => {
   return request<{ code: number; message: string }>({
     method: 'POST',
     url: '/activity/edit',
     data,
+  })
+}
+
+/**
+ * 删除活动
+ * @param userId - 用户ID
+ * @param activityId - 活动ID
+ */
+export const activityDelApi = (userId: string, activityId: string) => {
+  return request<DelResult>({
+    method: 'POST',
+    url: '/activity/del',
+    data: { userId, activityId },
   })
 }

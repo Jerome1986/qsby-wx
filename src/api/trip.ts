@@ -1,6 +1,7 @@
 import { request } from '@/utils/http.ts'
 import type { PublicTripResponse, SubmitFormData, TripTypeItem } from '@/types/Public'
 import type { PlayListItem, PlayListPageResponse, SortType } from '@/types/Play'
+import type { DelResult } from '@/types/Gobal'
 
 // 获取行程分类
 export const tripTypeGetAllApi = () => {
@@ -57,5 +58,18 @@ export const tripEditApi = (data: SubmitFormData & { _id: string }) => {
     method: 'POST',
     url: '/trip/edit',
     data,
+  })
+}
+
+/**
+ * 删除指定行程
+ * @param userId - 用户ID
+ * @param tripId - 行程ID
+ */
+export const tripDelApi = (userId: string, tripId: string) => {
+  return request<DelResult>({
+    method: 'POST',
+    url: '/trip/del',
+    data: { userId, tripId },
   })
 }

@@ -5,6 +5,7 @@ import type {
   ProjectSubmitResponse,
   SubmitProjectFormData,
 } from '@/types/Project'
+import type { DelResult } from '@/types/Gobal'
 import { request } from '@/utils/http'
 
 /**
@@ -51,5 +52,30 @@ export const projectSendApi = (data: SubmitProjectFormData) => {
     method: 'POST',
     url: '/project/add',
     data,
+  })
+}
+
+/**
+ * 编辑项目
+ * @param data - 提交参数（含 _id）
+ */
+export const projectEditApi = (data: SubmitProjectFormData & { _id: string }) => {
+  return request<{ code: number; message?: string }>({
+    method: 'POST',
+    url: '/project/edit',
+    data,
+  })
+}
+
+/**
+ * 删除项目
+ * @param userId - 用户ID
+ * @param projectId - 项目ID
+ */
+export const projectDelApi = (userId: string, projectId: string) => {
+  return request<DelResult>({
+    method: 'POST',
+    url: '/project/del',
+    data: { userId, projectId },
   })
 }

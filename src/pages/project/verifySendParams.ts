@@ -5,11 +5,13 @@ export interface VerifyProjectParams {
   formData: ProjectFormData
   agreed: boolean
   userId: string | undefined
+  /** 编辑模式下可不勾选须知（首次发布时已同意） */
+  isEdit?: boolean
 }
 
 /** 发布项目表单校验 */
 export const validateProjectForm = (params: VerifyProjectParams): boolean => {
-  const { cover, formData, agreed, userId } = params
+  const { cover, formData, agreed, userId, isEdit } = params
 
   if (!cover) {
     uni.showToast({ title: '请上传封面图片', icon: 'none' })
@@ -47,7 +49,7 @@ export const validateProjectForm = (params: VerifyProjectParams): boolean => {
     uni.showToast({ title: '请输入联系电话', icon: 'none' })
     return false
   }
-  if (!agreed) {
+  if (!isEdit && !agreed) {
     uni.showToast({ title: '请先阅读并同意提交须知', icon: 'none' })
     return false
   }

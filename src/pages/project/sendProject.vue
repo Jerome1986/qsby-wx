@@ -1,14 +1,24 @@
 <script setup lang="ts">
-import { projectAllCateGetApi, projectSendApi } from '@/api/project'
+import {
+  projectAllCateGetApi,
+  projectDetailGetApi,
+  projectEditApi,
+  projectSendApi,
+} from '@/api/project'
 import NavHead from '@/components/NavHead.vue'
+import { buildFileListFromDetailImages } from '@/pages/public/formDetail'
+import { getImagesFromFileList } from '@/pages/public/uploadUtils'
 import { onLoad } from '@dcloudio/uni-app'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { ProjectFormData } from '@/types/Project'
 import type { UploadChangeEvent, UploadFileItem } from 'wot-design-uni/components/wd-upload/types'
 import { useUserStore } from '@/stores'
 import { validateProjectForm } from './verifySendParams'
 
 const userStore = useUserStore()
+
+const projectId = ref('')
+const pageTitle = ref('发布项目')
 
 // 表单数据
 const formData = ref<ProjectFormData>({
@@ -67,7 +77,44 @@ const projectTypeGet = async () => {
   }))
 }
 
-onLoad(() => projectTypeGet())
+/** 拉取项目详情并回填表单（编辑模式） */
+const fetchDetail = async () => {
+  if (!projectId.value) return
+  try {
+    const res = await projectDetailGetApi(projectId.value)
+    const detail = res.data
+    if (!detail) return
+
+    formData.value = {
+      title: detail.title ?? '',
+      industry: detail.industry ?? '',
+      cooperationMode: detail.cooperationMode ?? '',
+      cooperationScale: detail.cooperationScale ?? '',
+      address_name: detail.address_name ?? '',
+      event_address: detail.event_address ?? '',
+      latitude: detail.latitude,
+      longitude: detail.longitude,
+      wechat: detail.wechat ?? '',
+      phone: detail.phone ?? '',
+      introduction: detail.introduction ?? '',
+      cover: detail.cover ?? '',
+    }
+    cover.value = detail.cover ?? ''
+    if (detail.introduction) showIntroInput.value = true
+    if (detail.images?.length) {
+      fileList.value = buildFileListFromDetailImages(detail.images)
+    }
+  } catch {
+    uni.showToast({ icon: 'none', title: '获取详情失败' })
+  }
+}
+
+onLoad(async (options) => {
+  projectId.value = options?.projectId ?? ''
+  pageTitle.value = projectId.value ? '编辑项目' : '发布项目'
+  await projectTypeGet()
+  if (projectId.value) await fetchDetail()
+})
 
 // 地图选点
 const changeLocal = () => {
@@ -94,18 +141,6 @@ const handleChange = (e: UploadChangeEvent) => {
   fileList.value = e.fileList
 }
 
-/** 从 fileList 每项的 response 中提取图片链接 */
-const getImagesFromFileList = (list: UploadFileItem[]): string[] => {
-  return list
-    .map((file) => {
-      const res = file.response
-      if (typeof res === 'string') return res
-      if (res && typeof res === 'object' && 'data' in res) return (res as { data: string }).data
-      return ''
-    })
-    .filter(Boolean)
-}
-
 // 是否同意提交须知
 const agreed = ref(false)
 
@@ -114,7 +149,13 @@ const handleNotice = () => {
   // TODO: 跳转提交须知页面
 }
 
-// 提交审核
+const isEditMode = computed(() => !!projectId.value)
+const submitBtnText = computed(() => (isEditMode.value ? '保存' : '提交审核'))
+const submitTip = computed(() =>
+  isEditMode.value ? '保存后立即生效' : '提交后我们将在24小时内完成审核',
+)
+
+// 提交 / 保存
 const handleSubmit = async () => {
   const userId = userStore.profile?._id
   if (!validateProjectForm({
@@ -122,12 +163,13 @@ const handleSubmit = async () => {
     formData: formData.value,
     agreed: agreed.value,
     userId,
+    isEdit: isEditMode.value,
   })) return
 
   const images = getImagesFromFileList(fileList.value)
   const submitData = {
     userId: userId as string,
-    cover: formData.value.cover,
+    cover: formData.value.cover as string,
     title: formData.value.title,
     industry: formData.value.industry,
     cooperationMode: formData.value.cooperationMode,
@@ -141,18 +183,26 @@ const handleSubmit = async () => {
     introduction: formData.value.introduction ?? '',
     images,
   }
-  console.log('提交前的参数', submitData)
-  const res = await projectSendApi(submitData)
-  if (res.code === 200) {
-    uni.showToast({ icon: 'success', title: '已提交审核', mask: true })
-    uni.navigateBack()
+
+  try {
+    const res = isEditMode.value
+      ? await projectEditApi({ ...submitData, _id: projectId.value })
+      : await projectSendApi(submitData)
+    if (res.code === 200) {
+      uni.showToast({ icon: 'success', title: isEditMode.value ? '已更新' : '已提交审核', mask: true })
+      uni.navigateBack()
+    } else {
+      uni.showToast({ icon: 'none', title: res.message || '操作失败' })
+    }
+  } catch {
+    uni.showToast({ icon: 'none', title: '操作失败，请重试' })
   }
 }
 </script>
 
 <template>
   <view class="sendProject">
-    <NavHead title="发布项目" :show-back="true"></NavHead>
+    <NavHead :title="pageTitle" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!-- 上传封面图 -->
       <view class="updateCover" @tap="handleUpdateCover" v-if="!cover">
@@ -229,10 +279,10 @@ const handleSubmit = async () => {
           <text class="agree-text">我已仔细阅读并同意</text>
           <text class="agree-link" @tap.stop="handleNotice">《提交须知》</text>
         </view>
-        <!-- 提交审核 -->
+        <!-- 提交 / 保存 -->
         <view class="submit">
-          <view class="submit-btn" @tap="handleSubmit">提交审核</view>
-          <view class="submit-tip">提交后我们将在24小时内完成审核</view>
+          <view class="submit-btn" @tap="handleSubmit">{{ submitBtnText }}</view>
+          <view class="submit-tip">{{ submitTip }}</view>
         </view>
       </view>
 

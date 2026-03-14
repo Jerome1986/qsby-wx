@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores'
 import type { SendListItem, SendType } from '@/types/Send'
 import { onLoad, onShow, onHide } from '@dcloudio/uni-app'
 import { formatTimestamp } from '@/utils/generateMonth'
+import { unifiedProcessDel } from './unifiedProcess'
 
 const userStore = useUserStore()
 
@@ -109,6 +110,27 @@ const getFee = (item: SendListItem) => item.viewFee ?? item.userFee ?? 0
 
 /** 报名人数 */
 const getCount = (item: SendListItem) => (Array.isArray(item.signUpList) ? item.signUpList.length : 0)
+/** 删除（trip/activity/project 均支持） */
+const handleDel = (itemId: string) => {
+  const tab = currentTab.value
+  const userId = userStore.profile?._id
+  if (!userId) return
+  uni.showModal({
+    title: '提示',
+    content: '确定要删除吗？',
+    confirmColor: '#ffd018',
+    success: async (res) => {
+      if (!res.confirm) return
+      const { ok, message } = await unifiedProcessDel[tab](itemId, userId)
+      uni.showToast({ icon: ok ? 'success' : 'none', title: message })
+      if (ok) {
+        reset()
+        publicListGet(userId, tab)
+      }
+    },
+  })
+}
+
 </script>
 <template>
   <view class="publishManagement">
@@ -184,7 +206,7 @@ const getCount = (item: SendListItem) => (Array.isArray(item.signUpList) ? item.
             </view>
             <view class="footer-right">
               <view class="action-btn primary" @tap="handleSignUpList(item._id)">查看报名列表</view>
-              <view class="action-btn">删除</view>
+              <view class="action-btn" @tap="handleDel(item._id)">删除</view>
             </view>
           </view>
         </view>
