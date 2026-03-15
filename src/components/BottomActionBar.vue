@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   pageType: string
+  price?: number
 }>()
 // 立即兑换
 const exchange = () => {
@@ -21,17 +22,23 @@ const buy = () => {
 <template>
   <view class="action-bar">
     <view class="action-tools">
+      <!--
+      隐藏的客服按钮：<button id="contactBtn" open-type="contact" class="contact-btn-hidden" />，通过样式隐藏且不占位。
+      用 label 做展示：<label class="action-tool-item" for="contactBtn"> 负责图标和文案，样式与「进群」一致。
+      点击逻辑：点击 label 会触发关联的 button，从而唤起客服会话。
+      -->
+      <button id="contactBtn" open-type="contact" class="contact-btn-hidden" />
       <view class="action-tool-item">
         <text class="iconfont icon-erweima action-tool-icon"></text>
         <text class="action-tool-text">进群</text>
       </view>
-      <view class="action-tool-item">
+      <label class="action-tool-item" for="contactBtn">
         <text class="iconfont icon-kefu action-tool-icon"></text>
         <text class="action-tool-text">客服</text>
-      </view>
+      </label>
     </view>
     <view class="action-submit-btn" @tap="exchange" v-if="pageType === 'score'">立即兑换</view>
-    <view class="action-submit-btn" @tap="buy" v-if="pageType === 'product'">立即购买(￥400)</view>
+    <view class="action-submit-btn" @tap="buy" v-if="pageType === 'product'">立即购买(￥{{ price }})</view>
   </view>
 </template>
 
@@ -54,6 +61,14 @@ const buy = () => {
   .action-tools {
     display: flex;
     gap: 40rpx;
+
+    .contact-btn-hidden {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
 
     .action-tool-item {
       display: flex;

@@ -80,12 +80,8 @@ export interface ProductItem {
   _id: string
   /** 关联门店ID */
   storeId: string
-  /** 门店名称 */
-  storeName?: string
   /** 产品类型ID */
   prodcutTypeId: string
-  /** 产品类型名称 */
-  prodcutTypeName: string
   /** 产品名称，如：大床房、双床房 */
   name: string
   /** 价格 */

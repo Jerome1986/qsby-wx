@@ -1,34 +1,11 @@
 <script setup lang="ts">
 import NavTitle from '@/components/NavTitle.vue'
-// type: 'image' 图片 | 'text' 文字
-const detailList = [
-  {
-    type: 'text',
-    content:
-      '湖景大床房位于酒店主楼高层，拥有绝佳的湖景视野。房间面积约45平方米，配备King Size大床，让您尽享舒适睡眠。',
-  },
-  {
-    type: 'image',
-    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
-  },
-  {
-    type: 'text',
-    content:
-      '房间内设施齐全，配有独立卫浴、智能马桶、雨淋花洒、高速WiFi、55寸智能电视等。落地窗设计，白天可欣赏湖光山色，夜晚可观赏城市夜景。',
-  },
-  {
-    type: 'image',
-    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
-  },
-  {
-    type: 'text',
-    content: '每日提供免费矿泉水、茶包及咖啡。入住期间可免费使用健身房、游泳池等酒店设施。',
-  },
-  {
-    type: 'image',
-    content: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png',
-  },
-]
+
+withDefaults(defineProps<{
+  images: string[]
+}>(), {})
+
+
 </script>
 
 <template>
@@ -36,13 +13,9 @@ const detailList = [
     <view class="detail-content">
       <NavTitle title="图文详情"></NavTitle>
       <view class="detail-list">
-        <template v-for="(item, index) in detailList" :key="index">
-          <!-- 文字 -->
-          <view v-if="item.type === 'text'" class="detail-text">
-            {{ item.content }}
-          </view>
+        <template v-for="(item, index) in images" :key="index">
           <!-- 图片 -->
-          <image v-else-if="item.type === 'image'" :src="item.content" mode="widthFix" class="detail-img"></image>
+          <image :src="item" mode="widthFix" class="detail-img"></image>
         </template>
       </view>
     </view>

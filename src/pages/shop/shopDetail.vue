@@ -6,12 +6,16 @@ import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import type { StoreDetail, StoreItem } from '@/types/store'
 import { shopDetailApi } from '@/api/store'
+import { useShopStore } from '@/stores'
+
+const shopStore = useShopStore()
 
 const shopId = ref('')
 const shopDetailData = ref<StoreDetail>()
 const shopDetailGet = async (shopId: string) => {
   const res = await shopDetailApi(shopId)
   shopDetailData.value = res.data
+  shopStore.setShopInfo(res.data.shopInfo)
 }
 
 onLoad(async (options) => {
@@ -21,9 +25,9 @@ onLoad(async (options) => {
   }
 })
 
-const handleDetail = () => {
+const handleDetail = (productId: string) => {
   uni.navigateTo({
-    url: '/pages/shop/shopProductDetail',
+    url: `/pages/shop/shopProductDetail?productId=${productId}`,
   })
 }
 </script>
@@ -63,7 +67,8 @@ const handleDetail = () => {
       </view>
       <!--   门店商品列表   -->
       <view class="product-list">
-        <view class="product-item" v-for="(item, index) in shopDetailData?.product" :key="item._id" @tap="handleDetail">
+        <view class="product-item" v-for="(item, index) in shopDetailData?.product" :key="item._id"
+          @tap="handleDetail(item._id)">
           <view class="product-cover">
             <image mode="aspectFill" :src="item.cover"></image>
           </view>

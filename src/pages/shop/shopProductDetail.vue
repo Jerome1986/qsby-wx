@@ -5,6 +5,28 @@ import BookFlow from '@/components/BookFlow.vue'
 import Note from '@/components/Note.vue'
 import ImageTextDetail from '@/components/ImageTextDetail.vue'
 import BottomActionBar from '@/components/BottomActionBar.vue'
+import { ref } from 'vue'
+import { shopPorductByOne } from '@/api/store'
+import { onLoad } from '@dcloudio/uni-app'
+import type { ProductItem } from '@/types/store'
+
+const producntData = ref<ProductItem>()
+const productGet = async (productId: string) => {
+  const res = await shopPorductByOne(productId)
+  console.log('产品', res)
+
+  producntData.value = res.data
+}
+
+
+onLoad((options) => {
+  console.log('参数', options)
+
+  if (options?.productId) {
+    productGet(options.productId)
+  }
+})
+
 </script>
 <template>
   <view class="shopProductDetail">
@@ -12,23 +34,23 @@ import BottomActionBar from '@/components/BottomActionBar.vue'
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  封面图  -->
       <view class="cover">
-        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg" mode="aspectFill"></image>
+        <image :src="producntData?.cover" mode="aspectFill"></image>
       </view>
       <!--  商品名称  -->
       <view class="productInfo">
-        <NavTitle title="湖景大床房"></NavTitle>
+        <NavTitle :title="producntData?.name as string"></NavTitle>
       </view>
       <!--  商品信息  -->
-      <!-- <BookFlow type="product"></BookFlow> -->
+      <BookFlow type="product" :price="producntData?.price" :commission="producntData?.commission"></BookFlow>
       <!--  预约须知  -->
       <Note></Note>
       <!--  图文详情    -->
-      <ImageTextDetail></ImageTextDetail>
+      <ImageTextDetail :images="producntData?.images as string[]"></ImageTextDetail>
       <!-- 底部占位，防止内容被操作栏遮挡 -->
       <view class="action-bar-placeholder"></view>
     </scroll-view>
     <!--  底部操作栏  -->
-    <BottomActionBar page-type="product"></BottomActionBar>
+    <BottomActionBar page-type="product" :price="producntData?.price"></BottomActionBar>
   </view>
 </template>
 

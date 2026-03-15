@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { openLocation } from '@/composables/openLocation';
+import { useShopStore } from '@/stores';
 import type { StoreItem } from '@/types/store';
 
 const props = withDefaults(
   defineProps<{
     type: string
-    shopInfo: StoreItem | null
+    shopInfo?: StoreItem | null
+    price?: number
+    commission?: number
   }>(),
   {
     type: 'score',
@@ -13,11 +16,21 @@ const props = withDefaults(
   },
 )
 
+// 门店store
+const shopStore = useShopStore()
+
 const handleCallPhone = () => {
   uni.makePhoneCall({
-    phoneNumber: props.shopInfo?.phone as string,
+    phoneNumber: props.shopInfo?.phone as string ?? shopStore.shopInfo?.phone,
+    success: (success) => {
+    },
+    fail: (fail) => {
+      uni.showToast({ icon: 'none', title: '未留电话' })
+    },
   })
 }
+console.log(shopStore.shopInfo)
+
 </script>
 
 <template>
@@ -27,18 +40,26 @@ const handleCallPhone = () => {
       <text class="iconfont icon-shijian"></text>
       <view class="value">积分：100积分</view>
     </view>
+    <view class="price" v-if="type === 'product'">
+      <text class="iconfont icon-shijian"></text>
+      <view class="value" style="display: flex;align-items: flex-start;">
+        <text style="margin-right: 40rpx;">价格:{{ price }}</text>
+        <text style="font-size: 28rpx;color: #919191;">佣金:{{ commission }}</text>
+      </view>
+    </view>
     <!--   位置和商家名称   -->
     <view class="info-row">
       <view class="info-main">
         <view class="info-title">
           <text class="iconfont icon-dingwei"></text>
-          <text class="title-text" style="margin-left: 10rpx">{{ shopInfo?.name }}</text>
+          <text class="title-text" style="margin-left: 10rpx">{{ shopInfo?.name ?? shopStore?.shopInfo?.name }}</text>
         </view>
         <view class="info-desc">
-          {{ shopInfo?.address ?? '' }}
+          {{ shopInfo?.address ?? shopStore?.shopInfo?.address }}
         </view>
       </view>
-      <view class="info-action" @tap="openLocation(shopInfo?.latitude as number, shopInfo?.longitude as number)">
+      <view class="info-action" @tap="openLocation(shopInfo?.latitude as number ?? shopStore.shopInfo?.latitude as number,
+        shopInfo?.longitude as number ?? shopStore.shopInfo?.longitude as number)">
         <text class="iconfont icon-ditu" style="color: #f7821a; font-size: 40rpx"></text>
         <view style="font-size: 24rpx; color: #919191">地图</view>
       </view>

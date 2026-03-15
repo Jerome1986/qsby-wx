@@ -1,5 +1,6 @@
 import type {
   CityItem,
+  ProductItem,
   StoreCategoryListPageResult,
   StoreDetail,
   StoreListPageResult,
@@ -56,5 +57,17 @@ export const shopDetailApi = (shopId: string) => {
     method: 'GET',
     url: '/store/shopDetail',
     data: { shopId },
+  })
+}
+
+/**
+ * 门店商品详情
+ * @param productId - 商品ID
+ */
+export const shopPorductByOne = (productId: string) => {
+  return request<ProductItem>({
+    method: 'GET',
+    url: '/store/productFindOne',
+    data: { productId },
   })
 }
