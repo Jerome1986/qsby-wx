@@ -1,12 +1,23 @@
 <script setup lang="ts">
-withDefaults(
+import { openLocation } from '@/composables/openLocation';
+import type { StoreItem } from '@/types/store';
+
+const props = withDefaults(
   defineProps<{
     type: string
+    shopInfo: StoreItem | null
   }>(),
   {
     type: 'score',
+    shopInfo: null
   },
 )
+
+const handleCallPhone = () => {
+  uni.makePhoneCall({
+    phoneNumber: props.shopInfo?.phone as string,
+  })
+}
 </script>
 
 <template>
@@ -16,26 +27,18 @@ withDefaults(
       <text class="iconfont icon-shijian"></text>
       <view class="value">积分：100积分</view>
     </view>
-    <!--   价格   -->
-    <view class="product-price" v-if="type === 'product'">
-      <view class="left">
-        <text class="iconfont icon-shijian"></text>
-        <view class="value">价格：400/晚</view>
-      </view>
-      <view class="commission">佣金：200</view>
-    </view>
     <!--   位置和商家名称   -->
     <view class="info-row">
       <view class="info-main">
         <view class="info-title">
           <text class="iconfont icon-dingwei"></text>
-          <text class="title-text" style="margin-left: 10rpx">千宿百院</text>
+          <text class="title-text" style="margin-left: 10rpx">{{ shopInfo?.name }}</text>
         </view>
         <view class="info-desc">
-          武汉市场口区区京汉大道668号恒隆广场场 东区L4层L444号INS室内蹦极
+          {{ shopInfo?.address ?? '' }}
         </view>
       </view>
-      <view class="info-action">
+      <view class="info-action" @tap="openLocation(shopInfo?.latitude as number, shopInfo?.longitude as number)">
         <text class="iconfont icon-ditu" style="color: #f7821a; font-size: 40rpx"></text>
         <view style="font-size: 24rpx; color: #919191">地图</view>
       </view>
@@ -49,11 +52,8 @@ withDefaults(
         </view>
         <view class="info-desc"> 购买商品→致电商家预约→商家确认→进店消费 </view>
       </view>
-      <view class="info-action">
-        <text
-          class="iconfont icon-dianhuabodadianhua"
-          style="color: #f7821a; font-size: 40rpx"
-        ></text>
+      <view class="info-action" @tap="handleCallPhone">
+        <text class="iconfont icon-dianhuabodadianhua" style="color: #f7821a; font-size: 40rpx"></text>
         <view style="font-size: 24rpx; color: #919191">预约</view>
       </view>
     </view>
@@ -94,28 +94,34 @@ withDefaults(
       align-items: center;
       gap: 10rpx;
     }
+
     .commission {
       font-size: 28rpx;
       color: $qs-font-dec2;
     }
   }
+
   /*通用信息行*/
   .info-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     .info-main {
       flex: 1;
+
       .info-title {
         margin-bottom: 10rpx;
         font-weight: bold;
         color: $qs-font-title;
       }
+
       .info-desc {
         font-size: 24rpx;
         color: $qs-font-dec;
       }
     }
+
     .info-action {
       margin-left: 30rpx;
       text-align: center;

@@ -12,6 +12,7 @@ import { userInfoGetApi } from '@/api/user.ts'
 import type { UserItem } from '@/types/UserItem'
 import { activityDetail } from '@/api/activity'
 import type { ActivityListItem } from '@/types/Activity'
+import { openLocation } from '@/composables/openLocation'
 
 // 页面标题
 const title = ref('详情')
@@ -70,20 +71,7 @@ onLoad((options: any) => {
   getSafeAreaBottom()
 })
 
-// 打开地图
-const openLocation = () => {
-  uni.openLocation({
-    latitude: detailData.value?.latitude!,
-    longitude: detailData.value?.longitude!,
-    success: () => {
-      console.log('地图定位打开成功')
-    },
-    fail: (error) => {
-      console.log('打开定位失败', error)
-      uni.showToast({ icon: 'fail', title: '定位打开失败' })
-    },
-  })
-}
+
 
 // 复制微信号
 const handleCopyWx = () => {
@@ -182,7 +170,7 @@ onShareAppMessage((res) => {
             <view class="title">{{ detailData.address_name }}</view>
             <view class="address">{{ detailData.event_address }}</view>
           </view>
-          <view class="right" @tap="openLocation">
+          <view class="right" @tap="openLocation(detailData.latitude as number, detailData.longitude as number)">
             <text class="iconfont icon-ditu"></text>
             <view class="text">地图</view>
           </view>
@@ -190,7 +178,7 @@ onShareAppMessage((res) => {
         <view class="bottom">
           <view class="signUp">已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
             detailData.maxPeople
-          }}）</view>
+            }}）</view>
           <view class="num">
             <view class="item">
               <text class="male">男</text>

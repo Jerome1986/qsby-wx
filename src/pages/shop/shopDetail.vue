@@ -2,6 +2,24 @@
 import NavHead from '@/components/NavHead.vue'
 import BookFlow from '@/components/BookFlow.vue'
 import NavTitle from '@/components/NavTitle.vue'
+import { onLoad } from '@dcloudio/uni-app'
+import { ref } from 'vue'
+import type { StoreDetail, StoreItem } from '@/types/store'
+import { shopDetailApi } from '@/api/store'
+
+const shopId = ref('')
+const shopDetailData = ref<StoreDetail>()
+const shopDetailGet = async (shopId: string) => {
+  const res = await shopDetailApi(shopId)
+  shopDetailData.value = res.data
+}
+
+onLoad(async (options) => {
+  if (options?.shopId) {
+    shopId.value = options.shopId
+    await shopDetailGet(shopId.value)
+  }
+})
 
 const handleDetail = () => {
   uni.navigateTo({
@@ -15,7 +33,7 @@ const handleDetail = () => {
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <!--  封面图  -->
       <view class="cover">
-        <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg" mode="aspectFill"></image>
+        <image :src="shopDetailData?.shopInfo.cover" mode="aspectFill"></image>
       </view>
       <!-- 快捷入口 -->
       <view class="nav-entry">
@@ -39,24 +57,23 @@ const handleDetail = () => {
       <!-- 门店办理入住 -->
       <view class="checkIn" @tap="">办理入住</view>
       <!--   预约流程   -->
-      <BookFlow type="shop"></BookFlow>
+      <BookFlow type="shop" :shop-info="shopDetailData?.shopInfo as StoreItem"></BookFlow>
       <view class="title" style="margin: 20rpx 0">
         <NavTitle title="门店商品"></NavTitle>
       </view>
       <!--   门店商品列表   -->
       <view class="product-list">
-        <view class="product-item" v-for="index in 5" :key="index" @tap="handleDetail">
+        <view class="product-item" v-for="(item, index) in shopDetailData?.product" :key="item._id" @tap="handleDetail">
           <view class="product-cover">
-            <image mode="aspectFill"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qiansu/testHouseCover/cover.jpg"></image>
+            <image mode="aspectFill" :src="item.cover"></image>
           </view>
           <view class="product-info">
             <view class="product-head">
-              <view class="product-name">标准大床房</view>
+              <view class="product-name">{{ item.name }}</view>
               <view class="product-desc">含早餐 · 免费WiFi · 可加床</view>
             </view>
             <view class="product-foot">
-              <view class="product-price">￥200.00</view>
+              <view class="product-price">￥{{ item.price.toFixed(2) }}</view>
               <view class="product-btn">立即购买</view>
             </view>
           </view>

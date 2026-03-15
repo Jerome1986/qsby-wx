@@ -51,6 +51,11 @@
   /* 小程序特有相关 */
   "mp-weixin": {
     "appid": "wxc953e8d56777b517",
+    "permission": {
+      "scope.userFuzzyLocation": {
+        "desc": "用于大致定位,获取最近门店商品信息"
+      }
+    },
     "optimization": {
       "subPackages": true
     },

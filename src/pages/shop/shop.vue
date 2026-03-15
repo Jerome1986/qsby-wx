@@ -7,6 +7,7 @@ import { cityDataApi, filterSotreListAll, storeCate } from '@/api/store'
 import type { CityItem, StoreCategoryItem, StoreItem } from '@/types/store'
 import { navBar } from './data'
 import { onLoad } from '@dcloudio/uni-app'
+import { formatDistance, getDistance } from '@/utils/distance'
 
 
 // 获取所有分类
@@ -78,9 +79,9 @@ onLoad(async () => {
 })
 
 // 门店详情
-const handleDetail = () => {
+const handleDetail = (shopId: string) => {
   uni.navigateTo({
-    url: '/pages/shop/shopDetail',
+    url: `/pages/shop/shopDetail?shopId=${shopId}`,
   })
 }
 
@@ -90,6 +91,24 @@ const handleRights = () => {
     url: '/pages/shop/managerRights',
   })
 }
+
+
+// 获取用户定位
+const myLatitude = ref()
+const myLongitude = ref()
+wx.getFuzzyLocation({
+  type: 'wgs84',
+  success(res) {
+    console.log('定位', res)
+    myLatitude.value = res.latitude
+    myLongitude.value = res.longitude
+  },
+  fail(err) {
+    console.error('定位', err)
+  }
+})
+
+
 </script>
 <template>
   <view class="shop">
@@ -132,7 +151,7 @@ const handleRights = () => {
       </view>
       <!--   门店列表   -->
       <view class="shopList">
-        <view class="shop-item" v-for="(item, index) in storeList" :key="item._id" @tap="handleDetail">
+        <view class="shop-item" v-for="(item, index) in storeList" :key="item._id" @tap="handleDetail(item._id)">
           <view class="cover">
             <image mode="aspectFill" :src="item.cover">
             </image>
@@ -143,7 +162,10 @@ const handleRights = () => {
               <view class="address"> {{ item.address }} </view>
             </view>
             <view class="foot">
-              <view class="distance">大约距您3.5公里</view>
+              <view class="distance" v-if="myLatitude && myLongitude">大约距您{{
+                formatDistance(getDistance(myLatitude, myLongitude, item.latitude as number, item.longitude as number))
+              }}</view>
+              <view class="distance">暂时无法获取具体定位</view>
               <view class="btn">进店</view>
             </view>
           </view>
@@ -191,7 +213,7 @@ const handleRights = () => {
   display: flex;
   flex-direction: column;
   margin: 24rpx 0;
-  background: linear-gradient(to left, #fff5d2, #fff6da);
+  background: linear-gradient(to left, rgba(255, 245, 210, 0.8), rgba(255, 246, 218, 0.8));
   border-radius: 30rpx;
   height: 210rpx;
   overflow: hidden;
@@ -312,7 +334,7 @@ const handleRights = () => {
 
         .distance {
           font-size: 24rpx;
-          color: #ff3b3b;
+          color: #F7821A;
         }
 
         .btn {

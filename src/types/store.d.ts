@@ -54,6 +54,8 @@ export interface StoreItem {
   name: string
   /** 门店地址 */
   address: string
+  /** 门店电话 */
+  phone: string
   /** 纬度 */
   latitude?: number
   /** 经度 */
@@ -71,4 +73,40 @@ export interface StoreListPageResult {
   pageNum: number
   pageSize: number
   totalPage: number
+}
+
+/** 产品（住宿：大床房、双床房等，可扩展） */
+export interface ProductItem {
+  _id: string
+  /** 关联门店ID */
+  storeId: string
+  /** 门店名称 */
+  storeName?: string
+  /** 产品类型ID */
+  prodcutTypeId: string
+  /** 产品类型名称 */
+  prodcutTypeName: string
+  /** 产品名称，如：大床房、双床房 */
+  name: string
+  /** 价格 */
+  price: number
+  /** 主理人佣金/折扣 固定值 */
+  commission: number
+  /** 封面图 */
+  cover?: string
+  /** 详情图片 */
+  images?: string[]
+  /** 简介 */
+  description?: string
+  /** 排序 */
+  sort?: number
+  status?: StoreStatus
+  createdAt?: string
+  updatedAt?: string
+}
+
+/** 门店详情+产品 */
+export interface StoreDetail {
+  shopInfo: StoreItem
+  product: ProductItem[]
 }

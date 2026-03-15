@@ -1,4 +1,9 @@
-import type { CityItem, StoreCategoryListPageResult, StoreListPageResult } from '@/types/store'
+import type {
+  CityItem,
+  StoreCategoryListPageResult,
+  StoreDetail,
+  StoreListPageResult,
+} from '@/types/store'
 import { request } from '@/utils/http'
 
 /**
@@ -39,5 +44,17 @@ export const filterSotreListAll = (
     method: 'GET',
     url: '/store/filterFindAll',
     data: { name, cityId, categoryId, pageNum, pageSize },
+  })
+}
+
+/**
+ * 获取门店详情和门店内的产品
+ * @param shopId - 门店ID
+ */
+export const shopDetailApi = (shopId: string) => {
+  return request<StoreDetail>({
+    method: 'GET',
+    url: '/store/shopDetail',
+    data: { shopId },
   })
 }

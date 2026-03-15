@@ -19,7 +19,7 @@ import BottomActionBar from '@/components/BottomActionBar.vue'
         <NavTitle title="湖景大床房"></NavTitle>
       </view>
       <!--  商品信息  -->
-      <BookFlow type="product"></BookFlow>
+      <!-- <BookFlow type="product"></BookFlow> -->
       <!--  预约须知  -->
       <Note></Note>
       <!--  图文详情    -->
