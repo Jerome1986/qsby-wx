@@ -3,28 +3,79 @@ import NavHead from '@/components/NavHead.vue'
 import NavTitle from '@/components/NavTitle.vue'
 import FilterBar from '@/components/FilterBar.vue'
 import { ref } from 'vue'
+import { cityDataApi, filterSotreListAll, storeCate } from '@/api/store'
+import type { CityItem, StoreCategoryItem, StoreItem } from '@/types/store'
+import { navBar } from './data'
+import { onLoad } from '@dcloudio/uni-app'
 
-const navBar = [
-  {
-    name: '民宿博主',
-    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/minsu.png',
-  },
-  {
-    name: '活动策划人',
-    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/cehua.png',
-  },
-  {
-    name: '旅行博主',
-    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/lvxing.png',
-  },
-]
 
-const cateData = ref([
-  { _id: '01', cateName: '武汉' },
-  { _id: '02', cateName: '合肥' },
-  { _id: '03', cateName: '长沙' },
-  { _id: '04', cateName: '黄石' },
-])
+// 获取所有分类
+const cateData = ref<StoreCategoryItem[]>([])
+
+const storeCateGet = async () => {
+  const res = await storeCate(1, 100)
+  console.log(res)
+  cateData.value = res.data.list.map(item => ({ cateName: item.name, ...item }))
+}
+
+// 获取城市列表
+const cityData = ref<CityItem[]>([])
+const cityDataGet = async () => {
+  const res = await cityDataApi()
+  cityData.value = res.data.filter(item => item.status === 'active')
+  console.log(cityData.value)
+}
+
+// 获取门店列表
+const storeList = ref<StoreItem[]>([])
+const cityId = ref('5')
+const cateId = ref('')
+const finish = ref(false)
+const pageNum = ref(1)
+const pageSize = ref(10)
+const storeListGet = async (cityId: string, cateId: string) => {
+  if (finish.value) return
+  const res = await filterSotreListAll('', cityId, cateId, pageNum.value, pageSize.value)
+  console.log('store', res.data)
+
+  storeList.value = res.data.list
+
+  if (pageNum.value < res.data.totalPage) {
+    pageNum.value++
+  } else {
+    finish.value = true
+  }
+}
+
+const reset = () => {
+  pageNum.value = 1
+  storeList.value = []
+  finish.value = false
+}
+
+const handleMore = () => {
+  if (!finish.value)
+    storeListGet(cityId.value, cateId.value)
+}
+
+const handleChangeCate = (cateId: string) => {
+  storeListGet(cateId, cityId.value)
+}
+
+const handleChangeSort = (sortId: string) => {
+  console.log('change')
+  reset()
+  storeListGet(cateId.value, sortId)
+}
+
+
+onLoad(async () => {
+  await Promise.all([
+    storeCateGet(),
+    cityDataGet(),
+    storeListGet(cityId.value, cateId.value)
+  ])
+})
 
 // 门店详情
 const handleDetail = () => {
@@ -43,7 +94,7 @@ const handleRights = () => {
 <template>
   <view class="shop">
     <NavHead title="自营门店" :show-back="true"></NavHead>
-    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
+    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
       <!-- 顶部横幅 -->
       <view class="banner">
         <image mode="aspectFill"
@@ -76,19 +127,20 @@ const handleRights = () => {
       </view>
       <!--   筛选（不加padding，内部有遮罩）   -->
       <view class="filter">
-        <FilterBar :cate-data="cateData" :sort-data="cateData" title="所有门店" :is-icon="true"></FilterBar>
+        <FilterBar :cate-data="cityData" :sort-data="cateData" title="武汉" :is-icon="true"
+          @selected-cate="handleChangeCate" @select-sort="handleChangeSort"></FilterBar>
       </view>
       <!--   门店列表   -->
       <view class="shopList">
-        <view class="shop-item" v-for="index in 5" :key="index" @tap="handleDetail">
+        <view class="shop-item" v-for="(item, index) in storeList" :key="item._id" @tap="handleDetail">
           <view class="cover">
-            <image mode="aspectFill" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg">
+            <image mode="aspectFill" :src="item.cover">
             </image>
           </view>
           <view class="info">
             <view class="head">
-              <view class="title">千宿百院介绍</view>
-              <view class="address"> 湖北省武汉市武昌区和平大道619号 </view>
+              <view class="title">{{ item.name }}</view>
+              <view class="address"> {{ item.address }} </view>
             </view>
             <view class="foot">
               <view class="distance">大约距您3.5公里</view>
@@ -104,7 +156,6 @@ const handleRights = () => {
 
 <style scoped lang="scss">
 .shop {
-  padding: 24rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -118,11 +169,17 @@ const handleRights = () => {
 
 /* 顶部横幅 */
 .banner {
-  margin-bottom: 24rpx;
+  margin: 24rpx 0;
+  padding: 0 24rpx;
   height: 188rpx;
   border-radius: 30rpx;
   overflow: hidden;
 }
+
+.section {
+  padding: 0 24rpx;
+}
+
 
 /* 筛选区域（无padding，遮罩需全宽） */
 .filter {
@@ -194,6 +251,7 @@ const handleRights = () => {
 
 /* 门店列表 */
 .shopList {
+  padding: 0 24rpx;
 
   .shop-item {
     display: flex;

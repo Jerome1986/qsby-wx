@@ -25,6 +25,21 @@ export const navBarOptions: NavbarItem[] = [
   },
 ]
 
+export const navBar = [
+  {
+    name: '民宿博主',
+    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/minsu.png',
+  },
+  {
+    name: '活动策划人',
+    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/cehua.png',
+  },
+  {
+    name: '旅行博主',
+    url: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/lvxing.png',
+  },
+]
+
 // 权益说明跳转
 export const rightsJump: Record<NavbarType, (type: NavbarType) => void> = {
   // 民宿博主权益

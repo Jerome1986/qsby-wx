@@ -121,6 +121,10 @@ const handleCallPhone = () => {
 
 // 跳转项目发布支付页面
 const handleUnlock = () => {
+  if (userStore.profile?._id === detailData.value?.userId) {
+    uni.showToast({ icon: 'none', title: '当前项目为本人发布，无须获取' })
+    return
+  }
   uni.navigateTo({
     url: `/pages/project/checkProject?projectId=${projectId.value}`,
   })

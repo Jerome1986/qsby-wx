@@ -3,8 +3,8 @@ import { ref } from 'vue'
 
 const props = withDefaults(
   defineProps<{
-    cateData: any[]
-    sortData: any[]
+    cateData?: any[]
+    sortData?: any[]
     title?: string
     isIcon?: boolean
   }>(),
@@ -33,13 +33,15 @@ const selectedCate = (item: any) => {
 }
 
 // 选择排序
-const currentSortData = ref(props.sortData[0].cateName || '')
+const currentSortData = ref(props.sortData[0]?.cateName || '门店类型')
 const filterSortActive = ref(false)
 const handleFilterSort = () => {
   filterSortActive.value = !filterSortActive.value
   filterCateActive.value = false
 }
 const selectedSort = (item: any) => {
+  console.log('changeSort', item);
+
   currentSortData.value = item.cateName
   filterSortActive.value = false
   emits('selectSort', item._id)
@@ -55,44 +57,26 @@ const selectedSort = (item: any) => {
         <text v-if="isIcon" class="iconfont icon-address cate-icon"></text>
         <text>{{ currentCateData }}</text>
       </view>
-      <text
-        v-show="!filterCateActive"
-        class="iconfont icon-laxiatubiao"
-        style="font-size: 16rpx; color: #0b0a0a"
-      ></text>
-      <text
-        v-show="filterCateActive"
-        class="iconfont icon-xiangshangtubiao"
-        style="font-size: 16rpx; color: #0b0a0a"
-      ></text>
+      <text v-show="!filterCateActive" class="iconfont icon-laxiatubiao"
+        style="font-size: 16rpx; color: #0b0a0a"></text>
+      <text v-show="filterCateActive" class="iconfont icon-xiangshangtubiao"
+        style="font-size: 16rpx; color: #0b0a0a"></text>
     </view>
     <!--   排序   -->
     <view class="filter-item" @tap="handleFilterSort">
       <!--   当前所选值   -->
       <view class="text">{{ currentSortData }}</view>
-      <text
-        v-show="!filterSortActive"
-        class="iconfont icon-laxiatubiao"
-        style="font-size: 16rpx; color: #0b0a0a"
-      ></text>
-      <text
-        v-show="filterSortActive"
-        class="iconfont icon-xiangshangtubiao"
-        style="font-size: 16rpx; color: #0b0a0a"
-      ></text>
+      <text v-show="!filterSortActive" class="iconfont icon-laxiatubiao"
+        style="font-size: 16rpx; color: #0b0a0a"></text>
+      <text v-show="filterSortActive" class="iconfont icon-xiangshangtubiao"
+        style="font-size: 16rpx; color: #0b0a0a"></text>
     </view>
   </view>
   <!--  分类弹框容器   -->
   <view class="dropdown-wrapper" v-if="filterCateActive">
     <view class="filterCate">
-      <view
-        class="cate"
-        :class="{ active: item.name === currentCateData }"
-        v-for="item in cateData"
-        :key="item._id"
-        @tap="selectedCate(item)"
-        >{{ item.name }}</view
-      >
+      <view class="cate" :class="{ active: item.name === currentCateData }" v-for="item in cateData" :key="item._id"
+        @tap="selectedCate(item)">{{ item.name }}</view>
     </view>
     <!-- 遮罩层（只在弹框下方） -->
     <view class="mask" @tap="filterCateActive = false"></view>
@@ -101,14 +85,8 @@ const selectedSort = (item: any) => {
   <!--  排序弹框容器   -->
   <view class="dropdown-wrapper" v-if="filterSortActive">
     <view class="filterSort">
-      <view
-        class="sort-item"
-        :class="{ active: item.cateName === currentSortData }"
-        v-for="item in sortData"
-        :key="item._id"
-        @tap="selectedSort(item)"
-        >{{ item.cateName }}</view
-      >
+      <view class="sort-item" :class="{ active: item.cateName === currentSortData }" v-for="item in sortData"
+        :key="item._id" @tap="selectedSort(item)">{{ item.cateName }}</view>
     </view>
     <!-- 遮罩层（只在弹框下方） -->
     <view class="mask" @tap="filterSortActive = false"></view>
@@ -120,6 +98,7 @@ const selectedSort = (item: any) => {
   padding: 0 24rpx;
   display: flex;
   gap: 40rpx;
+
   .filter-item {
     margin-right: 40rpx;
     display: flex;
@@ -139,6 +118,7 @@ const selectedSort = (item: any) => {
     }
   }
 }
+
 /* 下拉容器 */
 .dropdown-wrapper {
   position: relative;
@@ -153,9 +133,11 @@ const selectedSort = (item: any) => {
   gap: 40rpx;
   padding: 24rpx;
   z-index: 999;
+
   .cate {
     font-size: 28rpx;
     color: $qs-font-title;
+
     &.active {
       color: #ff3b3b;
     }
@@ -170,9 +152,11 @@ const selectedSort = (item: any) => {
   gap: 30rpx;
   padding: 24rpx;
   z-index: 999;
+
   .sort-item {
     font-size: 28rpx;
     color: $qs-font-title;
+
     &.active {
       color: #ff3b3b;
     }
