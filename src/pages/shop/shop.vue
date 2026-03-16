@@ -2,7 +2,7 @@
 import NavHead from '@/components/NavHead.vue'
 import NavTitle from '@/components/NavTitle.vue'
 import FilterBar from '@/components/FilterBar.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { cityDataApi, filterSotreListAll, storeCate } from '@/api/store'
 import type { CityItem, StoreCategoryItem, StoreItem } from '@/types/store'
 import { navBar } from './data'
@@ -94,8 +94,8 @@ const handleRights = () => {
 
 
 // 获取用户定位
-const myLatitude = ref()
-const myLongitude = ref()
+const myLatitude = ref<number>()
+const myLongitude = ref<number>()
 wx.getFuzzyLocation({
   type: 'wgs84',
   success(res) {
@@ -106,6 +106,23 @@ wx.getFuzzyLocation({
   fail(err) {
     console.error('定位', err)
   }
+})
+
+// 按距离排序后的门店列表（有定位时按距离升序，无定位时保持原序）
+const sortedStoreList = computed(() => {
+  const list = storeList.value
+  const lat = myLatitude.value
+  const lng = myLongitude.value
+  if (!lat || !lng || list.length === 0) return list
+  return [...list].sort((a, b) => {
+    const latA = a.latitude ?? 0
+    const lngA = a.longitude ?? 0
+    const latB = b.latitude ?? 0
+    const lngB = b.longitude ?? 0
+    const distA = latA && lngA ? getDistance(lat, lng, latA, lngA) : Infinity
+    const distB = latB && lngB ? getDistance(lat, lng, latB, lngB) : Infinity
+    return distA - distB
+  })
 })
 
 
@@ -151,7 +168,7 @@ wx.getFuzzyLocation({
       </view>
       <!--   门店列表   -->
       <view class="shopList">
-        <view class="shop-item" v-for="(item, index) in storeList" :key="item._id" @tap="handleDetail(item._id)">
+        <view class="shop-item" v-for="(item, index) in sortedStoreList" :key="item._id" @tap="handleDetail(item._id)">
           <view class="cover">
             <image mode="aspectFill" :src="item.cover">
             </image>
@@ -165,7 +182,7 @@ wx.getFuzzyLocation({
               <view class="distance" v-if="myLatitude && myLongitude">大约距您{{
                 formatDistance(getDistance(myLatitude, myLongitude, item.latitude as number, item.longitude as number))
               }}</view>
-              <view class="distance">暂时无法获取具体定位</view>
+              <view class="distance" v-else>暂时无法获取具体定位</view>
               <view class="btn">进店</view>
             </view>
           </view>
