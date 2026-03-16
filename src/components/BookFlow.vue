@@ -6,13 +6,12 @@ import type { StoreItem } from '@/types/store';
 const props = withDefaults(
   defineProps<{
     type: string
-    shopInfo?: StoreItem | null
+    shopInfo?: StoreItem
     price?: number
     commission?: number
   }>(),
   {
     type: 'score',
-    shopInfo: null
   },
 )
 

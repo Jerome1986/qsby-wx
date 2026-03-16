@@ -159,13 +159,13 @@ onShow(() => {
                 <text class="label">{{ item.orderType === 'trip' ? '行程日期：' : '活动日期：' }}</text>
                 <text class="value">{{ item.productInfo.time }}</text>
               </view>
-              <view class="info-row" v-if="item.productInfo.address_name">
+              <view class="info-row" v-if="item.productInfo.address_name || item.shopInfo?.shopName">
                 <text class="label">店名：</text>
-                <text class="value">{{ item.productInfo.address_name }}</text>
+                <text class="value">{{ item.productInfo.address_name ?? item.shopInfo?.shopName }}</text>
               </view>
-              <view class="info-row" v-if="item.productInfo.event_address">
+              <view class="info-row" v-if="item.productInfo.event_address || item.shopInfo?.address">
                 <text class="label">地址：</text>
-                <text class="value">{{ item.productInfo.event_address }}</text>
+                <text class="value">{{ item.productInfo.event_address ?? item.shopInfo?.address }}</text>
               </view>
             </template>
 

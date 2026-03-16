@@ -15,6 +15,8 @@ const shopDetailData = ref<StoreDetail>()
 const shopDetailGet = async (shopId: string) => {
   const res = await shopDetailApi(shopId)
   shopDetailData.value = res.data
+  console.log(shopDetailData.value)
+
   shopStore.setShopInfo(res.data.shopInfo)
 }
 

@@ -31,6 +31,20 @@ export interface OrderUserInfo {
   idCard?: string
 }
 
+// 门店信息
+export interface ShopInfo {
+  /** 门店名称 */
+  shopName: string
+  /** 门店地址 */
+  address: string
+  /** 门店电话 */
+  phone: string
+  /** 纬度 */
+  latitude?: number
+  /** 经度 */
+  longitude?: number
+}
+
 // 抵扣类型
 export type DiscountType = 'cash' | 'voucher' | 'commission' | 'points'
 
@@ -57,7 +71,8 @@ export interface OrderSubmitParams {
   /** 报名人信息 */
   userInfo: OrderUserInfo
   /** 发起人信息 */
-  initiatorInfo: InitiatorInfo
+  initiatorInfo?: InitiatorInfo
+  shopInfo?: ShopInfo
   /** 原价 */
   totalAmount: number
   /** 主理人佣金/折扣 */
@@ -99,8 +114,9 @@ export interface OrderItem {
     /** 用户手机号（脱敏前） */
     phone: string
   }
+  shopInfo?: ShopInfo
   /** 发起人信息 */
-  initiatorInfo: InitiatorInfo
+  initiatorInfo?: InitiatorInfo
   /** 订单总金额（原价，单位：元） */
   totalAmount: number
   /** 佣金金额（推广返佣，单位：元） */
@@ -152,9 +168,9 @@ export interface ProductInfo {
   /** 产品时间 行程、活动等，项目不包括时间，长期有效 */
   time?: string
   /** 产品对应的门店名称 */
-  address_name: string
+  address_name?: string
   /** 产品对应的门店地址 */
-  event_address: string
+  event_address?: string
 }
 
 // 订单对应的发起人信息 酒店类订单除外，默认空对象

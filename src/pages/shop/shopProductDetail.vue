@@ -50,7 +50,7 @@ onLoad((options) => {
       <view class="action-bar-placeholder"></view>
     </scroll-view>
     <!--  底部操作栏  -->
-    <BottomActionBar page-type="product" :price="producntData?.price"></BottomActionBar>
+    <BottomActionBar page-type="product" :price="producntData?.price" :product-id="producntData?._id"></BottomActionBar>
   </view>
 </template>
 

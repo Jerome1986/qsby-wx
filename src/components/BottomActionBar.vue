@@ -1,7 +1,8 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   pageType: string
   price?: number
+  productId?: string
 }>()
 // 立即兑换
 const exchange = () => {
@@ -14,7 +15,7 @@ const exchange = () => {
 const buy = () => {
   console.log('立即购买')
   uni.navigateTo({
-    url: '/pages/shop/createOrder',
+    url: `/pages/shop/createOrder?productId=${props.productId}`,
   })
 }
 </script>

@@ -4,10 +4,11 @@ import { ref, computed, watch } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import UQRCode from 'uqrcodejs'
 import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info'
-import type { OrderItem, OrderType } from '@/types/OrderItem'
+import type { OrderItem, OrderType, ShopInfo } from '@/types/OrderItem'
 import { orderFindOne, orderPay, orderCancel, createQrCode } from '@/api/order'
 import { useUserStore } from '@/stores'
 import { formatTimestamp } from '@/utils/generateMonth'
+import BookFlow from '@/components/BookFlow.vue'
 
 
 // store
@@ -41,7 +42,7 @@ const orderDetailGet = async (id: string) => {
 
 // 是否显示发起人（行程、活动、项目）
 const showInitiator = computed(() =>
-  ['trip', 'activity', 'project', 'shop'].includes(orderType.value)
+  ['trip', 'activity', 'project'].includes(orderType.value)
 )
 
 // 是否显示报名人（行程、活动、项目）
@@ -69,8 +70,30 @@ watch(
 
 // 拨打电话
 const handleCall = () => {
-  const phone = orderDetail.value?.initiatorInfo.mobile || ''
+  const phone = orderDetail.value?.initiatorInfo?.mobile || ''
   if (phone) uni.makePhoneCall({ phoneNumber: phone })
+}
+
+// 门店：拨打电话
+const handleShopCall = () => {
+  const phone = orderDetail.value?.shopInfo?.phone || ''
+  if (phone) uni.makePhoneCall({ phoneNumber: phone })
+}
+
+// 门店：查看地址（打开地图）
+const handleViewAddress = () => {
+  const shop = orderDetail.value?.shopInfo
+  if (!shop?.address) return
+  if (shop.latitude != null && shop.longitude != null) {
+    uni.openLocation({
+      latitude: shop.latitude,
+      longitude: shop.longitude,
+      name: shop.shopName || '门店',
+      address: shop.address,
+    })
+  } else {
+    uni.showToast({ icon: 'none', title: '暂无位置信息' })
+  }
 }
 
 // 申请退款
@@ -194,20 +217,24 @@ onLoad((options?: { orderId?: string; type?: string }) => {
               </view>
             </template>
             <!-- 门店 -->
-            <!-- <template v-else-if="orderDetail.orderType === 'shop'">
-              <view class="info-row" v-if="orderDetail?.productInfo.address_name">
+            <template v-else-if="orderDetail?.orderType === 'shop'">
+              <view class="info-row" v-if="orderDetail?.shopInfo?.shopName">
                 <text class="label">店名：</text>
-                <text class="value">{{ orderDetail.productInfo.address_name }}</text>
+                <text class="value">{{ orderDetail.shopInfo?.shopName }}</text>
               </view>
-              <view class="info-row" v-if="orderDetail.productInfo.event_address">
+              <view class="info-row" v-if="orderDetail.shopInfo?.address">
                 <text class="label">地址：</text>
-                <text class="value">{{ orderDetail.productInfo.event_address }}</text>
+                <text class="value">{{ orderDetail.shopInfo.address }}</text>
               </view>
-              <view class="price-row" >
+              <view class="info-row" v-if="orderDetail.shopInfo?.phone">
+                <text class="label">电话：</text>
+                <text class="value">{{ orderDetail.shopInfo.phone }}</text>
+              </view>
+              <view class="price-row">
                 <text class="label">价格：</text>
-                <text class="price">¥{{ orderDetail?.payAmount.toFixed(2) }}元/次</text>
+                <text class="price">¥{{ orderDetail?.payAmount.toFixed(2) }}元/晚</text>
               </view>
-            </template> -->
+            </template>
             <!-- 项目 -->
             <template v-else-if="orderDetail?.orderType === 'project'">
               <view class="info-row" v-if="orderDetail.industryCategory">
@@ -240,7 +267,7 @@ onLoad((options?: { orderId?: string; type?: string }) => {
       </view>
 
       <!-- 使用提示（门店） -->
-      <!-- <view class="card tip-card" v-if="orderDetail.usageTip && orderDetail.orderType === 'shop'">
+      <!-- <view class="card tip-card" v-if=" orderDetail?.orderType === 'shop'">
         <view class="section-header">
           <view class="bar"></view>
           <text class="section-title">使用提示</text>
@@ -274,11 +301,28 @@ onLoad((options?: { orderId?: string; type?: string }) => {
         </view>
       </view>
 
+      <!-- 联系门店 -->
+      <view class="card contact-store-card" v-if="orderDetail?.orderType === 'shop'">
+        <view class="section-header">
+          <view class="bar"></view>
+          <text class="section-title">联系门店</text>
+        </view>
+        <view class="contact-row" @tap="handleViewAddress">
+          <text class="contact-text">门店地址：{{ orderDetail?.shopInfo?.address || '请填写门店地址' }}</text>
+          <text class="iconfont icon-ditu contact-icon"></text>
+        </view>
+        <view class="contact-row" @tap="handleShopCall">
+          <text class="contact-text">门店电话：{{ orderDetail?.shopInfo?.phone || '请填写门店电话' }}</text>
+          <text class="iconfont icon-dianhuabodadianhua contact-icon"></text>
+        </view>
+      </view>
+
       <!-- 报名人（行程、活动、项目） -->
       <view class="card" v-if="showRegistrant">
         <view class="section-header">
           <view class="bar"></view>
-          <text class="section-title">报名人</text>
+          <text class="section-title" v-if="orderDetail?.orderType === 'shop'">入住信息</text>
+          <text class="section-title" v-else>报名人</text>
         </view>
         <view class="info-list">
           <view class="info-item">
@@ -506,6 +550,32 @@ onLoad((options?: { orderId?: string; type?: string }) => {
         }
       }
     }
+  }
+}
+
+/* 联系门店 */
+.contact-store-card {
+  .contact-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 1.8;
+  }
+
+  .contact-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 28rpx;
+    color: $qs-font-dec;
+    line-height: 1.8;
+    @include ellipsis(2);
+  }
+
+  .contact-icon {
+    font-size: 36rpx;
+    color: $qs-brandColor;
+    flex-shrink: 0;
+    margin-left: 24rpx;
   }
 }
 
