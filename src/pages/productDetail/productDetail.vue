@@ -132,7 +132,7 @@ onShareAppMessage((res) => {
       <view class="productInfo">
         <view class="top">
           <view class="cover">
-            <image mode="aspectFill" :src="detailData.cover"></image>
+            <image mode="aspectFill" :src="detailData.cover as string"></image>
           </view>
           <view class="info">
             <view class="title-row">

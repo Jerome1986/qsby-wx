@@ -91,7 +91,7 @@ const props = withDefaults(
   gap: 20rpx;
   /* 封面与内容间距 */
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: #fef8e5;
   border-radius: 20rpx;
   @include customShadow();
   /* 卡片阴影 */

@@ -104,7 +104,7 @@ const selectedSort = (item: any) => {
     display: flex;
     align-items: center;
     gap: 8rpx;
-    font-size: 28rpx;
+    font-size: 24rpx;
     color: $qs-font-title;
 
     .cate-label {
@@ -114,6 +114,7 @@ const selectedSort = (item: any) => {
       .cate-icon {
         margin-right: 8rpx;
         font-weight: bold;
+        font-size: 24rpx;
       }
     }
   }

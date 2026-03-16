@@ -144,7 +144,7 @@ const sortedStoreList = computed(() => {
           <view class="top">
             <view class="left">
               <text class="iconfont icon-wode" style="margin-right: 8rpx; font-weight: bold"></text>
-              <view class="value" style="font-weight: bold">主理人计划</view>
+              <view class="value" style="font-weight: bold;color: #0B0A0A;">主理人计划</view>
             </view>
             <view class="right">
               <view class="text">加入主理人 享3大权益</view>
@@ -152,7 +152,7 @@ const sortedStoreList = computed(() => {
           </view>
           <view class="bottom">
             <view class="item" v-for="(item, index) in navBar" :key="index">
-              <image mode="aspectFit" :src="item.url" style="width: 66rpx; height: 66rpx"></image>
+              <image mode="aspectFit" :src="item.url" style="width: 40rpx; height: 40rpx"></image>
               <view class="info">{{ item.name }}</view>
             </view>
           </view>
@@ -230,9 +230,9 @@ const sortedStoreList = computed(() => {
   display: flex;
   flex-direction: column;
   margin: 24rpx 0;
-  background: linear-gradient(to left, rgba(255, 245, 210, 0.8), rgba(255, 246, 218, 0.8));
+  background: #fef8e5;
   border-radius: 30rpx;
-  height: 210rpx;
+  height: 160rpx;
   overflow: hidden;
   @include customShadow();
 
@@ -253,15 +253,15 @@ const sortedStoreList = computed(() => {
 
     .right {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       border-radius: 0 30rpx 0 0;
       flex: 1;
 
       .text {
+        font-size: 28rpx;
         font-weight: bold;
         color: $qs-font-title;
-        font-style: italic;
       }
     }
   }
@@ -275,14 +275,13 @@ const sortedStoreList = computed(() => {
 
     .item {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      gap: 16rpx;
 
       .info {
         margin-top: 8rpx;
         font-size: 24rpx;
-        color: $qs-font-dec2;
+        color: $qs-font-title;
       }
     }
   }
@@ -297,7 +296,7 @@ const sortedStoreList = computed(() => {
     gap: 20rpx;
     padding: 24rpx;
     margin-bottom: 24rpx;
-    background-color: #ffffff;
+    background-color: #fef8e5;
     border-radius: 20rpx;
     @include customShadow();
 

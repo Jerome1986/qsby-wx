@@ -9,7 +9,7 @@ defineProps<{
     <view
       style="width: 10rpx; height: 30rpx; border-radius: 5rpx; background-color: #ffb034"
     ></view>
-    <view style="color: #0b0a0a; margin-left: 15rpx">
+    <view style="color: #0b0a0a; margin-left: 15rpx;font-weight: bold;">
       {{ title }}
     </view>
   </view>

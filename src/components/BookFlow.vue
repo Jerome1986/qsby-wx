@@ -88,7 +88,7 @@ console.log(shopStore.shopInfo)
   gap: 50rpx;
   padding: 39rpx 37rpx;
   margin-top: 20rpx;
-  background: #ffffff;
+  background: #fef8e5;
   border-radius: 20rpx;
   @include customShadow();
 

@@ -49,7 +49,7 @@ const handleDetail = (productId: string) => {
               src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/jieshao.png">
             </image>
           </view>
-          <view class="nav-label">门店介绍</view>
+          <view class="nav-label" style="font-weight: bold;">门店介绍</view>
         </view>
         <view class="nav-item">
           <view class="nav-icon">
@@ -57,7 +57,7 @@ const handleDetail = (productId: string) => {
               src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/tuijian.png">
             </image>
           </view>
-          <view class="nav-label">周边旅游路线推荐</view>
+          <view class="nav-label" style="font-weight: bold;">周边推荐</view>
         </view>
       </view>
       <!-- 门店办理入住 -->
@@ -124,8 +124,8 @@ const handleDetail = (productId: string) => {
 
     .nav-item {
       flex: 1;
-      height: 173rpx;
-      background: #fff7e2;
+      height: 88rpx;
+      background: #fef8e5;
       border-radius: 30rpx;
       display: flex;
       align-items: center;
@@ -134,13 +134,13 @@ const handleDetail = (productId: string) => {
       @include customShadow();
 
       &:first-child .nav-icon {
-        width: 96rpx;
-        height: 81rpx;
+        width: 50rpx;
+        height: 50rpx;
       }
 
       &:last-child .nav-icon {
-        width: 73rpx;
-        height: 75rpx;
+        width: 40rpx;
+        height: 40rpx;
       }
 
       &:last-child .nav-label {
@@ -148,8 +148,9 @@ const handleDetail = (productId: string) => {
       }
 
       .nav-label {
-        font-size: 30rpx;
-        color: #0b0a0a;
+        font-size: 28rpx;
+        color: $qs-font-title;
+        font-weight: bold;
       }
     }
   }
@@ -162,7 +163,7 @@ const handleDetail = (productId: string) => {
     text-align: center;
     font-size: 30rpx;
     font-weight: 600;
-    color: $qs-brandColor;
+    color: $qs-font-title;
     background: #fff7e2;
     border-radius: 30rpx;
     @include customShadow();
@@ -175,7 +176,7 @@ const handleDetail = (productId: string) => {
       gap: 20rpx;
       padding: 24rpx;
       margin-bottom: 24rpx;
-      background-color: #ffffff;
+      background-color: #fef8e5;
       border-radius: 20rpx;
       @include customShadow();
 

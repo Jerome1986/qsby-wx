@@ -103,19 +103,12 @@ image {
   position: relative;
   height: 100vh;
   overflow: hidden;
-
-  background: linear-gradient(
-    135deg,
-    #ffe9a0 0%,
-    /* 明亮金黄 */ #fff3c4 40%,
-    /* 浅黄 */ #fffbeb 65%,
-    /* 奶黄白 */ #fffef8 80%,
-    /* 近乎纯白带暖调 */ #ffffff 100% /* 纯白 */
-  );
+  background-color: #ffeca1;
+ 
 }
 
 // 通用阴影（柔和立体卡片阴影）
 @mixin customShadow() {
-  box-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.03), 0 2rpx 6rpx rgba(0, 0, 0, 0.05),
-    0 4rpx 10rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 2rpx 1rpx 2rpx rgba(0, 0, 0, 0.3), 0 2rpx 6rpx rgba(0, 0, 0, 0.2),
+    0 4rpx 10rpx rgba(0, 0, 0, 0.3);
 }
