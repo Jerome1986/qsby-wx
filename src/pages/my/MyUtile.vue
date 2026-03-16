@@ -57,6 +57,14 @@ const groupQrUrl = ref('')
           <image class="icon" :src="item.icon" mode="aspectFit"></image>
           <view class="text">{{ item.text }}</view>
         </button>
+        <button
+          v-else-if="item.type === 'cooperate'"
+          class="share-btn"
+          open-type="contact"
+        >
+          <image class="icon" :src="item.icon" mode="aspectFit"></image>
+          <view class="text">{{ item.text }}</view>
+        </button>
         <view v-else class="utils-item-inner" @tap="handleGo(item.type)">
           <image class="icon" :src="item.icon" mode="aspectFit"></image>
           <view class="text">{{ item.text }}</view>
