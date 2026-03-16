@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
+import { ref } from 'vue';
 
+
+const cover = ref('https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/qiansubaiyuan.jpg')
 // 品牌配图（可替换为实际图片 URL）
 const brandImages = [
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg',
+
+  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/02.jpg',
+  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/03.jpg',
 ]
 </script>
 
@@ -16,7 +19,7 @@ const brandImages = [
       <!-- 封面 + 主标题 -->
       <view class="hero-card">
         <view class="hero-cover">
-          <image :src="brandImages[0]" mode="aspectFill" />
+          <image :src="cover" mode="aspectFill" />
           <view class="hero-mask"></view>
           <view class="hero-title">千宿百院</view>
           <view class="hero-subtitle">品牌介绍</view>

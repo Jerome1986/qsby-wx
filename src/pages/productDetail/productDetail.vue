@@ -145,6 +145,10 @@ onShareAppMessage((res) => {
                 <text>{{ formatTimestamp(detailData.time!, 2) }}</text>
               </view>
               <view class="address">
+                <text class="iconfont icon-fangzi"></text>
+                <text>{{ detailData.address_name }}</text>
+              </view>
+              <view class="address">
                 <text class="iconfont icon-address"></text>
                 <text>{{ detailData.event_address }}</text>
               </view>
@@ -253,7 +257,7 @@ onShareAppMessage((res) => {
     .cover {
       width: 192rpx;
       height: 215rpx;
-      background: #f7d11a;
+      background: $qs-font-dec;
       border-radius: 24rpx;
       overflow: hidden;
     }

@@ -270,16 +270,13 @@ onLoad(async (options: any) => {
             <image mode="aspectFill" :src="detailData.cover"></image>
           </view>
           <view class="info">
-            <!-- 标题和日期 -->
-            <view class="info-group">
+            <!-- 标题、行程日期、门店、地址 统一一组，垂直均分 -->
+            <view class="info-group info-group-rows">
               <view class="title">{{ detailData.title }}</view>
               <view class="row">
                 <text class="label">行程日期：</text>
                 <text class="text">{{ formatTimestamp(detailData.time!, 2) }}</text>
               </view>
-            </view>
-            <!-- 门店和地址 -->
-            <view class="info-group">
               <view class="row">
                 <text class="label">行程门店：</text>
                 <text class="text">{{ detailData.address_name }}</text>
@@ -405,22 +402,26 @@ onLoad(async (options: any) => {
       flex-direction: column;
       justify-content: space-between;
       flex: 1;
+      height: 215rpx;
       margin-left: 24rpx;
 
       .info-group {
+        &.info-group-rows {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
         .title {
           font-weight: bold;
-          font-size: 28rpx;
           color: $qs-font-title;
-          line-height: 1.4;
-          @include ellipsis(2);
+          @include ellipsis(1);
         }
 
         .row {
-          margin-top: 4rpx;
-          font-size: 22rpx;
-          line-height: 1.6;
-
+          font-size: 24rpx;
+          @include ellipsis(2);
           .label {
             color: $qs-font-dec2;
           }

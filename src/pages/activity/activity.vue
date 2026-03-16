@@ -120,7 +120,6 @@ const handleSend = () => {
 <style scoped lang="scss">
 /* 页面容器 */
 .activity {
-  padding: 24rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -133,6 +132,7 @@ const handleSend = () => {
 
   /* 顶部横幅 */
   .banner {
+    padding: 24rpx;
     width: 100%;
     height: 240rpx;
 
@@ -143,13 +143,15 @@ const handleSend = () => {
 
   /* 页面标题 */
   .title {
-    margin: 24rpx 0;
+    margin-bottom: 24rpx;
+    padding: 0 24rpx;
     color: $qs-font-title;
     font-weight: bold;
   }
 
   /* 行程列表 */
   .list {
+    padding: 0 24rpx;
     margin-top: 24rpx;
   }
 

@@ -132,7 +132,7 @@ const openCode = () => {
 }
 
 .content {
-  margin-top: 48rpx;
+  margin-top: 40rpx;
   padding: 24rpx;
 }
 </style>
