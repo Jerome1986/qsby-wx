@@ -70,7 +70,12 @@ const handleDetail = (productId: string) => {
         </view>
         <!--   门店商品列表   -->
         <view class="product-list">
-          <view class="product-item" v-for="(item, index) in shopDetailData?.product" :key="item._id"
+          <view v-if="!shopDetailData?.product?.length" class="empty">
+            <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+              mode="aspectFit"></image>
+            <text class="empty-text">暂无商品</text>
+          </view>
+          <view class="product-item" v-else v-for="(item, index) in shopDetailData?.product" :key="item._id"
             @tap="handleDetail(item._id)">
             <view class="product-cover">
               <image mode="aspectFill" :src="item.cover"></image>
@@ -172,6 +177,25 @@ const handleDetail = (productId: string) => {
 
   /* 门店商品列表 */
   .product-list {
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80rpx 0;
+
+      .empty-img {
+        width: 240rpx;
+        height: 240rpx;
+        margin-bottom: 24rpx;
+      }
+
+      .empty-text {
+        font-size: 28rpx;
+        color: $qs-font-dec;
+      }
+    }
+
     .product-item {
       display: flex;
       gap: 20rpx;

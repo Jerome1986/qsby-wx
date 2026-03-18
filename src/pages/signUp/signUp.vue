@@ -79,7 +79,7 @@ const detailGet = async (id: string, proType: OrderType) => {
 }
 
 // 是否使用代金券
-const useVoucher = ref(true)
+const useVoucher = ref(false)
 
 // 抵扣金额
 const discountAmount = computed(() => {
@@ -342,7 +342,7 @@ onLoad(async (options: any) => {
           <text class="label">实际费用</text>
           <text class="value">￥{{ realPayAmount }}</text>
         </view>
-        <view class="row discount" v-if="userStore.profile?.role === 'manager' && !useVoucher">
+        <view class="row discount" v-if="userStore.profile?.role === 'manager'">
           <text class="label">主理人折扣</text>
           <text class="value">-￥{{ detailData.commission?.toFixed(2) }}</text>
         </view>

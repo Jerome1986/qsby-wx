@@ -33,7 +33,7 @@ const noteList = [
 .note {
   padding: 39rpx 37rpx;
   margin-top: 20rpx;
-  background: #ffffff;
+  background: $qs-card-bg;
   border-radius: 20rpx;
   @include customShadow();
 
@@ -50,6 +50,7 @@ const noteList = [
         color: $qs-font-title;
         margin-bottom: 12rpx;
       }
+
       .note-content {
         font-size: 24rpx;
         color: $qs-font-dec;

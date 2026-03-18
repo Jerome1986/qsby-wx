@@ -24,7 +24,7 @@ const handleCallPhone = () => {
     success: (success) => {
     },
     fail: (fail) => {
-      uni.showToast({ icon: 'none', title: '未留电话' })
+      uni.showToast({ icon: 'none', title: '已取消/无法联系' })
     },
   })
 }

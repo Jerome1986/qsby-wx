@@ -74,6 +74,21 @@ const handleCall = () => {
   if (phone) uni.makePhoneCall({ phoneNumber: phone })
 }
 
+// 复制微信号
+const handleCopyWx = () => {
+  const wechat = orderDetail.value?.initiatorInfo?.wechat || ''
+  if (!wechat) return
+  uni.setClipboardData({
+    data: wechat,
+    success: () => {
+      uni.showToast({ icon: 'success', title: '微信号已复制' })
+    },
+    fail: () => {
+      uni.showToast({ icon: 'none', title: '复制失败，请重试' })
+    },
+  })
+}
+
 // 门店：拨打电话
 const handleShopCall = () => {
   const phone = orderDetail.value?.shopInfo?.phone || ''
@@ -272,15 +287,6 @@ onLoad((options?: { orderId?: string; type?: string }) => {
           </view>
         </view>
 
-        <!-- 使用提示（门店） -->
-        <!-- <view class="card tip-card" v-if=" orderDetail?.orderType === 'shop'">
-        <view class="section-header">
-          <view class="bar"></view>
-          <text class="section-title">使用提示</text>
-        </view>
-        <view class="tip-text">{{ orderDetail.usageTip }}</view>
-      </view> -->
-
         <!-- 活动发起人（行程、活动、项目） -->
         <view class="card" v-if="showInitiator">
           <view class="section-header">
@@ -300,9 +306,12 @@ onLoad((options?: { orderId?: string; type?: string }) => {
               <text class="label">手机</text>
               <text class="value">：{{ orderDetail?.initiatorInfo?.mobile }}</text>
             </view>
-            <view class="info-item">
-              <text class="label">微信</text>
-              <text class="value">：{{ orderDetail?.initiatorInfo?.wechat }}</text>
+            <view class="info-item info-item-wechat">
+              <view class="info-item-left">
+                <text class="label">微信</text>
+                <text class="value">：{{ orderDetail?.initiatorInfo?.wechat }}</text>
+              </view>
+              <view class="copy-btn" @tap.stop="handleCopyWx">复制</view>
             </view>
           </view>
         </view>
@@ -445,11 +454,11 @@ onLoad((options?: { orderId?: string; type?: string }) => {
     display: flex;
     align-items: center;
     gap: 6rpx;
-    font-size: 24rpx;
+    font-size: 28rpx;
     color: $qs-brandColor;
 
     .iconfont {
-      font-size: 28rpx;
+      font-size: 32rpx;
     }
   }
 }
@@ -588,12 +597,6 @@ onLoad((options?: { orderId?: string; type?: string }) => {
   }
 }
 
-/* 使用提示 */
-.tip-card .tip-text {
-  font-size: 28rpx;
-  color: $qs-font-dec;
-}
-
 /* 信息列表 */
 .info-list {
   .info-item {
@@ -606,6 +609,26 @@ onLoad((options?: { orderId?: string; type?: string }) => {
 
     .value {
       color: $qs-font-dec;
+    }
+
+    &.info-item-wechat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .info-item-left {
+        display: flex;
+        align-items: baseline;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .copy-btn {
+        flex-shrink: 0;
+        margin-left: 16rpx;
+        font-size: 26rpx;
+        color: $qs-brandColor;
+      }
     }
   }
 }

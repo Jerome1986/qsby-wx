@@ -176,7 +176,7 @@ onShareAppMessage((res) => {
               <view class="address">{{ detailData.event_address }}</view>
             </view>
             <view class="right"
-              @tap="openLocation(detailData.latitude as number, detailData.longitude as number, detailData.address_name, detailData.event_address)">
+              @tap="openLocation(detailData.latitude as number, detailData.longitude as number, detailData.address_name as string, detailData?.event_address as string)">
               <text class="iconfont icon-ditu"></text>
               <view class="text">地图</view>
             </view>

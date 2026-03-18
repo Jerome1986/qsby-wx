@@ -197,45 +197,47 @@ const handlePay = async () => {
   <view class="createOrder">
     <NavHead title="确认订单" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!-- 商品信息 -->
-      <view class="card product-row">
-        <text class="product-name">{{ productData?.name }}</text>
-        <text class="product-price">¥{{ productData?.price }}/晚</text>
-      </view>
-
-      <!-- 订单联系人 -->
-      <view class="card contact-card">
-        <view style="margin-bottom: 24rpx">
-          <NavTitle title="订单联系人"></NavTitle>
+      <view style="padding: 24rpx;">
+        <!-- 商品信息 -->
+        <view class="card product-row">
+          <text class="product-name">{{ productData?.name }}</text>
+          <text class="product-price">¥{{ productData?.price }}/晚</text>
         </view>
-        <uni-forms :modelValue="contactInfo" labelWidth="140rpx">
-          <uni-forms-item label="姓名" name="name">
-            <uni-easyinput v-model="contactInfo.name" placeholder="请输入姓名" :inputBorder="false" />
-          </uni-forms-item>
-          <uni-forms-item label="手机" name="phone">
-            <uni-easyinput v-model="contactInfo.phone" placeholder="请输入手机号" :inputBorder="false" type="number" />
-          </uni-forms-item>
-        </uni-forms>
-      </view>
 
-      <!-- 支付方式 -->
-      <PayMethod />
-
-      <!-- 代金券 -->
-      <Voucher v-if="userStore.profile?.role === 'manager'" :amount="userStore.profile.couponBalance"
-        v-model:useVoucher="useVoucher" />
-
-      <!-- 订单须知 -->
-      <view class="card notice-card">
-        <view style="margin-bottom: 24rpx">
-          <NavTitle title="订单须知"></NavTitle>
+        <!-- 订单联系人 -->
+        <view class="card contact-card">
+          <view style="margin-bottom: 24rpx">
+            <NavTitle title="订单联系人"></NavTitle>
+          </view>
+          <uni-forms :modelValue="contactInfo" labelWidth="140rpx">
+            <uni-forms-item label="姓名" name="name">
+              <uni-easyinput v-model="contactInfo.name" placeholder="请输入姓名" :inputBorder="false" />
+            </uni-forms-item>
+            <uni-forms-item label="手机" name="phone">
+              <uni-easyinput v-model="contactInfo.phone" placeholder="请输入手机号" :inputBorder="false" type="number" />
+            </uni-forms-item>
+          </uni-forms>
         </view>
-        <view class="notice-item" v-for="(item, index) in noticeList" :key="index">
-          <text>{{ index + 1 }}. {{ item }}</text>
-        </view>
-      </view>
 
-      <view style="height: 140rpx"></view>
+        <!-- 支付方式 -->
+        <PayMethod />
+
+        <!-- 代金券 -->
+        <Voucher v-if="userStore.profile?.role === 'manager'" :amount="userStore.profile.couponBalance"
+          v-model:useVoucher="useVoucher" />
+
+        <!-- 订单须知 -->
+        <view class="card notice-card">
+          <view style="margin-bottom: 24rpx">
+            <NavTitle title="订单须知"></NavTitle>
+          </view>
+          <view class="notice-item" v-for="(item, index) in noticeList" :key="index">
+            <text>{{ index + 1 }}. {{ item }}</text>
+          </view>
+        </view>
+
+        <view style="height: 140rpx"></view>
+      </view>
     </scroll-view>
 
     <!-- 底部操作栏 -->
@@ -265,12 +267,11 @@ const handlePay = async () => {
 
 .content {
   flex: 1;
-  padding: 24rpx;
 }
 
 /* 通用卡片 */
 .card {
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 20rpx;
   padding: 24rpx;
   margin-bottom: 24rpx;

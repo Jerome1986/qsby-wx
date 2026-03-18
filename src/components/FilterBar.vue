@@ -49,6 +49,7 @@ const selectedSort = (item: any) => {
 </script>
 
 <template>
+  <view class="filter-wrapper">
   <view class="filter-list">
     <!--   行程   -->
     <view class="filter-item" @tap="handleFilterCate">
@@ -72,28 +73,37 @@ const selectedSort = (item: any) => {
         style="font-size: 16rpx; color: #0b0a0a"></text>
     </view>
   </view>
-  <!--  分类弹框容器   -->
-  <view class="dropdown-wrapper" v-if="filterCateActive">
-    <view class="filterCate">
-      <view class="cate" :class="{ active: item.name === currentCateData }" v-for="item in cateData" :key="item._id"
-        @tap="selectedCate(item)">{{ item.name }}</view>
+  <!--  分类弹框 - 筛选下方弹出   -->
+  <view class="dialog-overlay" v-if="filterCateActive">
+    <view class="dialog-mask" @tap="filterCateActive = false"></view>
+    <view class="dialog-box" @tap.stop>
+      <view class="dialog-title">选择城市</view>
+      <view class="dialog-options filterCate">
+        <view class="option-item" :class="{ active: item.name === currentCateData }" v-for="item in cateData"
+          :key="item._id" @tap="selectedCate(item)">{{ item.name }}</view>
+      </view>
     </view>
-    <!-- 遮罩层（只在弹框下方） -->
-    <view class="mask" @tap="filterCateActive = false"></view>
   </view>
 
-  <!--  排序弹框容器   -->
-  <view class="dropdown-wrapper" v-if="filterSortActive">
-    <view class="filterSort">
-      <view class="sort-item" :class="{ active: item.cateName === currentSortData }" v-for="item in sortData"
-        :key="item._id" @tap="selectedSort(item)">{{ item.cateName }}</view>
+  <!--  排序弹框 - 筛选下方弹出   -->
+  <view class="dialog-overlay" v-if="filterSortActive">
+    <view class="dialog-mask" @tap="filterSortActive = false"></view>
+    <view class="dialog-box" @tap.stop>
+      <view class="dialog-title">门店类型</view>
+      <view class="dialog-options filterSort">
+        <view class="option-item" :class="{ active: item.cateName === currentSortData }" v-for="item in sortData"
+          :key="item._id" @tap="selectedSort(item)">{{ item.cateName }}</view>
+      </view>
     </view>
-    <!-- 遮罩层（只在弹框下方） -->
-    <view class="mask" @tap="filterSortActive = false"></view>
+  </view>
   </view>
 </template>
 
 <style scoped lang="scss">
+.filter-wrapper {
+  position: relative;
+}
+
 .filter-list {
   padding: 0 24rpx;
   display: flex;
@@ -120,58 +130,78 @@ const selectedSort = (item: any) => {
   }
 }
 
-/* 下拉容器 */
-.dropdown-wrapper {
-  position: relative;
-  padding-bottom: 20rpx;
-}
-
-/* 分类下拉 */
-.filterCate {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 40rpx;
-  padding: 24rpx;
+/* 弹框容器 - 筛选下方 */
+.dialog-overlay {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   z-index: 999;
-
-  .cate {
-    font-size: 28rpx;
-    color: $qs-font-title;
-
-    &.active {
-      color: #ff3b3b;
-    }
-  }
+  padding-top: 16rpx;
 }
 
-/* 排序下拉 */
-.filterSort {
+/* 对话框 - 白色底色，紧贴筛选下方 */
+.dialog-box {
   position: relative;
+  z-index: 999;
+  margin: 0 24rpx;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 全屏遮罩 - 弹框背后，点击关闭 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+}
+
+.dialog-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: $qs-font-title;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid $qs-border;
+}
+
+/* 选项区域 - 每个选项独立 */
+.dialog-options {
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
-  padding: 24rpx;
-  z-index: 999;
+  gap: 16rpx;
 
-  .sort-item {
-    font-size: 28rpx;
-    color: $qs-font-title;
-
-    &.active {
-      color: #ff3b3b;
-    }
+  &.filterCate {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* 遮罩层（只覆盖弹框下方区域） */
-.mask {
-  position: absolute;
-  left: -24rpx;
-  right: -24rpx;
-  top: 100%;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
+.option-item {
+  padding: 28rpx 32rpx;
+  font-size: 28rpx;
+  color: $qs-font-title;
+  background-color: #f8f8f8;
+  border-radius: 16rpx;
+  text-align: center;
+  border: 2rpx solid transparent;
+
+  &.active {
+    color: $qs-font-title;
+    background-color: rgba($qs-brandColor, 0.2);
+    border-color: $qs-brandColor;
+    font-weight: 600;
+  }
+}
+
+/* 排序为单列，每个选项独立一行 */
+.filterSort .option-item {
+  text-align: left;
 }
 </style>

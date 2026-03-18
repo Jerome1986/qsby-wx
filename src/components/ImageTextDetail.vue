@@ -29,7 +29,7 @@ withDefaults(defineProps<{
 
   .detail-content {
     padding: 30rpx;
-    background: #ffffff;
+    background: $qs-card-bg;
     border-radius: 20rpx;
     @include customShadow();
     overflow: hidden;

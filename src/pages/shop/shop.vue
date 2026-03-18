@@ -131,35 +131,37 @@ const sortedStoreList = computed(() => {
   <view class="shop">
     <NavHead title="自营门店" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
-      <!-- 顶部横幅 -->
-      <view class="banner">
-        <image mode="aspectFill"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/shopBanner2.png">
-        </image>
-      </view>
-      <!--  主理人权益  -->
-      <view class="section">
-        <NavTitle title="千宿百院/主理人计划"></NavTitle>
-        <view class="interests" @tap="handleRights">
-          <view class="top">
-            <view class="left">
-              <text class="iconfont icon-wode" style="margin-right: 8rpx; font-weight: bold"></text>
-              <view class="value" style="font-weight: bold;color: #0B0A0A;">主理人计划</view>
+      <view style="padding: 0 24rpx;">
+        <!-- 顶部横幅 -->
+        <view class="banner">
+          <image mode="heightFix"
+            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/shopBanner2.png">
+          </image>
+        </view>
+        <!--  主理人权益  -->
+        <view class="section">
+          <NavTitle title="千宿百院/主理人计划"></NavTitle>
+          <view class="interests" @tap="handleRights">
+            <view class="top">
+              <view class="left">
+                <text class="iconfont icon-wode" style="margin-right: 8rpx; font-weight: bold"></text>
+                <view class="value" style="font-weight: bold;color: #0B0A0A;">主理人计划</view>
+              </view>
+              <view class="right">
+                <view class="text">加入主理人 享3大权益</view>
+              </view>
             </view>
-            <view class="right">
-              <view class="text">加入主理人 享3大权益</view>
-            </view>
-          </view>
-          <view class="bottom">
-            <view class="item" v-for="(item, index) in navBar" :key="index">
-              <image mode="aspectFit" :src="item.url" style="width: 40rpx; height: 40rpx"></image>
-              <view class="info">{{ item.name }}</view>
+            <view class="bottom">
+              <view class="item" v-for="(item, index) in navBar" :key="index">
+                <image mode="aspectFit" :src="item.url" style="width: 40rpx; height: 40rpx"></image>
+                <view class="info">{{ item.name }}</view>
+              </view>
             </view>
           </view>
         </view>
-      </view>
-      <view class="section">
-        <NavTitle title="千宿百院/自营门店"></NavTitle>
+        <view class="section">
+          <NavTitle title="千宿百院/自营门店"></NavTitle>
+        </view>
       </view>
       <!--   筛选（不加padding，内部有遮罩）   -->
       <view class="filter">
@@ -168,7 +170,12 @@ const sortedStoreList = computed(() => {
       </view>
       <!--   门店列表   -->
       <view class="shopList">
-        <view class="shop-item" v-for="(item, index) in sortedStoreList" :key="item._id" @tap="handleDetail(item._id)">
+        <view v-if="sortedStoreList.length === 0" class="empty">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="aspectFit"></image>
+          <text class="empty-text">暂无门店</text>
+        </view>
+        <view class="shop-item" v-else v-for="(item, index) in sortedStoreList" :key="item._id" @tap="handleDetail(item._id)">
           <view class="cover">
             <image mode="aspectFill" :src="item.cover">
             </image>
@@ -181,7 +188,7 @@ const sortedStoreList = computed(() => {
             <view class="foot">
               <view class="distance" v-if="myLatitude && myLongitude">大约距您{{
                 formatDistance(getDistance(myLatitude, myLongitude, item.latitude as number, item.longitude as number))
-              }}</view>
+                }}</view>
               <view class="distance" v-else>暂时无法获取具体定位</view>
               <view class="btn">进店</view>
             </view>
@@ -209,16 +216,11 @@ const sortedStoreList = computed(() => {
 /* 顶部横幅 */
 .banner {
   margin: 24rpx 0;
-  padding: 0 24rpx;
-  height: 188rpx;
+  width: 100%;
+  height: 240rpx;
   border-radius: 30rpx;
   overflow: hidden;
 }
-
-.section {
-  padding: 0 24rpx;
-}
-
 
 /* 筛选区域（无padding，遮罩需全宽） */
 .filter {
@@ -290,6 +292,25 @@ const sortedStoreList = computed(() => {
 /* 门店列表 */
 .shopList {
   padding: 0 24rpx;
+
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80rpx 0;
+
+    .empty-img {
+      width: 240rpx;
+      height: 240rpx;
+      margin-bottom: 24rpx;
+    }
+
+    .empty-text {
+      font-size: 28rpx;
+      color: $qs-font-dec;
+    }
+  }
 
   .shop-item {
     display: flex;
