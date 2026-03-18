@@ -38,7 +38,7 @@ const goDetail = () => {
   margin-bottom: 24rpx;
   display: flex;
   padding: 24rpx;
-  background: #ffffff;
+  background: $qs-card-bg;
   border-radius: 30rpx;
   @include customShadow();
 

@@ -204,89 +204,91 @@ const handleSubmit = async () => {
   <view class="sendProject">
     <NavHead :title="pageTitle" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!-- 上传封面图 -->
-      <view class="updateCover" @tap="handleUpdateCover" v-if="!cover">
-        <view class="title">
-          <text class="iconfont icon-tupian" style="margin-right: 8rpx"></text>
-          <text>上传封面图片</text>
+      <view style="padding: 24rpx;">
+        <!-- 上传封面图 -->
+        <view class="updateCover" @tap="handleUpdateCover" v-if="!cover">
+          <view class="title">
+            <text class="iconfont icon-tupian" style="margin-right: 8rpx"></text>
+            <text>上传封面图片</text>
+          </view>
+          <view class="text">支持JPG、PNG格式，文件大小不超2.5MB</view>
         </view>
-        <view class="text">支持JPG、PNG格式，文件大小不超2.5MB</view>
-      </view>
-      <!-- 预览图 -->
-      <view class="cover" v-else @tap="handleUpdateCover">
-        <image :src="cover" mode="widthFix"></image>
-        <view class="cover-mask">
-          <text class="iconfont icon-tupian"></text>
-          <text>点击更换</text>
+        <!-- 预览图 -->
+        <view class="cover" v-else @tap="handleUpdateCover">
+          <image :src="cover" mode="widthFix"></image>
+          <view class="cover-mask">
+            <text class="iconfont icon-tupian"></text>
+            <text>点击更换</text>
+          </view>
         </view>
-      </view>
 
-      <!-- 表单 -->
-      <view class="formCard">
-        <uni-forms ref="formRef" :modelValue="formData" labelWidth="160rpx">
-          <uni-forms-item label="项目标题" name="title">
-            <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入项目主题" primaryColor="#ffd018"
-              trim />
-          </uni-forms-item>
-          <uni-forms-item label="行业类别" name="industry">
-            <uni-data-select v-model="formData.industry" :localdata="industryOptions"
-              placeholder="请选择"></uni-data-select>
-          </uni-forms-item>
-          <uni-forms-item label="合作方式" name="cooperationMode">
-            <uni-data-select v-model="formData.cooperationMode" :localdata="modeOptions"
-              placeholder="请选择"></uni-data-select>
-          </uni-forms-item>
-          <uni-forms-item label="合作规模" name="cooperationScale">
-            <uni-data-select v-model="formData.cooperationScale" :localdata="scaleOptions"
-              placeholder="请选择合作规模"></uni-data-select>
-          </uni-forms-item>
-          <!-- 行程地点 -->
-          <uni-forms-item label="行程地点" name="address_name">
-            <view class="location-row">
-              <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择行程地点"
-                primaryColor="#ffd018" disabled trim />
-              <view class="search-btn" @tap="changeLocal">搜索</view>
-            </view>
-          </uni-forms-item>
-          <!-- 行程地址 -->
-          <uni-forms-item label="行程地址" name="event_address">
-            <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请选择行程地址"
-              primaryColor="#ffd018" trim />
-          </uni-forms-item>
-          <uni-forms-item label="联系微信" name="wechat">
-            <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入项目联系微信" primaryColor="#ffd018"
-              trim />
-          </uni-forms-item>
-          <uni-forms-item label="联系电话" name="phone">
-            <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入项目联系电话" primaryColor="#ffd018"
-              type="number" trim />
-          </uni-forms-item>
-          <uni-forms-item label="项目介绍" name="introduction">
-            <view class="intro-row" v-show="!showIntroInput" @tap="showIntroInput = true">
-              <text class="intro-placeholder">去填写</text>
-            </view>
-          </uni-forms-item>
-          <wd-textarea v-if="showIntroInput" v-model="formData.introduction" placeholder="请输入项目介绍" :maxlength="500" />
-        </uni-forms>
-        <!-- 项目图片上传 -->
-        <view class="uploadSection">
-          <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6" multiple
-            @change="handleChange"></wd-upload>
+        <!-- 表单 -->
+        <view class="formCard">
+          <uni-forms ref="formRef" :modelValue="formData" labelWidth="160rpx">
+            <uni-forms-item label="项目标题" name="title">
+              <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入项目主题" primaryColor="#ffd018"
+                trim />
+            </uni-forms-item>
+            <uni-forms-item label="行业类别" name="industry">
+              <uni-data-select v-model="formData.industry" :localdata="industryOptions"
+                placeholder="请选择"></uni-data-select>
+            </uni-forms-item>
+            <uni-forms-item label="合作方式" name="cooperationMode">
+              <uni-data-select v-model="formData.cooperationMode" :localdata="modeOptions"
+                placeholder="请选择"></uni-data-select>
+            </uni-forms-item>
+            <uni-forms-item label="合作规模" name="cooperationScale">
+              <uni-data-select v-model="formData.cooperationScale" :localdata="scaleOptions"
+                placeholder="请选择合作规模"></uni-data-select>
+            </uni-forms-item>
+            <!-- 行程地点 -->
+            <uni-forms-item label="行程地点" name="address_name">
+              <view class="location-row">
+                <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择行程地点"
+                  primaryColor="#ffd018" disabled trim />
+                <view class="search-btn" @tap="changeLocal">搜索</view>
+              </view>
+            </uni-forms-item>
+            <!-- 行程地址 -->
+            <uni-forms-item label="行程地址" name="event_address">
+              <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请选择行程地址"
+                primaryColor="#ffd018" trim />
+            </uni-forms-item>
+            <uni-forms-item label="联系微信" name="wechat">
+              <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入项目联系微信"
+                primaryColor="#ffd018" trim />
+            </uni-forms-item>
+            <uni-forms-item label="联系电话" name="phone">
+              <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入项目联系电话"
+                primaryColor="#ffd018" type="number" trim />
+            </uni-forms-item>
+            <uni-forms-item label="项目介绍" name="introduction">
+              <view class="intro-row" v-show="!showIntroInput" @tap="showIntroInput = true">
+                <text class="intro-placeholder">去填写</text>
+              </view>
+            </uni-forms-item>
+            <wd-textarea v-if="showIntroInput" v-model="formData.introduction" placeholder="请输入项目介绍" :maxlength="500" />
+          </uni-forms>
+          <!-- 项目图片上传 -->
+          <view class="uploadSection">
+            <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6" multiple
+              @change="handleChange"></wd-upload>
+          </view>
+          <!-- 免责声明勾选 -->
+          <view class="agreement" @tap="agreed = !agreed">
+            <radio :checked="agreed" color="#ffd018" style="transform: scale(0.7)" />
+            <text class="agree-text">我已仔细阅读并同意</text>
+            <text class="agree-link" @tap.stop="handleNotice">《提交须知》</text>
+          </view>
+          <!-- 提交 / 保存 -->
+          <view class="submit">
+            <view class="submit-btn" @tap="handleSubmit">{{ submitBtnText }}</view>
+            <view class="submit-tip">{{ submitTip }}</view>
+          </view>
         </view>
-        <!-- 免责声明勾选 -->
-        <view class="agreement" @tap="agreed = !agreed">
-          <radio :checked="agreed" color="#ffd018" style="transform: scale(0.7)" />
-          <text class="agree-text">我已仔细阅读并同意</text>
-          <text class="agree-link" @tap.stop="handleNotice">《提交须知》</text>
-        </view>
-        <!-- 提交 / 保存 -->
-        <view class="submit">
-          <view class="submit-btn" @tap="handleSubmit">{{ submitBtnText }}</view>
-          <view class="submit-tip">{{ submitTip }}</view>
-        </view>
-      </view>
 
-      <view class="scroll-bottom-placeholder"></view>
+        <view class="scroll-bottom-placeholder"></view>
+      </view>
     </scroll-view>
   </view>
 </template>
@@ -301,7 +303,6 @@ const handleSubmit = async () => {
 
 .content {
   flex: 1;
-  padding: 24rpx 24rpx 120rpx;
 
   .scroll-bottom-placeholder {
     height: 20rpx;
@@ -319,7 +320,8 @@ const handleSubmit = async () => {
   border: 2rpx solid #e4e4e4;
   font-size: 28rpx;
   color: $qs-font-dec2;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
+  @include customShadow();
 }
 
 /* 封面图预览 */
@@ -360,7 +362,7 @@ const handleSubmit = async () => {
 .formCard {
   margin-top: 24rpx;
   padding: 0 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 20rpx;
   @include customShadow();
 

@@ -47,14 +47,14 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
       // 如果携带了商品链接直接跳转商品详情
       if (productId.value) {
         await uni.redirectTo({
-          url: `/pages/productDetail/productDetail?productId=${productId.value}`,
+          url: `/pages/productDetail/productDetail?productId=${productId.value}&proType=${proType.value}`,
         })
         return
       }
       // 如果携带了项目链接直接跳转项目详情
       if (projectId.value) {
         await uni.redirectTo({
-          url: `/pages/project/projectDetail?projectId=${projectId.value}`,
+          url: `/pages/project/projectDetail?projectId=${projectId.value}&proType=${proType.value}`,
         })
         return
       }
@@ -72,6 +72,7 @@ const freshCode = ref('')
 const inviterCode = ref('')
 const productId = ref('')
 const projectId = ref('')
+const proType = ref('')
 onLoad((options: any) => {
   // 进页面就重新获取code，防止过期
   uni.login({
@@ -95,6 +96,7 @@ onLoad((options: any) => {
   inviterCode.value = options.inviterCode
   productId.value = options.productId
   projectId.value = options.projectId
+  proType.value = options.proType
   setTimeout(() => {
     console.log('1秒后打印 inviterCode.value', inviterCode.value, 'and', options.inviterCode)
   }, 1000)

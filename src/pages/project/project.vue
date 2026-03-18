@@ -71,20 +71,22 @@ const handleGoDetail = (item: ProjectItem) => {
 <template>
   <view class="project">
     <NavHead title="有趣的项目" :show-back="true"></NavHead>
-    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false"
-      @scrolltolower="handleMore">
+    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
       <!--  发布  -->
       <view class="banner" @tap="handleSend">
         <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/project.png"
           mode="aspectFill"></image>
       </view>
       <!--   title   -->
-      <NavTitle title="发现有趣的项目"></NavTitle>
+      <view class="title">
+        <NavTitle title="发现有趣的项目"></NavTitle>
+      </view>
       <!--  项目列表  -->
       <view class="list" v-if="projectList.length > 0">
         <view class="list-item" v-for="item in projectList" :key="item._id" @tap="handleGoDetail(item)">
           <view class="cover">
-            <image mode="aspectFill" :src="item.cover || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg'">
+            <image mode="aspectFill"
+              :src="item.cover || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg'">
             </image>
           </view>
           <view class="info">
@@ -127,7 +129,6 @@ const handleGoDetail = (item: ProjectItem) => {
 
 <style scoped lang="scss">
 .project {
-  padding: 24rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -139,24 +140,35 @@ const handleGoDetail = (item: ProjectItem) => {
 
   /* 顶部横幅 */
   .banner {
-    margin-bottom: 24rpx;
+    padding: 0 24rpx;
+    margin: 24rpx 0;
     width: 100%;
     height: 240rpx;
-    overflow: hidden;
     border-radius: 30rpx;
+
+    image {
+      border-radius: 30rpx;
+    }
+  }
+
+  .title {
+    padding: 0 24rpx;
+    margin-bottom: 24rpx;
+    color: $qs-font-title;
+    font-weight: bold;
   }
 
   /* 项目列表 */
   .list {
+    padding: 0 24rpx;
     margin-top: 24rpx;
-    padding-bottom: 60rpx;
 
     .list-item {
       display: flex;
       gap: 20rpx;
       padding: 24rpx;
       margin-bottom: 24rpx;
-      background-color: #ffffff;
+      background-color: $qs-card-bg;
       border-radius: 30rpx;
       @include customShadow();
 
@@ -220,7 +232,7 @@ const handleGoDetail = (item: ProjectItem) => {
               background-color: $qs-brandColor;
               border-radius: 30rpx;
               font-size: 24rpx;
-              color: #ffffff;
+              color: $qs-font-title;
               white-space: nowrap;
             }
           }

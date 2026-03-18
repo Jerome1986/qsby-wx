@@ -32,36 +32,21 @@ const groupQrUrl = ref('')
       <view class="qr-popup" @tap.stop>
         <view class="qr-popup-title">同城社群</view>
         <view class="qr-placeholder">
-          <image
-            class="qr-img"
+          <image class="qr-img"
             :src="groupQrUrl || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48cmVjdCBmaWxsPSIjZmZkMDE4IiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjNlbSIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyNCI+54mI55qE57O757uf5LqM5qC3PC90ZXh0Pjwvc3ZnPg=='"
-            mode="aspectFit"
-            show-menu-by-longpress
-          />
+            mode="aspectFit" show-menu-by-longpress />
         </view>
         <view class="qr-popup-tip">长按图片可保存</view>
         <view class="qr-popup-close" @tap="closeGroupQr">关闭</view>
       </view>
     </view>
     <view class="utils">
-      <view
-        v-for="(item, index) in utilsData"
-        :key="index"
-        class="utils-item"
-      >
-        <button
-          v-if="item.type === 'share'"
-          class="share-btn"
-          open-type="share"
-        >
+      <view v-for="(item, index) in utilsData" :key="index" class="utils-item">
+        <button v-if="item.type === 'share'" class="share-btn" open-type="share">
           <image class="icon" :src="item.icon" mode="aspectFit"></image>
           <view class="text">{{ item.text }}</view>
         </button>
-        <button
-          v-else-if="item.type === 'cooperate'"
-          class="share-btn"
-          open-type="contact"
-        >
+        <button v-else-if="item.type === 'cooperate'" class="share-btn" open-type="contact">
           <image class="icon" :src="item.icon" mode="aspectFit"></image>
           <view class="text">{{ item.text }}</view>
         </button>
@@ -78,9 +63,9 @@ const groupQrUrl = ref('')
 .myUtils {
   margin-top: 30rpx;
   padding: 26rpx 30rpx;
-  background: #ffffff;
+  background: #fef8e5;
   border-radius: 30rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  @include customShadow();
 
   .utils {
     margin-top: 30rpx;

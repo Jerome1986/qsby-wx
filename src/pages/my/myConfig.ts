@@ -4,24 +4,28 @@ import type { OrderStatus } from '@/types/OrderItem'
 // 功能区数据
 export const functionData: FeatureItem[] = [
   {
-    icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/friend.png',
+    icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/frirend/friend.png',
     text: '我的好友',
     type: 'friend',
+    iconSize: 58,
   },
   {
     icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/money.png',
     text: '我的钱包',
     type: 'wallet',
+    iconSize: 60,
   },
   {
     icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/voucher.png',
     text: '代金券',
     type: 'voucher',
+    iconSize: 60,
   },
   {
     icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/score.png',
     text: '我的积分',
     type: 'score',
+    iconSize: 60,
   },
 ]
 

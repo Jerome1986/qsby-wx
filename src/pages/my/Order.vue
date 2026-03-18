@@ -34,9 +34,9 @@ const handleAll = (status: string) => {
   margin-top: 30rpx;
   padding: 24rpx 30rpx;
   height: 232rpx;
-  background-color: #ffffff;
+  background-color: #fef8e5;
   border-radius: 30rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  @include customShadow();
 
   .order-head {
     display: flex;

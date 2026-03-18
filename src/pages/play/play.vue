@@ -140,9 +140,12 @@ const handleSend = () => {
 
   /* 顶部横幅 */
   .banner {
-  padding: 24rpx;
+    padding: 0 24rpx;
+    margin: 24rpx 0;
     width: 100%;
     height: 240rpx;
+    border-radius: 30rpx;
+
 
     image {
       border-radius: 30rpx;

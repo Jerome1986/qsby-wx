@@ -110,6 +110,7 @@ const openCode = () => {
 
   /*核销扫码*/
   .code {
+    margin-top: 40rpx;
     display: flex;
     justify-content: center;
     align-items: center;

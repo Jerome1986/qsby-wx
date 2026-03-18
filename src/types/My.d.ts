@@ -4,6 +4,7 @@ export interface FeatureItem {
   icon: string
   text: string
   type: FeatureType
+  iconSize?: number // 可选，单位 rpx
 }
 
 // 我的工具页面类型

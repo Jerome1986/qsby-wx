@@ -115,19 +115,21 @@ const handleBalance = async () => {
   <view class="myWallet">
     <NavHead title="我的钱包" :show-back="true"></NavHead>
     <!--  金额信息  -->
-    <view class="userMoney">
-      <view class="top">
-        <view class="user">
-          <image class="avatar" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png"
-            mode="aspectFit"></image>
-          <view class="nickname">{{ userStore.profile?.nickname }}</view>
+    <view style="padding: 0 24rpx;">
+      <view class="userMoney">
+        <view class="top">
+          <view class="user">
+            <image class="avatar" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png"
+              mode="aspectFit"></image>
+            <view class="nickname">{{ userStore.profile?.nickname }}</view>
+          </view>
+          <view class="money">￥{{ userStore.profile?.balance }}</view>
         </view>
-        <view class="money">￥{{ userStore.profile?.balance }}</view>
-      </view>
-      <!--  底部体现按钮  -->
-      <view class="bottom">
-        <view class="label">可提现金额 (元)</view>
-        <view class="btn" @tap="handleBalance">去提现</view>
+        <!--  底部体现按钮  -->
+        <view class="bottom">
+          <view class="label">可提现金额 (元)</view>
+          <view class="btn" @tap="handleBalance">去提现</view>
+        </view>
       </view>
     </view>
     <!--  切换TAB  -->
@@ -142,19 +144,23 @@ const handleBalance = async () => {
     <!--  提现记录  -->
     <scroll-view v-show="activeTab === 'withdraw'" class="scroll-view" :scroll-y="true" :enhanced="true"
       :show-scrollbar="false">
-      <CashRecord :withdrawListData="withdrawListData"></CashRecord>
+      <view style="padding: 0 24rpx;">
+        <CashRecord :withdrawListData="withdrawListData"></CashRecord>
+      </view>
     </scroll-view>
 
     <!--  收入记录  -->
     <scroll-view v-show="activeTab === 'income'" class="scroll-view" :scroll-y="true" :enhanced="true"
       :show-scrollbar="false">
-      <Record v-if="listData.length" :fields="fields" :list-data="listData"></Record>
-      <view v-else class="empty">
-        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
-          mode="widthFix"></image>
-        <text class="empty-text">暂无数据</text>
+      <view style="padding:0 24rpx;">
+        <Record v-if="listData.length" :fields="fields" :list-data="listData"></Record>
+        <view v-else class="empty">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="widthFix"></image>
+          <text class="empty-text">暂无数据</text>
+        </view>
+        <view style="height: 40rpx;"></view>
       </view>
-      <view style="height: 40rpx;"></view>
     </scroll-view>
   </view>
 </template>
@@ -163,7 +169,6 @@ const handleBalance = async () => {
 .myWallet {
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
 
@@ -182,6 +187,7 @@ const handleBalance = async () => {
 
     /*用户*/
     .top {
+
       .user {
         margin-bottom: 36rpx;
         display: flex;
@@ -225,7 +231,7 @@ const handleBalance = async () => {
         line-height: 48rpx;
         border-radius: 24rpx;
         font-size: 24rpx;
-        color: #ffda00;
+        color: $qs-brandColor;
         background-color: #121313;
       }
     }
@@ -233,6 +239,7 @@ const handleBalance = async () => {
 
   /*tab*/
   .tap {
+    padding: 0 24rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -260,6 +267,7 @@ const handleBalance = async () => {
 
   /*日期选择*/
   .my-select {
+    padding: 0 24rpx;
     width: 100%;
     margin: 20rpx 0;
     @include customSelected();

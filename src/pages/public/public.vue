@@ -30,124 +30,126 @@ onLoad((options) => {
     <NavHead :title="title" :show-back="true"></NavHead>
 
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!--  上传封面图    -->
-      <view class="updateCover" @tap="handleUpdateCover" v-if="!cover">
-        <view class="title">
-          <text class="iconfont icon-tupian" style="margin-right: 8rpx"></text>
-          <text>上传封面图片</text>
+      <view style="padding: 24rpx;">
+        <!--  上传封面图    -->
+        <view class="updateCover" @tap="handleUpdateCover" v-if="!cover">
+          <view class="title">
+            <text class="iconfont icon-tupian" style="margin-right: 8rpx"></text>
+            <text>上传封面图片</text>
+          </view>
+          <view class="text">支持JPG、PNG格式，文件大小不超过2.5MB</view>
         </view>
-        <view class="text">支持JPG、PNG格式，文件大小不超过2.5MB</view>
-      </view>
-      <!--  预览图   -->
-      <view class="cover" v-else @tap="handleUpdateCover">
-        <image :src="cover" mode="widthFix"></image>
-        <view class="cover-mask">
-          <text class="iconfont icon-tupian"></text>
-          <text>点击更换</text>
+        <!--  预览图   -->
+        <view class="cover" v-else @tap="handleUpdateCover">
+          <image :src="cover" mode="widthFix"></image>
+          <view class="cover-mask">
+            <text class="iconfont icon-tupian"></text>
+            <text>点击更换</text>
+          </view>
         </view>
-      </view>
-      <!--  表单内容  -->
-      <view class="formCard">
-        <uni-forms ref="formRef" :modelValue="formData" labelWidth="160rpx">
-          <!-- 行程主题 -->
-          <uni-forms-item label="行程主题" name="title">
-            <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入行程主题" primaryColor="#ffd018"
-              trim />
-          </uni-forms-item>
-          <!-- 行程类型 -->
-          <uni-forms-item label="行程类型" name="type">
-            <uni-data-select v-model="formData.type" :localdata="typeOptions" placeholder="请选择"
-              mode="none"></uni-data-select>
-          </uni-forms-item>
-          <!-- 行程时间 -->
-          <uni-forms-item label="行程时间" name="time">
-            <view class="time">
-              <wd-datetime-picker v-model="pickerTime" :min-date="minDate" :displayFormat="displayFormat" label=""
-                placeholder="请选择行程开始日期" confirmButtonText="选择" />
-            </view>
-          </uni-forms-item>
-          <!-- 行程地点 -->
-          <uni-forms-item label="行程地点" name="location">
-            <view class="location-row">
-              <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择行程地点"
-                primaryColor="#ffd018" disabled trim />
-              <view class="search-btn" @tap="changeLocal">搜索</view>
-            </view>
-          </uni-forms-item>
-          <!-- 行程地址 -->
-          <uni-forms-item label="行程地址" name="address">
-            <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请输入行程地址"
-              primaryColor="#ffd018" trim />
-          </uni-forms-item>
-          <!-- 联系微信 -->
-          <uni-forms-item label="联系微信" name="wechat">
-            <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入行程联系微信" primaryColor="#ffd018"
-              trim />
-          </uni-forms-item>
-          <!-- 联系电话 -->
-          <uni-forms-item label="联系电话" name="phone">
-            <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入行程联系电话" primaryColor="#ffd018"
-              type="number" trim />
-          </uni-forms-item>
-          <!-- 人数限制 -->
-          <uni-forms-item label="人数限制" name="maxPeople">
-            <view class="number-input">
-              <uni-easyinput v-model="formData.maxPeople" :inputBorder="false" placeholder="请输入最高人数"
-                primaryColor="#ffd018" trim type="number" />
-              <text class="unit">人</text>
-            </view>
-          </uni-forms-item>
-          <!-- 男士报名 -->
-          <uni-forms-item label="男士报名" name="maleCount">
-            <view class="number-input">
-              <uni-easyinput v-model="formData.maleCount" :inputBorder="false" placeholder="可手动输入已报名男士数量"
-                primaryColor="#ffd018" trim type="number" />
-              <text class="unit">人</text>
-            </view>
-          </uni-forms-item>
-          <!-- 女士报名 -->
-          <uni-forms-item label="女士报名" name="femaleCount">
-            <view class="number-input">
-              <uni-easyinput v-model="formData.femaleCount" :inputBorder="false" placeholder="可手动输入已报名女士数量"
-                primaryColor="#ffd018" trim type="number" />
-              <text class="unit">人</text>
-            </view>
-          </uni-forms-item>
-          <!-- 用户报名费用 -->
-          <uni-forms-item label="报名费用" name="userFee">
-            <uni-easyinput v-model="formData.userFee" :inputBorder="false" placeholder="请输入报名费用" primaryColor="#ffd018"
-              type="number" trim />
-          </uni-forms-item>
-          <!-- 主理人佣金 -->
-          <uni-forms-item label="主理人佣金" name="commission">
-            <uni-easyinput v-model="formData.commission" :inputBorder="false" placeholder="请输入主理人佣金"
-              primaryColor="#ffd018" type="number" trim />
-          </uni-forms-item>
-          <!-- 行程需求 -->
-          <uni-forms-item label="行程需求" name="requirement">
-            <view class="requirement-row" v-show="!showRequirementInput" @tap="showRequirementInput = true">
-              <text class="requirement-placeholder">去填写</text>
-            </view>
-          </uni-forms-item>
-          <wd-textarea v-if="showRequirementInput" v-model="formData.requirement" placeholder="请输入行程需求"
-            :maxlength="500" />
-        </uni-forms>
-      </view>
-      <!-- 行程图片上传 -->
-      <view class="contentUpdateImage">
-        <view class="contentUpdateImage-header">
-          <text>行程图片</text>
+        <!--  表单内容  -->
+        <view class="formCard">
+          <uni-forms ref="formRef" :modelValue="formData" labelWidth="160rpx">
+            <!-- 行程主题 -->
+            <uni-forms-item label="行程主题" name="title">
+              <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入行程主题" primaryColor="#ffd018"
+                trim />
+            </uni-forms-item>
+            <!-- 行程类型 -->
+            <uni-forms-item label="行程类型" name="type">
+              <uni-data-select v-model="formData.type" :localdata="typeOptions" placeholder="请选择"
+                mode="none"></uni-data-select>
+            </uni-forms-item>
+            <!-- 行程时间 -->
+            <uni-forms-item label="行程时间" name="time">
+              <view class="time">
+                <wd-datetime-picker v-model="pickerTime" :min-date="minDate" :displayFormat="displayFormat" label=""
+                  placeholder="请选择行程开始日期" confirmButtonText="选择" />
+              </view>
+            </uni-forms-item>
+            <!-- 行程地点 -->
+            <uni-forms-item label="行程地点" name="location">
+              <view class="location-row">
+                <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择行程地点"
+                  primaryColor="#ffd018" disabled trim />
+                <view class="search-btn" @tap="changeLocal">搜索</view>
+              </view>
+            </uni-forms-item>
+            <!-- 行程地址 -->
+            <uni-forms-item label="行程地址" name="address">
+              <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请输入行程地址"
+                primaryColor="#ffd018" trim />
+            </uni-forms-item>
+            <!-- 联系微信 -->
+            <uni-forms-item label="联系微信" name="wechat">
+              <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入行程联系微信"
+                primaryColor="#ffd018" trim />
+            </uni-forms-item>
+            <!-- 联系电话 -->
+            <uni-forms-item label="联系电话" name="phone">
+              <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入行程联系电话"
+                primaryColor="#ffd018" type="number" trim />
+            </uni-forms-item>
+            <!-- 人数限制 -->
+            <uni-forms-item label="人数限制" name="maxPeople">
+              <view class="number-input">
+                <uni-easyinput v-model="formData.maxPeople" :inputBorder="false" placeholder="请输入最高人数"
+                  primaryColor="#ffd018" trim type="number" />
+                <text class="unit">人</text>
+              </view>
+            </uni-forms-item>
+            <!-- 男士报名 -->
+            <uni-forms-item label="男士报名" name="maleCount">
+              <view class="number-input">
+                <uni-easyinput v-model="formData.maleCount" :inputBorder="false" placeholder="可手动输入已报名男士数量"
+                  primaryColor="#ffd018" trim type="number" />
+                <text class="unit">人</text>
+              </view>
+            </uni-forms-item>
+            <!-- 女士报名 -->
+            <uni-forms-item label="女士报名" name="femaleCount">
+              <view class="number-input">
+                <uni-easyinput v-model="formData.femaleCount" :inputBorder="false" placeholder="可手动输入已报名女士数量"
+                  primaryColor="#ffd018" trim type="number" />
+                <text class="unit">人</text>
+              </view>
+            </uni-forms-item>
+            <!-- 用户报名费用 -->
+            <uni-forms-item label="报名费用" name="userFee">
+              <uni-easyinput v-model="formData.userFee" :inputBorder="false" placeholder="请输入报名费用"
+                primaryColor="#ffd018" type="number" trim />
+            </uni-forms-item>
+            <!-- 主理人佣金 -->
+            <uni-forms-item label="主理人佣金" name="commission">
+              <uni-easyinput v-model="formData.commission" :inputBorder="false" placeholder="请输入主理人佣金"
+                primaryColor="#ffd018" type="number" trim />
+            </uni-forms-item>
+            <!-- 行程需求 -->
+            <uni-forms-item label="行程需求" name="requirement">
+              <view class="requirement-row" v-show="!showRequirementInput" @tap="showRequirementInput = true">
+                <text class="requirement-placeholder">去填写</text>
+              </view>
+            </uni-forms-item>
+            <wd-textarea v-if="showRequirementInput" v-model="formData.requirement" placeholder="请输入行程需求"
+              :maxlength="500" />
+          </uni-forms>
         </view>
-        <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6" multiple
-          @change="handleChange"></wd-upload>
-        <view class="contentUpdateImage-tip">最多上传6张，支持JPG、PNG格式</view>
+        <!-- 行程图片上传 -->
+        <view class="contentUpdateImage">
+          <view class="contentUpdateImage-header">
+            <text>行程图片</text>
+          </view>
+          <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6" multiple
+            @change="handleChange"></wd-upload>
+          <view class="contentUpdateImage-tip">最多上传6张，支持JPG、PNG格式</view>
+        </view>
+        <!-- 提交 -->
+        <view class="submit">
+          <view class="submit-btn" @tap="handleSubmit">{{ isEditMode ? '保存修改' : '提交审核' }}</view>
+        </view>
+        <!-- 底部占位 -->
+        <view class="scroll-bottom-placeholder"></view>
       </view>
-      <!-- 提交 -->
-      <view class="submit">
-        <view class="submit-btn" @tap="handleSubmit">{{ isEditMode ? '保存修改' : '提交审核' }}</view>
-      </view>
-      <!-- 底部占位 -->
-      <view class="scroll-bottom-placeholder"></view>
     </scroll-view>
   </view>
 </template>
@@ -155,6 +157,7 @@ onLoad((options) => {
 <style scoped lang="scss">
 /* 页面容器 */
 .public {
+  padding-bottom: 60rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -164,7 +167,6 @@ onLoad((options) => {
 /* 内容区域 */
 .content {
   flex: 1;
-  padding: 24rpx 24rpx 120rpx;
 
   .scroll-bottom-placeholder {
     height: 20rpx;
@@ -180,8 +182,7 @@ onLoad((options) => {
   height: 219rpx;
   border-radius: 20rpx;
   background-color: rgba(255, 255, 255, 0.5);
-  border: 2rpx dashed #cdcdcd;
-  box-shadow: inset 0 0 20rpx rgba(255, 208, 24, 0.1);
+  @include customShadow();
 
   .title {
     font-size: 28rpx;
@@ -225,7 +226,7 @@ onLoad((options) => {
     align-items: center;
     background: rgba(0, 0, 0, 0.4);
     color: #ffffff;
-    font-size: 22rpx;
+    font-size: 24rpx;
 
     .iconfont {
       font-size: 40rpx;
@@ -382,7 +383,6 @@ onLoad((options) => {
 .contentUpdateImage {
   margin-top: 24rpx;
   padding: 24rpx;
-  border-bottom: 1px solid #f5f5f5;
 
   .contentUpdateImage-header {
     display: flex;
@@ -414,7 +414,6 @@ onLoad((options) => {
 
   :deep(.is-add) {
     border-radius: 12rpx;
-    background-color: #fafafa;
   }
 
   :deep(.file-picker__progress) {

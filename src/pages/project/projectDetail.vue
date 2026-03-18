@@ -155,7 +155,7 @@ onShareAppMessage((res) => {
     <NavHead title="项目详情" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <view v-if="loading" class="loading">加载中...</view>
-      <template v-else-if="detailData">
+      <view v-else-if="detailData" style="padding: 24rpx;">
         <!-- 产品信息 + 位置信息（恢复原布局） -->
         <view class="product-card">
           <view class="product-top">
@@ -206,7 +206,7 @@ onShareAppMessage((res) => {
           </view>
           <view v-if="!detailData.introduction && !detailData.images?.length" class="empty-tip">暂无介绍</view>
         </view>
-      </template>
+      </view>
       <view v-else class="empty">项目不存在</view>
 
       <!-- 底部占位 -->
@@ -231,9 +231,9 @@ onShareAppMessage((res) => {
 <style scoped lang="scss">
 /* 页面容器（与 productDetail 同步） */
 .projectDetail {
+  padding-bottom: 180rpx;
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 180rpx;
   height: 100%;
   @include page-background();
 }
@@ -260,7 +260,7 @@ onShareAppMessage((res) => {
 /* 产品信息 + 位置信息卡片（恢复原布局） */
 .product-card {
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 
@@ -348,7 +348,7 @@ onShareAppMessage((res) => {
 .activity {
   margin-top: 24rpx;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 

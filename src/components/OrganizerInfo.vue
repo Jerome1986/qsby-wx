@@ -62,7 +62,7 @@ const handlePhone = () => {
 .organizer {
   margin-top: 24rpx;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 

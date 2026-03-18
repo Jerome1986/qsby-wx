@@ -263,77 +263,77 @@ onLoad(async (options: any) => {
   <view class="signUp">
     <NavHead title="报名信息" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!--  商品信息  -->
-      <view class="productInfo">
-        <view class="top">
-          <view class="cover">
-            <image mode="aspectFill" :src="detailData.cover"></image>
-          </view>
-          <view class="info">
-            <!-- 标题、行程日期、门店、地址 统一一组，垂直均分 -->
-            <view class="info-group info-group-rows">
-              <view class="title">{{ detailData.title }}</view>
-              <view class="row">
-                <text class="label">行程日期：</text>
-                <text class="text">{{ formatTimestamp(detailData.time!, 2) }}</text>
-              </view>
-              <view class="row">
-                <text class="label">行程门店：</text>
-                <text class="text">{{ detailData.address_name }}</text>
-              </view>
-              <view class="row">
-                <text class="label">行程地址：</text>
-                <text class="text">{{ detailData.event_address }}</text>
+      <view style="padding: 24rpx;">
+        <!--  商品信息  -->
+        <view class="productInfo">
+          <view class="top">
+            <view class="cover">
+              <image mode="aspectFill" :src="detailData.cover"></image>
+            </view>
+            <view class="info">
+              <!-- 标题、行程日期、门店、地址 统一一组，垂直均分 -->
+              <view class="info-group info-group-rows">
+                <view class="title">{{ detailData.title }}</view>
+                <view class="row">
+                  <text class="label">行程日期：</text>
+                  <text class="text">{{ formatTimestamp(detailData.time!, 2) }}</text>
+                </view>
+                <view class="row">
+                  <text class="label">行程门店：</text>
+                  <text class="text">{{ detailData.address_name }}</text>
+                </view>
+                <view class="row">
+                  <text class="label">行程地址：</text>
+                  <text class="text">{{ detailData.event_address }}</text>
+                </view>
               </view>
             </view>
           </view>
+          <view class="price">
+            <view class="label">行程报名费用</view>
+            <view class="value">￥{{ detailData.userFee?.toFixed(2) }}</view>
+          </view>
         </view>
-        <view class="price">
-          <view class="label">行程报名费用</view>
-          <view class="value">￥{{ detailData.userFee?.toFixed(2) }}</view>
+        <!--  报名人信息  -->
+        <view class="section-title">报名人信息</view>
+        <view class="userInfo">
+          <uni-forms ref="formRef" :modelValue="formData" labelWidth="140rpx">
+            <uni-forms-item label="昵称" name="nickname">
+              <uni-easyinput v-model="formData.nickname" :inputBorder="false" placeholder="代用名" primaryColor="#ffd018"
+                trim />
+            </uni-forms-item>
+            <uni-forms-item label="性别" name="gender">
+              <radio-group @change="(e: any) => (formData.gender = e.detail.value)">
+                <label class="radio-label">
+                  <radio value="男" :checked="formData.gender === 1" color="#ffd018" />
+                  <text>男</text>
+                </label>
+                <label class="radio-label">
+                  <radio value="女" :checked="formData.gender === 2" color="#ffd018" />
+                  <text>女</text>
+                </label>
+              </radio-group>
+            </uni-forms-item>
+            <uni-forms-item label="手机号" name="phone">
+              <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请填写正确的手机号码"
+                primaryColor="#ffd018" type="number" trim />
+            </uni-forms-item>
+          </uni-forms>
         </view>
+        <!-- 支付方式 -->
+        <PayMethod />
+        <!--  温馨提示  -->
+        <view class="tips">
+          <view class="tips-title">温馨提示：</view>
+          <view class="tips-item">1、报名成功后，请按照行程安排准时到达指定集合地点，逾期未到视为自动放弃，费用不予退还。</view>
+          <view class="tips-item">2、如需取消报名，请提前24小时联系组织方，逾期取消将扣除相应手续费。</view>
+          <view class="tips-item">3、活动期间请遵守组织方安排，注意人身及财产安全，如遇突发情况请及时与工作人员沟通。</view>
+          <view class="tips-item">4、请确保所填写的联系方式真实有效，以便组织方及时与您取得联系。</view>
+          <view class="tips-item">5、本平台仅提供信息展示及报名服务，活动最终解释权归组织方所有。</view>
+        </view>
+        <!-- 底部占位 -->
+        <view class="scroll-bottom-placeholder"></view>
       </view>
-      <!--  报名人信息  -->
-      <view class="section-title">报名人信息</view>
-      <view class="userInfo">
-        <uni-forms ref="formRef" :modelValue="formData" labelWidth="140rpx">
-          <uni-forms-item label="昵称" name="nickname">
-            <uni-easyinput v-model="formData.nickname" :inputBorder="false" placeholder="代用名" primaryColor="#ffd018"
-              trim />
-          </uni-forms-item>
-          <uni-forms-item label="性别" name="gender">
-            <radio-group @change="(e: any) => (formData.gender = e.detail.value)">
-              <label class="radio-label">
-                <radio value="男" :checked="formData.gender === 1" color="#ffd018" />
-                <text>男</text>
-              </label>
-              <label class="radio-label">
-                <radio value="女" :checked="formData.gender === 2" color="#ffd018" />
-                <text>女</text>
-              </label>
-            </radio-group>
-          </uni-forms-item>
-          <uni-forms-item label="手机号" name="phone">
-            <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请填写正确的手机号码" primaryColor="#ffd018"
-              type="number" trim />
-          </uni-forms-item>
-        </uni-forms>
-      </view>
-      <!-- 支付方式 -->
-      <PayMethod />
-      <!-- 代金券 -->
-      <Voucher :amount="userStore.profile?.couponBalance ?? 0" v-model:useVoucher="useVoucher" />
-      <!--  温馨提示  -->
-      <view class="tips">
-        <view class="tips-title">温馨提示：</view>
-        <view class="tips-item">1、报名成功后，请按照行程安排准时到达指定集合地点，逾期未到视为自动放弃，费用不予退还。</view>
-        <view class="tips-item">2、如需取消报名，请提前24小时联系组织方，逾期取消将扣除相应手续费。</view>
-        <view class="tips-item">3、活动期间请遵守组织方安排，注意人身及财产安全，如遇突发情况请及时与工作人员沟通。</view>
-        <view class="tips-item">4、请确保所填写的联系方式真实有效，以便组织方及时与您取得联系。</view>
-        <view class="tips-item">5、本平台仅提供信息展示及报名服务，活动最终解释权归组织方所有。</view>
-      </view>
-      <!-- 底部占位 -->
-      <view class="scroll-bottom-placeholder"></view>
     </scroll-view>
     <!--  底部操作区域  -->
     <view class="signUpBar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
@@ -356,9 +356,9 @@ onLoad(async (options: any) => {
 <style scoped lang="scss">
 /* 页面容器 */
 .signUp {
+  padding-bottom: 180rpx;
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 180rpx;
   height: 100%;
   @include page-background();
 }
@@ -375,7 +375,7 @@ onLoad(async (options: any) => {
 /* 商品信息卡片 */
 .productInfo {
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 
@@ -422,6 +422,7 @@ onLoad(async (options: any) => {
         .row {
           font-size: 24rpx;
           @include ellipsis(2);
+
           .label {
             color: $qs-font-dec2;
           }
@@ -466,7 +467,7 @@ onLoad(async (options: any) => {
 .userInfo {
   margin-bottom: 24rpx;
   padding: 0 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 
@@ -536,7 +537,7 @@ onLoad(async (options: any) => {
 .tips {
   margin-top: 30rpx;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 

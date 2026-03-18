@@ -68,20 +68,6 @@ const handleViewDetail = (item: OrderItem) => {
   })
 }
 
-// 申请退款（待核销订单）
-const handleRefund = (item: OrderItem) => {
-  uni.showModal({
-    title: '申请退款',
-    content: `确定要申请退款吗？`,
-    success: (res) => {
-      if (res.confirm) {
-        // TODO: 调用退款 API
-        uni.showToast({ icon: 'none', title: '退款申请已提交' })
-      }
-    },
-  })
-}
-
 // 获取订单类型标签
 const getOrderTypeLabel = (type: OrderType) => {
   const map: Record<OrderType, string> = {
@@ -109,98 +95,97 @@ onShow(() => {
     <NavHead title="我的订单" :show-back="true"></NavHead>
 
     <!-- 筛选区域 -->
-    <view class="filter-section">
-      <!-- 一级Tab：订单类型 -->
-      <scroll-view class="type-tabs-scroll" :scroll-x="true" enable-flex :show-scrollbar="false">
-        <view class="type-tabs">
-          <view v-for="item in orderTypes" :key="item.value" class="type-tab-item"
-            :class="{ active: currentOrderType === item.value }" @tap="handleTypeTab(item.value)">
+    <view style="padding: 24rpx;">
+      <view class="filter-section">
+        <!-- 一级Tab：订单类型 -->
+        <scroll-view class="type-tabs-scroll" :scroll-x="true" enable-flex :show-scrollbar="false">
+          <view class="type-tabs">
+            <view v-for="item in orderTypes" :key="item.value" class="type-tab-item"
+              :class="{ active: currentOrderType === item.value }" @tap="handleTypeTab(item.value)">
+              {{ item.label }}
+            </view>
+          </view>
+        </scroll-view>
+        <!-- 二级Tab：订单状态 -->
+        <view class="status-tabs">
+          <view v-for="item in statusTabs" :key="item.value" class="status-tab-item"
+            :class="{ active: currentStatus === item.value }" @tap="handleStatusTab(item.value)">
             {{ item.label }}
           </view>
-        </view>
-      </scroll-view>
-      <!-- 二级Tab：订单状态 -->
-      <view class="status-tabs">
-        <view v-for="item in statusTabs" :key="item.value" class="status-tab-item"
-          :class="{ active: currentStatus === item.value }" @tap="handleStatusTab(item.value)">
-          {{ item.label }}
         </view>
       </view>
     </view>
 
     <!-- 订单列表 -->
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <view v-if="loading" class="loading">
-        <text>加载中...</text>
-      </view>
-      <view v-else-if="orderList.length === 0" class="empty">
-        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
-          mode="aspectFit"></image>
-        <text class="empty-text">暂无订单</text>
-      </view>
-      <view v-else class="order-list">
-        <view class="order-card" v-for="item in orderList" :key="item._id" @tap="handleViewDetail(item)">
-          <!-- 封面图 -->
-          <view class="cover-wrap">
-            <image class="cover" :src="item.productInfo.cover" mode="aspectFill"></image>
-            <view class="type-tag">{{ getOrderTypeLabel(item.orderType) }}</view>
-          </view>
-          <!-- 订单信息：标题、每条信息、价格+按钮 各为独立 view -->
-          <view class="order-info">
-            <!-- 已核销印章 -->
-            <view class="status" v-if="item.status === 'verified'">
-              <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/hx.png"
-                mode="aspectFit" />
+      <view style="padding:0 24rpx;">
+        <view v-if="loading" class="loading">
+          <text>加载中...</text>
+        </view>
+        <view v-else-if="orderList.length === 0" class="empty">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="aspectFit"></image>
+          <text class="empty-text">暂无订单</text>
+        </view>
+        <view v-else class="order-list">
+          <view class="order-card" v-for="item in orderList" :key="item._id" @tap="handleViewDetail(item)">
+            <!-- 封面图 -->
+            <view class="cover-wrap">
+              <image class="cover" :src="item.productInfo.cover" mode="aspectFill"></image>
+              <view class="type-tag">{{ getOrderTypeLabel(item.orderType) }}</view>
             </view>
-            <view class="title">{{ item.productInfo.title }}</view>
-            <!-- 门店类型 -->
-            <template>
-              <view class="info-row" v-if="item.orderType !== 'shop'">
-                <text class="label">{{ item.orderType === 'trip' ? '行程日期：' : '活动日期：' }}</text>
-                <text class="value">{{ item.productInfo.time }}</text>
+            <!-- 订单信息：标题、每条信息、价格+按钮 各为独立 view -->
+            <view class="order-info">
+              <!-- 已核销印章 -->
+              <view class="status" v-if="item.status === 'verified'">
+                <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/hx.png"
+                  mode="aspectFit" />
               </view>
-              <view class="info-row" v-if="item.productInfo.address_name || item.shopInfo?.shopName">
-                <text class="label">店名：</text>
-                <text class="value">{{ item.productInfo.address_name ?? item.shopInfo?.shopName }}</text>
-              </view>
-              <view class="info-row" v-if="item.productInfo.event_address || item.shopInfo?.address">
-                <text class="label">地址：</text>
-                <text class="value">{{ item.productInfo.event_address ?? item.shopInfo?.address }}</text>
-              </view>
-            </template>
+              <view class="title">{{ item.productInfo.title }}</view>
+              <!-- 门店类型 -->
+              <template>
+                <view class="info-row" v-if="item.orderType !== 'shop'">
+                  <text class="label">{{ item.orderType === 'trip' ? '行程日期：' : '活动日期：' }}</text>
+                  <text class="value">{{ item.productInfo.time }}</text>
+                </view>
+                <view class="info-row" v-if="item.productInfo.address_name || item.shopInfo?.shopName">
+                  <text class="label">店名：</text>
+                  <text class="value">{{ item.productInfo.address_name ?? item.shopInfo?.shopName }}</text>
+                </view>
+                <view class="info-row" v-if="item.productInfo.event_address || item.shopInfo?.address">
+                  <text class="label">地址：</text>
+                  <text class="value">{{ item.productInfo.event_address ?? item.shopInfo?.address }}</text>
+                </view>
+              </template>
 
-            <!-- 价格 + 按钮 同一 view -->
-            <view class="price-btn-row">
-              <view class="price-part">
-                <template v-if="item.orderType === 'shop'">
-                  <template>
-                    <text class="label">订单价格：</text>
-                    <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
+              <!-- 价格 + 按钮 同一 view -->
+              <view class="price-btn-row">
+                <view class="price-part">
+                  <template v-if="item.orderType === 'shop'">
+                    <template>
+                      <text class="label">订单价格：</text>
+                      <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
+                    </template>
                   </template>
-                </template>
-                <template v-else>
-                  <template>
-                    <text class="label">报名金额：</text>
-                    <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
+                  <template v-else>
+                    <template>
+                      <text class="label">报名金额：</text>
+                      <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
+                    </template>
                   </template>
-                </template>
-              </view>
-              <view class="btn-wrap"
-                v-if="item.status === 'paid' && item.discountType !== 'voucher' && item.orderType !== 'project'">
-                <view class="btn refund-btn" @tap.stop="handleRefund(item)">退款</view>
+                </view>
               </view>
             </view>
           </view>
         </view>
+        <view class="bottom-placeholder"></view>
       </view>
-      <view class="bottom-placeholder"></view>
     </scroll-view>
   </view>
 </template>
 
 <style scoped lang="scss">
 .orderManage {
-  padding: 24rpx;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -209,9 +194,8 @@ onShow(() => {
 
 /* 筛选区域 */
 .filter-section {
-  margin-bottom: 24rpx;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 }
@@ -324,7 +308,7 @@ onShow(() => {
   display: flex;
   align-items: stretch;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 }
@@ -426,17 +410,6 @@ onShow(() => {
       }
     }
 
-    .btn-wrap {
-      flex-shrink: 0;
-
-      .btn {
-        padding: 8rpx 24rpx;
-        background-color: rgba(#ff3b3b, 0.1);
-        border-radius: 30rpx;
-        font-size: 24rpx;
-        color: #ff3b3b;
-      }
-    }
   }
 }
 

@@ -61,23 +61,27 @@ const handleScroll = () => {
 </script>
 <template>
   <view class="detail">
-    <NavHead title="代金券明细" :show-back="true"></NavHead>
-    <view class="head">
-      <NavTitle title="代金券明细"></NavTitle>
-    </view>
-    <!-- 日期选择  -->
-    <view class="my-select">
-      <uni-data-select v-model="selectedMonth" :localdata="range" hideRight @change="change"></uni-data-select>
+    <view style="padding: 0 24rpx;margin-top: 24rpx;">
+      <NavHead title="代金券明细" :show-back="true"></NavHead>
+      <view class="head">
+        <NavTitle title="代金券明细"></NavTitle>
+      </view>
+      <!-- 日期选择  -->
+      <view class="my-select">
+        <uni-data-select v-model="selectedMonth" :localdata="range" hideRight @change="change"></uni-data-select>
+      </view>
     </view>
     <!--  代金券消费订单列表  -->
     <scroll-view class="list" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true" :show-scrollbar="false">
-      <Record v-if="voucherOrderData.length" :list-data="voucherOrderData" :fields="fields"></Record>
-      <view v-else class="empty">
-        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
-          mode="widthFix"></image>
-        <text class="empty-text">暂无数据</text>
+      <view style="padding:0 24rpx;">
+        <Record v-if="voucherOrderData.length" :list-data="voucherOrderData" :fields="fields"></Record>
+        <view v-else class="empty">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="widthFix"></image>
+          <text class="empty-text">暂无数据</text>
+        </view>
+        <view style="height: 40rpx;"></view>
       </view>
-      <view style="height: 40rpx;"></view>
     </scroll-view>
   </view>
 </template>
@@ -86,7 +90,6 @@ const handleScroll = () => {
 .detail {
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
 }

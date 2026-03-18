@@ -131,9 +131,9 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
       align-items: center;
       padding: 0 33rpx;
       height: 100%;
-      background: #fffae6;
+      background: $qs-card-bg;
       border-radius: 30rpx;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      @include customShadow();
 
       .img {
         width: 81rpx;
@@ -166,9 +166,9 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
     margin-top: 20rpx;
     width: 100%;
     height: calc(100% - 188rpx);
-    background-color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: $qs-card-bg;
     border-radius: 30rpx;
+    @include customShadow();
 
     /*好友列表*/
     .list {
@@ -181,7 +181,7 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
         align-items: center;
         margin-bottom: 20rpx;
         height: 195rpx;
-        background: #f6f6f6;
+        background: #fff;
         border-radius: 30rpx;
 
         &:last-of-type {

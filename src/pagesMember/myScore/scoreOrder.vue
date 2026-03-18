@@ -25,19 +25,21 @@ const handleScroll = () => {
   <view class="scoreOrder">
     <NavHead title="积分订单" :show-back="true"></NavHead>
     <!--  tab  -->
-    <view class="tabList">
-      <!--  订单类型  -->
-      <view class="tabItem" :class="{ activeTab: activeTabIndex === index }" v-for="(item, index) in tabList"
-        :key="item.value" @tap="changeTab(index)">{{ item.label }}</view>
-      <view
-        class="tab-indicator"
-        :style="{ left: `calc(${activeTabIndex * 33.333}% + (33.333% - 48rpx) / 2)` }"
-      ></view>
+    <view style="padding: 24rpx;">
+      <view class="tabList">
+        <!--  订单类型  -->
+        <view class="tabItem" :class="{ activeTab: activeTabIndex === index }" v-for="(item, index) in tabList"
+          :key="item.value" @tap="changeTab(index)">{{ item.label }}</view>
+        <view class="tab-indicator" :style="{ left: `calc(${activeTabIndex * 33.333}% + (33.333% - 48rpx) / 2)` }">
+        </view>
+      </view>
     </view>
     <!-- 订单列表   -->
     <scroll-view class="list" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true" :show-scrollbar="false">
-      <OrderItem :list-data="scoreOrderItems" :fields="fieldsScoreOrder"></OrderItem>
-      <view style="height: 40rpx;"></view>
+      <view style="padding: 24rpx;">
+        <OrderItem :list-data="scoreOrderItems" :fields="fieldsScoreOrder"></OrderItem>
+        <view style="height: 40rpx;"></view>
+      </view>
     </scroll-view>
   </view>
 </template>
@@ -46,7 +48,6 @@ const handleScroll = () => {
 .scoreOrder {
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
 }
@@ -56,7 +57,7 @@ const handleScroll = () => {
   padding: 30rpx 0 24rpx;
   display: flex;
   justify-content: space-between;
-  background-color: #fff;
+  background-color: $qs-card-bg;
   border-radius: 30rpx;
   @include customShadow();
 

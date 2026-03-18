@@ -181,7 +181,7 @@ const handleDisclaimer = () => {
     <NavHead title="查看项目" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
       <view v-if="loading" class="loading">加载中...</view>
-      <template v-else-if="detailData">
+      <view v-else-if="detailData" style="padding: 24rpx;">
         <!-- 产品信息卡 -->
         <view class="card product-card">
           <view class="product-top">
@@ -250,7 +250,7 @@ const handleDisclaimer = () => {
           <text class="agree-text">我已仔细阅读并同意</text>
           <text class="agree-link" @tap.stop="handleDisclaimer">《免责声明》</text>
         </view>
-      </template>
+      </view>
       <view v-else class="empty">项目不存在</view>
 
       <!-- 底部占位 -->
@@ -278,7 +278,6 @@ const handleDisclaimer = () => {
 
 .content {
   flex: 1;
-  padding: 24rpx;
 }
 
 .loading,
@@ -291,7 +290,7 @@ const handleDisclaimer = () => {
 
 /* 通用卡片 */
 .card {
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 20rpx;
   padding: 24rpx;
   margin-bottom: 24rpx;

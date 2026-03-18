@@ -20,13 +20,9 @@ const handleNav = (val: FeatureType) => {
 
 <template>
   <view class="function">
-    <view
-      class="function-item"
-      v-for="(item, index) in functionData"
-      :key="index"
-      @tap="handleNav(item.type)"
-    >
-      <image class="icon" :src="item.icon" mode="aspectFit"></image>
+    <view class="function-item" v-for="(item, index) in functionData" :key="index" @tap="handleNav(item.type)">
+      <image class="icon" :src="item.icon" mode="aspectFit"
+        :style="item.iconSize ? { width: item.iconSize + 'rpx', height: item.iconSize + 'rpx' } : {}"></image>
       <view class="text">{{ item.text }}</view>
     </view>
   </view>
@@ -39,10 +35,10 @@ const handleNav = (val: FeatureType) => {
   justify-content: space-evenly;
   align-items: center;
   width: 100%;
-  height: 179rpx;
-  background: #ffffff;
+  height: 140rpx;
+  background: #fef8e5;
   border-radius: 30rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  @include customShadow();
 
   .function-item {
     display: flex;
@@ -51,15 +47,15 @@ const handleNav = (val: FeatureType) => {
     align-items: center;
     width: fit-content;
     height: fit-content;
+
     .icon {
-      margin-bottom: 12rpx;
-      width: 106rpx;
-      height: 80rpx;
-      overflow: hidden;
+      width: 60rpx;
+      height: 60rpx;
     }
+
     .text {
-      font-size: 22rpx;
-      color: #6a6451;
+      font-size: 24rpx;
+      color: $qs-font-title;
     }
   }
 }

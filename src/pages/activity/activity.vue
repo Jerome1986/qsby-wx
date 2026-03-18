@@ -132,7 +132,8 @@ const handleSend = () => {
 
   /* 顶部横幅 */
   .banner {
-    padding: 24rpx;
+    margin: 24rpx 0;
+    padding: 0 24rpx;
     width: 100%;
     height: 240rpx;
 

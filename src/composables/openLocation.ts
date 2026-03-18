@@ -1,8 +1,15 @@
 // 打开地图
-export const openLocation = (latitude: number, longitude: number) => {
+export const openLocation = (
+  latitude: number,
+  longitude: number,
+  name: string,
+  address: string,
+) => {
   uni.openLocation({
     latitude,
     longitude,
+    name,
+    address,
     success: () => {
       console.log('地图定位打开成功')
     },

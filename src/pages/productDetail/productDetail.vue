@@ -110,7 +110,7 @@ onShareAppMessage((res) => {
     // 来自页面内按钮
     return {
       title: detailData.value.title,
-      path: `/pages/login/login?inviterCode=${userStore.profile.referralCode}&productId=${productId.value}`,
+      path: `/pages/login/login?inviterCode=${userStore.profile.referralCode}&productId=${productId.value}&proType=${proType.value}`,
       imageUrl: detailData.value.cover,
     }
   }
@@ -128,85 +128,88 @@ onShareAppMessage((res) => {
     <NavHead :title="title" :show-back="true"></NavHead>
     <!--  滚动内容区域  -->
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!-- 商品信息 -->
-      <view class="productInfo">
-        <view class="top">
-          <view class="cover">
-            <image mode="aspectFill" :src="detailData.cover as string"></image>
-          </view>
-          <view class="info">
-            <view class="title-row">
-              <view class="title">{{ detailData.title }}</view>
-              <view class="poster-btn">生成海报</view>
+      <view class="body">
+        <!-- 商品信息 -->
+        <view class="productInfo">
+          <view class="top">
+            <view class="cover">
+              <image mode="aspectFill" :src="detailData.cover as string"></image>
             </view>
-            <view class="location-info">
-              <view class="time">
-                <text class="iconfont icon-shijian1"></text>
-                <text>{{ formatTimestamp(detailData.time!, 2) }}</text>
+            <view class="info">
+              <view class="title-row">
+                <view class="title">{{ detailData.title }}</view>
+                <view class="poster-btn">生成海报</view>
               </view>
-              <view class="address">
-                <text class="iconfont icon-fangzi"></text>
-                <text>{{ detailData.address_name }}</text>
+              <view class="location-info">
+                <view class="time">
+                  <text class="iconfont icon-shijian1"></text>
+                  <text>{{ formatTimestamp(detailData.time!, 2) }}</text>
+                </view>
+                <view class="address">
+                  <text class="iconfont icon-fangzi"></text>
+                  <text>{{ detailData.address_name }}</text>
+                </view>
+                <view class="address">
+                  <text class="iconfont icon-address"></text>
+                  <text>{{ detailData.event_address }}</text>
+                </view>
               </view>
-              <view class="address">
-                <text class="iconfont icon-address"></text>
-                <text>{{ detailData.event_address }}</text>
-              </view>
+            </view>
+          </view>
+          <view class="bottom">
+            <view class="row">
+              <view class="text">报名费用</view>
+              <view class="value">￥{{ detailData.userFee }}</view>
+            </view>
+            <view class="row" v-if="userStore.profile?.role === 'manager'">
+              <view class="text">佣金</view>
+              <view class="value">￥{{ detailData.commission }}</view>
             </view>
           </view>
         </view>
-        <view class="bottom">
-          <view class="row">
-            <view class="text">报名费用</view>
-            <view class="value">￥{{ detailData.userFee }}</view>
-          </view>
-          <view class="row" v-if="userStore.profile?.role === 'manager'">
-            <view class="text">佣金</view>
-            <view class="value">￥{{ detailData.commission }}</view>
-          </view>
-        </view>
-      </view>
 
-      <!-- 商户信息 -->
-      <view class="shopInfo">
-        <view class="top">
-          <view class="left">
-            <view class="title">{{ detailData.address_name }}</view>
-            <view class="address">{{ detailData.event_address }}</view>
+        <!-- 商户信息 -->
+        <view class="shopInfo">
+          <view class="top">
+            <view class="left">
+              <view class="title">{{ detailData.address_name }}</view>
+              <view class="address">{{ detailData.event_address }}</view>
+            </view>
+            <view class="right"
+              @tap="openLocation(detailData.latitude as number, detailData.longitude as number, detailData.address_name, detailData.event_address)">
+              <text class="iconfont icon-ditu"></text>
+              <view class="text">地图</view>
+            </view>
           </view>
-          <view class="right" @tap="openLocation(detailData.latitude as number, detailData.longitude as number)">
-            <text class="iconfont icon-ditu"></text>
-            <view class="text">地图</view>
-          </view>
-        </view>
-        <view class="bottom">
-          <view class="signUp">已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
-            detailData.maxPeople
+          <view class="bottom">
+            <view class="signUp">已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
+              detailData.maxPeople
             }}）</view>
-          <view class="num">
-            <view class="item">
-              <text class="male">男</text>
-              <text class="count">{{ detailData.maleCount }}人</text>
-            </view>
-            <view class="item">
-              <text class="female">女</text>
-              <text class="count">{{ detailData.femaleCount }}人</text>
+            <view class="num">
+              <view class="item">
+                <text class="male">男</text>
+                <text class="count">{{ detailData.maleCount }}人</text>
+              </view>
+              <view class="item">
+                <text class="female">女</text>
+                <text class="count">{{ detailData.femaleCount }}人</text>
+              </view>
             </view>
           </view>
         </view>
-      </view>
-      <!-- 组织方 -->
-      <OrganizerInfo :userData="userData" @copyWx="handleCopyWx" @callPhone="handleCallPhone"></OrganizerInfo>
-      <!-- 活动介绍 -->
-      <view class="activity">
-        <view class="title">活动介绍</view>
-        <view class="content" v-if="detailData.requirement">{{ detailData.requirement }}</view>
-        <view class="images" v-for="(item, index) in detailData.images" :key="index">
-          <image mode="widthFix" :src="item"></image>
+        <!-- 组织方 -->
+        <OrganizerInfo :userData="userData" @copyWx="handleCopyWx" @callPhone="handleCallPhone"></OrganizerInfo>
+        <!-- 活动介绍 -->
+        <view class="activity">
+          <view class="title">活动介绍</view>
+          <view class="content" v-if="detailData.requirement">{{ detailData.requirement }}</view>
+          <view class="images" v-for="(item, index) in detailData.images" :key="index">
+            <image mode="widthFix" :src="item"></image>
+          </view>
         </view>
+        <!-- 底部占位，防止阴影被裁剪 -->
+        <view class="scroll-bottom-placeholder"></view>
       </view>
-      <!-- 底部占位，防止阴影被裁剪 -->
-      <view class="scroll-bottom-placeholder"></view>
     </scroll-view>
     <!--  底部操作区  -->
     <view class="footerBar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
@@ -226,9 +229,9 @@ onShareAppMessage((res) => {
 <style scoped lang="scss">
 /* 页面容器 */
 .playDetail {
+  padding-bottom: 180rpx;
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 180rpx;
   height: 100%;
   @include page-background();
 }
@@ -236,6 +239,10 @@ onShareAppMessage((res) => {
 /* 内容区域 scroll */
 .content {
   flex: 1;
+
+  .body {
+    padding: 24rpx;
+  }
 
   .scroll-bottom-placeholder {
     height: 20rpx;
@@ -245,7 +252,7 @@ onShareAppMessage((res) => {
 /* 商品信息卡片 */
 .productInfo {
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 
@@ -365,7 +372,7 @@ onShareAppMessage((res) => {
 .shopInfo {
   margin-top: 24rpx;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 
@@ -454,7 +461,7 @@ onShareAppMessage((res) => {
 .activity {
   margin-top: 24rpx;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 

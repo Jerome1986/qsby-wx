@@ -85,9 +85,9 @@ const goDetail = () => {
   position: relative;
   flex: 1;
   padding: 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 30rpx;
   overflow: hidden;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  @include customShadow();
 }
 </style>

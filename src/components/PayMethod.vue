@@ -12,7 +12,7 @@
 
 <style scoped lang="scss">
 .card {
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   border-radius: 20rpx;
   padding: 24rpx;
   margin-bottom: 24rpx;

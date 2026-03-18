@@ -197,9 +197,9 @@ const fields: { label: string; key: string }[] = [
     align-items: center;
     padding: 0 33rpx;
     height: 100%;
-    background: #fffae6;
+    background: $qs-card-bg;
     border-radius: 30rpx;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    @include customShadow();
 
     .img {
       overflow: hidden;
@@ -232,9 +232,9 @@ const fields: { label: string; key: string }[] = [
   margin-top: 20rpx;
   width: 100%;
   flex: 1;
-  background-color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: $qs-card-bg;
   border-radius: 30rpx;
+  @include customShadow();
 
   .my-select {
     margin-top: 18rpx;
@@ -268,7 +268,7 @@ const fields: { label: string; key: string }[] = [
     .item {
       padding: 24rpx;
       margin-bottom: 20rpx;
-      background: #f6f6f6;
+      background: #fff;
       border-radius: 30rpx;
 
       &:last-of-type {

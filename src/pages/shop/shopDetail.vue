@@ -37,57 +37,59 @@ const handleDetail = (productId: string) => {
   <view class="shopDetail">
     <NavHead title="门店详情" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <!--  封面图  -->
-      <view class="cover">
-        <image :src="shopDetailData?.shopInfo.cover" mode="aspectFill"></image>
-      </view>
-      <!-- 快捷入口 -->
-      <view class="nav-entry">
-        <view class="nav-item">
-          <view class="nav-icon">
-            <image mode="aspectFit"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/jieshao.png">
-            </image>
-          </view>
-          <view class="nav-label" style="font-weight: bold;">门店介绍</view>
+      <view style="padding: 24rpx;">
+        <!--  封面图  -->
+        <view class="cover">
+          <image :src="shopDetailData?.shopInfo.cover" mode="aspectFill"></image>
         </view>
-        <view class="nav-item">
-          <view class="nav-icon">
-            <image mode="aspectFit"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/tuijian.png">
-            </image>
-          </view>
-          <view class="nav-label" style="font-weight: bold;">周边推荐</view>
-        </view>
-      </view>
-      <!-- 门店办理入住 -->
-      <view class="checkIn" @tap="">办理入住</view>
-      <!--   预约流程   -->
-      <BookFlow type="shop" :shop-info="shopDetailData?.shopInfo as StoreItem"></BookFlow>
-      <view class="title" style="margin: 20rpx 0">
-        <NavTitle title="门店商品"></NavTitle>
-      </view>
-      <!--   门店商品列表   -->
-      <view class="product-list">
-        <view class="product-item" v-for="(item, index) in shopDetailData?.product" :key="item._id"
-          @tap="handleDetail(item._id)">
-          <view class="product-cover">
-            <image mode="aspectFill" :src="item.cover"></image>
-          </view>
-          <view class="product-info">
-            <view class="product-head">
-              <view class="product-name">{{ item.name }}</view>
-              <view class="product-desc">含早餐 · 免费WiFi · 可加床</view>
+        <!-- 快捷入口 -->
+        <view class="nav-entry">
+          <view class="nav-item">
+            <view class="nav-icon">
+              <image mode="aspectFit"
+                src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/jieshao.png">
+              </image>
             </view>
-            <view class="product-foot">
-              <view class="product-price">￥{{ item.price.toFixed(2) }}</view>
-              <view class="product-btn">立即购买</view>
+            <view class="nav-label" style="font-weight: bold;">门店介绍</view>
+          </view>
+          <view class="nav-item">
+            <view class="nav-icon">
+              <image mode="aspectFit"
+                src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/tuijian.png">
+              </image>
+            </view>
+            <view class="nav-label" style="font-weight: bold;">周边推荐</view>
+          </view>
+        </view>
+        <!-- 门店办理入住 -->
+        <view class="checkIn" @tap="">办理入住</view>
+        <!--   预约流程   -->
+        <BookFlow type="shop" :shop-info="shopDetailData?.shopInfo as StoreItem"></BookFlow>
+        <view class="title" style="margin: 20rpx 0">
+          <NavTitle title="门店商品"></NavTitle>
+        </view>
+        <!--   门店商品列表   -->
+        <view class="product-list">
+          <view class="product-item" v-for="(item, index) in shopDetailData?.product" :key="item._id"
+            @tap="handleDetail(item._id)">
+            <view class="product-cover">
+              <image mode="aspectFill" :src="item.cover"></image>
+            </view>
+            <view class="product-info">
+              <view class="product-head">
+                <view class="product-name">{{ item.name }}</view>
+                <view class="product-desc">含早餐 · 免费WiFi · 可加床</view>
+              </view>
+              <view class="product-foot">
+                <view class="product-price">￥{{ item.price.toFixed(2) }}</view>
+                <view class="product-btn">立即购买</view>
+              </view>
             </view>
           </view>
         </view>
+        <!-- 底部占位 -->
+        <view class="scroll-bottom-placeholder"></view>
       </view>
-      <!-- 底部占位 -->
-      <view class="scroll-bottom-placeholder"></view>
     </scroll-view>
   </view>
 </template>
@@ -96,7 +98,6 @@ const handleDetail = (productId: string) => {
 .shopDetail {
   display: flex;
   flex-direction: column;
-  padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
 }
