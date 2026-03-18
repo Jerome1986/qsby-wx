@@ -51,6 +51,11 @@ onShareAppMessage((res) => {
 
 // 扫码核销
 const openCode = () => {
+  if (userStore.profile?.role === 'user' || !userStore.profile) {
+    uni.showToast({ icon: 'error', title: '没有权限' })
+    return
+  }
+
   uni.scanCode({
     success: async (success) => {
       const profile = userStore.profile
@@ -64,6 +69,9 @@ const openCode = () => {
         title: code === 200 ? '核销成功' : '核销失败'
       })
     },
+    fail: (fail) => {
+      console.error(fail)
+    },
   })
 }
 </script>
@@ -76,7 +84,8 @@ const openCode = () => {
       <!-- 用户信息 -->
       <UserInfo></UserInfo>
       <!-- 扫码核销 -->
-      <view class="code" @tap="openCode">
+      <view class="code" @tap="openCode"
+        v-if="userStore.profile?.role === 'admin' || userStore.profile?.role === 'manager'">
         <image class="icon" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/code.png"
           mode="aspectFit" />
         <view class="text">扫码核销</view>

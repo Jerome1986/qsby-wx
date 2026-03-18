@@ -33,7 +33,7 @@ const selectedCate = (item: any) => {
 }
 
 // 选择排序
-const currentSortData = ref(props.sortData[0]?.cateName || '门店类型')
+const currentSortData = ref(props.sortData[0]?.cateName || '全部')
 const filterSortActive = ref(false)
 const handleFilterSort = () => {
   filterSortActive.value = !filterSortActive.value
@@ -46,56 +46,58 @@ const selectedSort = (item: any) => {
   filterSortActive.value = false
   emits('selectSort', item._id)
 }
+console.log('currentSortData', currentSortData.value);
+
 </script>
 
 <template>
   <view class="filter-wrapper">
-  <view class="filter-list">
-    <!--   行程   -->
-    <view class="filter-item" @tap="handleFilterCate">
-      <!--   当前所选值   -->
-      <view class="cate-label">
-        <text v-if="isIcon" class="iconfont icon-address cate-icon"></text>
-        <text>{{ currentCateData }}</text>
+    <view class="filter-list">
+      <!--   行程   -->
+      <view class="filter-item" @tap="handleFilterCate">
+        <!--   当前所选值   -->
+        <view class="cate-label">
+          <text v-if="isIcon" class="iconfont icon-address cate-icon"></text>
+          <text>{{ currentCateData }}</text>
+        </view>
+        <text v-show="!filterCateActive" class="iconfont icon-laxiatubiao"
+          style="font-size: 16rpx; color: #0b0a0a"></text>
+        <text v-show="filterCateActive" class="iconfont icon-xiangshangtubiao"
+          style="font-size: 16rpx; color: #0b0a0a"></text>
       </view>
-      <text v-show="!filterCateActive" class="iconfont icon-laxiatubiao"
-        style="font-size: 16rpx; color: #0b0a0a"></text>
-      <text v-show="filterCateActive" class="iconfont icon-xiangshangtubiao"
-        style="font-size: 16rpx; color: #0b0a0a"></text>
-    </view>
-    <!--   排序   -->
-    <view class="filter-item" @tap="handleFilterSort">
-      <!--   当前所选值   -->
-      <view class="text">{{ currentSortData }}</view>
-      <text v-show="!filterSortActive" class="iconfont icon-laxiatubiao"
-        style="font-size: 16rpx; color: #0b0a0a"></text>
-      <text v-show="filterSortActive" class="iconfont icon-xiangshangtubiao"
-        style="font-size: 16rpx; color: #0b0a0a"></text>
-    </view>
-  </view>
-  <!--  分类弹框 - 筛选下方弹出   -->
-  <view class="dialog-overlay" v-if="filterCateActive">
-    <view class="dialog-mask" @tap="filterCateActive = false"></view>
-    <view class="dialog-box" @tap.stop>
-      <view class="dialog-title">选择城市</view>
-      <view class="dialog-options filterCate">
-        <view class="option-item" :class="{ active: item.name === currentCateData }" v-for="item in cateData"
-          :key="item._id" @tap="selectedCate(item)">{{ item.name }}</view>
+      <!--   排序   -->
+      <view class="filter-item" @tap="handleFilterSort">
+        <!--   当前所选值   -->
+        <view class="text">{{ currentSortData }}</view>
+        <text v-show="!filterSortActive" class="iconfont icon-laxiatubiao"
+          style="font-size: 16rpx; color: #0b0a0a"></text>
+        <text v-show="filterSortActive" class="iconfont icon-xiangshangtubiao"
+          style="font-size: 16rpx; color: #0b0a0a"></text>
       </view>
     </view>
-  </view>
+    <!--  分类弹框 - 筛选下方弹出   -->
+    <view class="dialog-overlay" v-if="filterCateActive">
+      <view class="dialog-mask" @tap="filterCateActive = false"></view>
+      <view class="dialog-box" @tap.stop>
+        <view class="dialog-title">选择城市</view>
+        <view class="dialog-options filterCate">
+          <view class="option-item" :class="{ active: item.name === currentCateData }" v-for="item in cateData"
+            :key="item._id" @tap="selectedCate(item)">{{ item.name }}</view>
+        </view>
+      </view>
+    </view>
 
-  <!--  排序弹框 - 筛选下方弹出   -->
-  <view class="dialog-overlay" v-if="filterSortActive">
-    <view class="dialog-mask" @tap="filterSortActive = false"></view>
-    <view class="dialog-box" @tap.stop>
-      <view class="dialog-title">门店类型</view>
-      <view class="dialog-options filterSort">
-        <view class="option-item" :class="{ active: item.cateName === currentSortData }" v-for="item in sortData"
-          :key="item._id" @tap="selectedSort(item)">{{ item.cateName }}</view>
+    <!--  排序弹框 - 筛选下方弹出   -->
+    <view class="dialog-overlay" v-if="filterSortActive">
+      <view class="dialog-mask" @tap="filterSortActive = false"></view>
+      <view class="dialog-box" @tap.stop>
+        <view class="dialog-title">选择类型</view>
+        <view class="dialog-options filterSort">
+          <view class="option-item" :class="{ active: item.cateName === currentSortData }" v-for="item in sortData"
+            :key="item._id" @tap="selectedSort(item)">{{ item.cateName }}</view>
+        </view>
       </view>
     </view>
-  </view>
   </view>
 </template>
 

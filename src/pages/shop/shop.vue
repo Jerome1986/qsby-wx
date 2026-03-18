@@ -15,8 +15,20 @@ const cateData = ref<StoreCategoryItem[]>([])
 
 const storeCateGet = async () => {
   const res = await storeCate(1, 100)
-  console.log(res)
-  cateData.value = res.data.list.map(item => ({ cateName: item.name, ...item }))
+  console.log('门店类型', res)
+  const list = res.data.list.map(item => ({ cateName: item.name, ...item }))
+  cateData.value = [
+    {
+      cateName: '全部',
+      name: '全部',
+      _id: '',
+      sort: 0,
+      status: 'active',
+      createdAt: new Date(),
+      updateAt: new Date(),
+    } as StoreCategoryItem,
+    ...list,
+  ]
 }
 
 // 获取城市列表
@@ -175,7 +187,8 @@ const sortedStoreList = computed(() => {
             mode="aspectFit"></image>
           <text class="empty-text">暂无门店</text>
         </view>
-        <view class="shop-item" v-else v-for="(item, index) in sortedStoreList" :key="item._id" @tap="handleDetail(item._id)">
+        <view class="shop-item" v-else v-for="(item, index) in sortedStoreList" :key="item._id"
+          @tap="handleDetail(item._id)">
           <view class="cover">
             <image mode="aspectFill" :src="item.cover">
             </image>
@@ -188,7 +201,7 @@ const sortedStoreList = computed(() => {
             <view class="foot">
               <view class="distance" v-if="myLatitude && myLongitude">大约距您{{
                 formatDistance(getDistance(myLatitude, myLongitude, item.latitude as number, item.longitude as number))
-                }}</view>
+              }}</view>
               <view class="distance" v-else>暂时无法获取具体定位</view>
               <view class="btn">进店</view>
             </view>

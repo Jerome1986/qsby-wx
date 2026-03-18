@@ -10,7 +10,7 @@ import { useShopStore, useUserStore } from '@/stores'
 import { shopPorductByOne } from '@/api/store'
 import type { ProductItem } from '@/types/store'
 import { vaildateMoible } from '@/utils/validateMobile'
-import type { OrderSubmitParams, OrderType } from '@/types/OrderItem'
+import type { OrderSubmitParams } from '@/types/OrderItem'
 import { createOrderFree, createQrCode, orderAdd } from '@/api/order'
 
 const userStore = useUserStore()
@@ -36,6 +36,7 @@ const contactInfo = ref({
   name: '',
   phone: '',
 })
+
 
 // 订单须知
 const noticeList = ref([
@@ -79,7 +80,7 @@ const realPayAmount = computed(() => {
 
 // 提交支付
 const handlePay = async () => {
-  // TODO: 微信支付逻辑
+  // 微信支付逻辑
   // 验证
   const vaildate = vaildateMoible(contactInfo.value.phone as string)
   if (!vaildate) return
@@ -150,7 +151,7 @@ const handlePay = async () => {
         console.error('核销码创建失败', err)
       )
       await uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&type=trip`,
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&type=shop`,
       })
     } catch (err) {
       console.error('免支付下单失败', err)
@@ -159,37 +160,48 @@ const handlePay = async () => {
     return
   }
 
-  console.log('参数', params)
-  //  调用生成订单+支付接口
-  const payRes = await orderAdd(params)
-  console.log('支付返回结果', payRes)
-  // 2.通过后端返回参数、发起前端微信支付
-  wx.requestPayment({
-    timeStamp: payRes.data.timeStamp,
-    nonceStr: payRes.data.nonceStr,
-    package: payRes.data.packageValue,
-    signType: payRes.data.signType,
-    paySign: payRes.data.paySign,
-    async success() {
-      try {
-        const qrCodeRes = await createQrCode(payRes.data.orderId, userStore.profile?.openid as string)
-        console.log(qrCodeRes)
+  uni.showModal({
+    title: '提示',
+    content: '确认提交订单，并支付吗',
+    showCancel: true,
+    success: async ({ confirm, cancel }) => {
+      if (confirm) {
+        console.log('参数', params)
+        //  调用生成订单+支付接口
+        const payRes = await orderAdd(params)
+        console.log('支付返回结果', payRes)
+        // 2.通过后端返回参数、发起前端微信支付
+        wx.requestPayment({
+          timeStamp: payRes.data.timeStamp,
+          nonceStr: payRes.data.nonceStr,
+          package: payRes.data.packageValue,
+          signType: payRes.data.signType,
+          paySign: payRes.data.paySign,
+          async success() {
+            try {
+              const qrCodeRes = await createQrCode(payRes.data.orderId, userStore.profile?.openid as string)
+              console.log(qrCodeRes)
 
-      } catch (err) {
-        console.error('核销码创建失败', err)
+            } catch (err) {
+              console.error('核销码创建失败', err)
+            }
+            await uni.redirectTo({
+              url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=shop`,
+            })
+          },
+          fail(err) {
+            console.error('支付失败', err)
+            uni.showToast({
+              icon: 'none',
+              title: '取消支付',
+            })
+          },
+        })
       }
-      await uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=shop`,
-      })
-    },
-    fail(err) {
-      console.error('支付失败', err)
-      uni.showToast({
-        icon: 'none',
-        title: '取消支付',
-      })
-    },
+    }
   })
+
+
 }
 </script>
 
@@ -351,7 +363,7 @@ const handlePay = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 16rpx 24rpx;
-  background-color: #ffffff;
+  background-color: $qs-card-bg;
   box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 
   .price {

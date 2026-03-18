@@ -109,8 +109,8 @@ export const usePublicForm = () => {
         timeVal == null
           ? Date.now()
           : timeVal instanceof Date
-            ? timeVal.getTime()
-            : new Date(timeVal).getTime()
+          ? timeVal.getTime()
+          : new Date(timeVal).getTime()
 
       pickerTime.value = isNaN(timeStamp) ? Date.now() : timeStamp
       // formDetail.buildFormFromDetail 负责 type/typeName 反查、字段默认值
@@ -129,38 +129,46 @@ export const usePublicForm = () => {
   }
 
   /** 提交：新增走 add，编辑走 edit */
-  const handleSubmit = async () => {
-    formData.value.time = String(pickerTime.value)
-    const fromFileList = getImagesFromFileList(fileList.value)
-    formData.value.images =
-      fromFileList.length > 0
-        ? fromFileList
-        : isEditMode.value && fileList.value.length > 0 && formData.value.images?.length
-        ? formData.value.images
-        : []
+  const handleSubmit = () => {
+    uni.showModal({
+      title: '提示',
+      content: '确定发布吗？',
+      success: async (confrim) => {
+        formData.value.time = String(pickerTime.value)
+        const fromFileList = getImagesFromFileList(fileList.value)
+        formData.value.images =
+          fromFileList.length > 0
+            ? fromFileList
+            : isEditMode.value && fileList.value.length > 0 && formData.value.images?.length
+            ? formData.value.images
+            : []
 
-    if (!validatePublicForm(formData.value, isEditMode.value)) return
-    const userId = userStore.profile?._id
-    if (!userId) return
+        if (!validatePublicForm(formData.value, isEditMode.value)) return
+        const userId = userStore.profile?._id
+        if (!userId) return
 
-    const isEdit = isEditMode.value && !!itemId.value
-    const basePayload = { userId, ...formData.value }
+        const isEdit = isEditMode.value && !!itemId.value
+        const basePayload = { userId, ...formData.value }
 
-    // 按 sendType 与 isEdit 分别调用对应 API（避免联合类型推断 _id 为可选）
-    let res: { code: number; message?: string }
-    if (sendType.value === 'trip') {
-      res = isEdit
-        ? await tripEditApi({ ...basePayload, _id: itemId.value })
-        : await sendTripApi(basePayload)
-    } else {
-      res = isEdit
-        ? await activityEditApi({ ...basePayload, _id: itemId.value })
-        : await activitySendApi(basePayload)
-    }
-    if (res.code === 200) {
-      uni.showToast({ icon: 'success', title: isEdit ? '已更新' : '已发布', mask: true })
-      isEdit ? uni.navigateBack() : uni.switchTab({ url: '/pages/home/home' })
-    }
+        // 按 sendType 与 isEdit 分别调用对应 API（避免联合类型推断 _id 为可选）
+        let res: { code: number; message?: string }
+        if (sendType.value === 'trip') {
+          res = isEdit
+            ? await tripEditApi({ ...basePayload, _id: itemId.value })
+            : await sendTripApi(basePayload)
+        } else {
+          res = isEdit
+            ? await activityEditApi({ ...basePayload, _id: itemId.value })
+            : await activitySendApi(basePayload)
+        }
+        if (res.code === 200) {
+          setTimeout(() => {
+            uni.showToast({ icon: 'success', title: isEdit ? '已更新' : '已发布', mask: true })
+            isEdit ? uni.navigateBack() : uni.switchTab({ url: '/pages/home/home' })
+          }, 500)
+        }
+      },
+    })
   }
 
   /** 初始化：根据 URL 参数加载类型、拉取详情（编辑模式） */

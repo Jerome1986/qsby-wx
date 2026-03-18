@@ -5,6 +5,9 @@ import { projectAllCateGetApi, projectListFindAllApi } from '@/api/project'
 import type { ProjectItem } from '@/types/Project'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
+import { useUserStore } from '@/stores'
+
+const userStore = useUserStore()
 
 // 分类映射（_id -> name）
 const industryMap = ref<Record<string, string>>({})
@@ -63,6 +66,10 @@ const handleSend = () => {
 
 // 跳转项目详情
 const handleGoDetail = (item: ProjectItem) => {
+  if (userStore.profile?.role === 'user') {
+    uni.showToast({ icon: 'none', message: '请先申请主理人' })
+    return
+  }
   uni.navigateTo({
     url: `/pages/project/projectDetail?projectId=${item._id}`,
   })

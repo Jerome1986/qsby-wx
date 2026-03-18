@@ -9,6 +9,9 @@ import type { ActivityTypeItem } from '@/types/Public'
 import { onLoad } from '@dcloudio/uni-app'
 import type { SortType } from '@/types/Play'
 import type { ActivityListItem } from '@/types/Activity'
+import { useUserStore } from '@/stores'
+
+const userStore = useUserStore()
 
 const cateData = ref<ActivityTypeItem[]>([])
 // 活动分类获取
@@ -78,6 +81,10 @@ const handleSelectedSort = (currentSortId: SortType) => {
 }
 
 const handleSend = () => {
+  if (userStore.profile?.role === 'user') {
+    uni.showToast({ icon: 'none', message: '请先申请主理人' })
+    return
+  }
   uni.navigateTo({
     url: `/pages/public/public?sendType=activity`,
   })

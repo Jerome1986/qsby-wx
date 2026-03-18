@@ -13,6 +13,8 @@ import type { UserItem } from '@/types/UserItem'
 import { activityDetail } from '@/api/activity'
 import type { ActivityListItem } from '@/types/Activity'
 import { openLocation } from '@/composables/openLocation'
+import { isSignUp, isVerify } from '@/composables/isVerifySignUp'
+import type { OrderType } from '@/types/OrderItem'
 
 // 页面标题
 const title = ref('详情')
@@ -69,12 +71,19 @@ onLoad((options: any) => {
   }
   // 获取底部安全区域高度
   getSafeAreaBottom()
+  isSignUp(options?.productId, proType.value as OrderType, userStore.profile?._id as string)
 })
 
 
 
 // 复制微信号
 const handleCopyWx = () => {
+  if (!isVerify.value) {
+    console.log('未报名')
+
+    uni.showToast({ icon: 'none', title: '请报名后查看' })
+    return
+  }
   // 调用uni的剪贴板API
   uni.setClipboardData({
     data: detailData.value?.wechat as string, // 要复制的内容
@@ -100,6 +109,12 @@ const handleCopyWx = () => {
 
 // 拨打电话
 const handleCallPhone = () => {
+  if (!isVerify.value) {
+    console.log('未报名')
+
+    uni.showToast({ icon: 'none', title: '请报名后查看' })
+    return
+  }
   uni.makePhoneCall({
     phoneNumber: detailData.value.phone as string,
   })
@@ -499,7 +514,7 @@ onShareAppMessage((res) => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 20rpx 24rpx;
-  background: #ffffff;
+  background: $qs-card-bg;
   border-top: 1px solid #f1f1f1;
 
   .share {

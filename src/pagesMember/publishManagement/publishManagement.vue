@@ -202,10 +202,10 @@ const handleDel = (itemId: string) => {
           </view>
           <view class="card-footer">
             <view class="edit-btn" @tap="handleEdit(item._id)">
-              {{ currentTab === 'project' ? '重新编辑项目' : '重新编辑行程' }}
+              重新编辑
             </view>
             <view class="footer-right">
-              <view class="action-btn primary" @tap="handleSignUpList(item._id)">查看报名列表</view>
+              <view class="action-btn primary" @tap="handleSignUpList(item._id)">报名列表</view>
               <view class="action-btn" @tap="handleDel(item._id)">删除</view>
             </view>
           </view>
@@ -417,6 +417,7 @@ const handleDel = (itemId: string) => {
 }
 
 .edit-btn {
+  text-align: center;
   padding: 10rpx 20rpx;
   width: 200rpx;
   background-color: $qs-brandColor;

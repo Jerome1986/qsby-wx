@@ -131,7 +131,7 @@ const handleDetail = (productId: string) => {
     .nav-item {
       flex: 1;
       height: 88rpx;
-      background: #fef8e5;
+      background: $qs-card-bg;
       border-radius: 30rpx;
       display: flex;
       align-items: center;
@@ -170,7 +170,7 @@ const handleDetail = (productId: string) => {
     font-size: 30rpx;
     font-weight: 600;
     color: $qs-font-title;
-    background: #fff7e2;
+    background: $qs-card-bg;
     border-radius: 30rpx;
     @include customShadow();
   }
@@ -183,6 +183,9 @@ const handleDetail = (productId: string) => {
       align-items: center;
       justify-content: center;
       padding: 80rpx 0;
+      background: $qs-card-bg;
+      border-radius: 20rpx;
+      @include customShadow();
 
       .empty-img {
         width: 240rpx;
@@ -201,7 +204,7 @@ const handleDetail = (productId: string) => {
       gap: 20rpx;
       padding: 24rpx;
       margin-bottom: 24rpx;
-      background-color: #fef8e5;
+      background-color: $qs-card-bg;
       border-radius: 20rpx;
       @include customShadow();
 

@@ -54,7 +54,7 @@ const buy = () => {
   align-items: center;
   justify-content: space-between;
   padding: 20rpx 40rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: #ffffff;
+  background: $qs-card-bg;
   border-top: 1rpx solid #f0f0f0;
   box-sizing: border-box;
 

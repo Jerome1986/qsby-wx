@@ -391,7 +391,7 @@ onShareAppMessage((res) => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 20rpx 24rpx;
-  background: #ffffff;
+  background: $qs-card-bg;
   border-top: 1px solid #f1f1f1;
 
   .share {

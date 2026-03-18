@@ -8,14 +8,12 @@ import type { PlayListItem } from '@/types/Play'
 import { tripDetailGetApi } from '@/api/trip'
 import { formatTimestamp } from '@/utils/generateMonth'
 import { vaildateMoible } from '@/utils/validateMobile'
-import type { OrderSubmitParams, OrderUserInfo, DiscountType, InitiatorInfo, OrderType } from '@/types/OrderItem'
+import type { OrderSubmitParams, OrderUserInfo, InitiatorInfo, OrderType } from '@/types/OrderItem'
 import PayMethod from '@/components/PayMethod.vue'
-import Voucher from '@/components/Voucher.vue'
 import { createQrCode, createOrderFree, orderAdd } from '@/api/order'
-import { verifySignUpApi } from '@/api/verifySignUp'
 import { userInfoGetApi } from '@/api/user'
 import { activityDetail } from '@/api/activity'
-import type { PublicType } from '@/types/PublicManagement'
+import { isSignUp, isVerify } from '@/composables/isVerifySignUp';
 
 // store
 const userStore = useUserStore()
@@ -35,23 +33,11 @@ const refreshUserInfo = async () => {
 onLoad(async () => {
   await refreshUserInfo()
 })
-// 验证是否报名
-const isVerify = ref(false)
-const isSignUp = async (targetId: string, proType: OrderType) => {
 
-  const res = await verifySignUpApi(
-    proType as PublicType,
-    targetId,
-    userStore.profile?._id as string
-  )
-  console.log('报名结果', res)
-
-  isVerify.value = res.data.isSignUp
-}
 onLoad((options) => {
   proType.value = options?.proType
 
-  isSignUp(options?.productId, proType.value as OrderType)
+  isSignUp(options?.productId, proType.value as OrderType, userStore.profile?._id as string)
 })
 
 // 表单数据
@@ -570,7 +556,7 @@ onLoad(async (options: any) => {
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 24rpx;
-  background: #ffffff;
+  background: $qs-card-bg;
   border-top: 1px solid #f1f1f1;
   box-sizing: border-box;
 

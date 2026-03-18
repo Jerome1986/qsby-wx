@@ -8,6 +8,9 @@ import { tripListGetAllApi, tripTypeGetAllApi } from '@/api/trip.ts'
 import type { TripTypeItem } from '@/types/Public'
 import { onLoad } from '@dcloudio/uni-app'
 import type { PlayListItem, SortType } from '@/types/Play'
+import { useUserStore } from '@/stores'
+
+const userStore = useUserStore()
 
 // 分类
 const cateData = ref<TripTypeItem[]>([])
@@ -86,6 +89,11 @@ const handleSelectedSort = (currentSortId: SortType) => {
 
 // 发布行程
 const handleSend = () => {
+  // 验证身份
+  if (userStore.profile?.role === 'user') {
+    uni.showToast({ icon: 'none', message: '请先申请主理人' })
+    return
+  }
   uni.navigateTo({
     url: `/pages/public/public?sendType=trip`,
   })
