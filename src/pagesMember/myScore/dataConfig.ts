@@ -31,7 +31,7 @@ interface ScoreOrderItem {
 }
 
 // 定义积分收入字段配置
-export const fieldsIncome: { label: string; key: keyof ConsumptionIncomeItem }[] = [
+export const fieldsIncome: { label: string; key: string }[] = [
   { label: '购买人', key: 'buyerName' },
   { label: '产品金额', key: 'amount' },
   { label: '下单时间', key: 'orderTime' },
@@ -41,7 +41,7 @@ export const fieldsIncome: { label: string; key: keyof ConsumptionIncomeItem }[]
 ]
 
 // 定义积分支出字段配置
-export const fieldsOut: { label: string; key: keyof ConsumptionOutItem }[] = [
+export const fieldsOut: { label: string; key: string }[] = [
   { label: '订单编号', key: 'orderNo' },
   { label: '兑换时间', key: 'exchangeTime' },
   { label: '兑换数量', key: 'exchangeNum' },
@@ -49,7 +49,7 @@ export const fieldsOut: { label: string; key: keyof ConsumptionOutItem }[] = [
 ]
 
 // 定义积分订单字段配置
-export const fieldsScoreOrder: { label: string; key: keyof ScoreOrderItem }[] = [
+export const fieldsScoreOrder: { label: string; key: string }[] = [
   { label: '门店', key: 'storeName' },
   { label: '地址', key: 'address' },
   { label: '积分价格', key: 'scoreNum' },

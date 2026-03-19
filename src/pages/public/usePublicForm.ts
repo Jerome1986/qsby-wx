@@ -130,42 +130,44 @@ export const usePublicForm = () => {
 
   /** 提交：新增走 add，编辑走 edit */
   const handleSubmit = () => {
+    formData.value.time = String(pickerTime.value)
+    const fromFileList = getImagesFromFileList(fileList.value)
+    formData.value.images =
+      fromFileList.length > 0
+        ? fromFileList
+        : isEditMode.value && fileList.value.length > 0 && formData.value.images?.length
+        ? formData.value.images
+        : []
+
+    if (!validatePublicForm(formData.value, isEditMode.value)) return
+    const userId = userStore.profile?._id
+    if (!userId) return
+
+    const isEdit = isEditMode.value && !!itemId.value
+    const basePayload = { userId, ...formData.value }
     uni.showModal({
       title: '提示',
       content: '确定发布吗？',
+      confirmColor: '#eed261',
       success: async (confrim) => {
-        formData.value.time = String(pickerTime.value)
-        const fromFileList = getImagesFromFileList(fileList.value)
-        formData.value.images =
-          fromFileList.length > 0
-            ? fromFileList
-            : isEditMode.value && fileList.value.length > 0 && formData.value.images?.length
-            ? formData.value.images
-            : []
-
-        if (!validatePublicForm(formData.value, isEditMode.value)) return
-        const userId = userStore.profile?._id
-        if (!userId) return
-
-        const isEdit = isEditMode.value && !!itemId.value
-        const basePayload = { userId, ...formData.value }
-
-        // 按 sendType 与 isEdit 分别调用对应 API（避免联合类型推断 _id 为可选）
-        let res: { code: number; message?: string }
-        if (sendType.value === 'trip') {
-          res = isEdit
-            ? await tripEditApi({ ...basePayload, _id: itemId.value })
-            : await sendTripApi(basePayload)
-        } else {
-          res = isEdit
-            ? await activityEditApi({ ...basePayload, _id: itemId.value })
-            : await activitySendApi(basePayload)
-        }
-        if (res.code === 200) {
-          setTimeout(() => {
+        if (confrim) {
+          // 按 sendType 与 isEdit 分别调用对应 API（避免联合类型推断 _id 为可选）
+          let res: { code: number; message?: string }
+          if (sendType.value === 'trip') {
+            res = isEdit
+              ? await tripEditApi({ ...basePayload, _id: itemId.value })
+              : await sendTripApi(basePayload)
+          } else {
+            res = isEdit
+              ? await activityEditApi({ ...basePayload, _id: itemId.value })
+              : await activitySendApi(basePayload)
+          }
+          if (res.code === 200) {
             uni.showToast({ icon: 'success', title: isEdit ? '已更新' : '已发布', mask: true })
-            isEdit ? uni.navigateBack() : uni.switchTab({ url: '/pages/home/home' })
-          }, 500)
+            setTimeout(() => {
+              isEdit ? uni.navigateBack() : uni.switchTab({ url: '/pages/home/home' })
+            }, 500)
+          }
         }
       },
     })

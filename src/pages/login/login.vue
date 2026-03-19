@@ -90,7 +90,7 @@ onLoad((options: any) => {
     },
   })
 
-  console.log('立即打印 options', options.inviterCode)
+  console.log('立即打印 options', options)
 
   // 先判断分享链接进入且是分享商品/项目详情进入（多页面统一）
   inviterCode.value = options.inviterCode

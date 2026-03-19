@@ -142,7 +142,7 @@ const submit = async () => {
 
   // 检查用户是否有openid,如果没有就跳转登录
   if (!userStore.profile?.openid) {
-    uni.navigateTo({ url: `/pages/login/login?productId=${detailData.value._id}` })
+    uni.navigateTo({ url: `/pages/login/login?productId=${detailData.value._id}&proType=${proType.value}` })
     return
   }
 
@@ -193,7 +193,7 @@ const submit = async () => {
         console.error('核销码创建失败', err)
       )
       await uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&type=trip`,
+        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&proType=${proType.value}`,
       })
     } catch (err) {
       console.error('免支付下单失败', err)

@@ -33,50 +33,32 @@ const handleScrollIncome = () => {
     <view class="content">
       <!--  标签  -->
       <view class="tag">
-        <view
-          class="tag-item"
-          :class="{ 'active-item': activeIndex === 'income' }"
-          @tap="switchTag('income')"
-          >收入积分</view
-        >
-        <view
-          class="tag-item"
-          :class="{ 'active-item': activeIndex === 'out' }"
-          @tap="switchTag('out')"
-          >支出积分</view
-        >
+        <view class="tag-item" :class="{ 'active-item': activeIndex === 'income' }" @tap="switchTag('income')">收入积分
+        </view>
+        <view class="tag-item" :class="{ 'active-item': activeIndex === 'out' }" @tap="switchTag('out')">支出积分</view>
       </view>
       <!-- 日期选择  -->
       <view class="my-select">
-        <uni-data-select
-          v-model="selectedMonth"
-          :localdata="range"
-          hideRight
-          @change="change"
-        ></uni-data-select>
+        <uni-data-select v-model="selectedMonth" :localdata="range" hideRight @change="change"></uni-data-select>
       </view>
       <!-- 收入积分  -->
       <template v-if="activeIndex === 'income'">
-        <scroll-view
-          class="record"
-          :scroll-y="true"
-          @scrolltolower="handleScrollIncome"
-          :enhanced="true"
-          :show-scrollbar="false"
-        >
-          <Record :list-data="listDataIncome" :fields="fieldsIncome"></Record>
+        <scroll-view class="record" :scroll-y="true" @scrolltolower="handleScrollIncome" :enhanced="true"
+          :show-scrollbar="false">
+          <view style="padding: 0 24rpx;">
+            <Record :list-data="listDataIncome" :fields="fieldsIncome"></Record>
+          </view>
+          <view style="height: 20rpx;"></view>
         </scroll-view>
       </template>
       <!-- 支出积分  -->
       <template v-if="activeIndex === 'out'">
-        <scroll-view
-          class="outRecord"
-          :scroll-y="true"
-          @scrolltolower="handleScrollIncome"
-          :enhanced="true"
-          :show-scrollbar="false"
-        >
-          <Record :list-data="listDataOut" :fields="fieldsOut" :show-title="true"></Record>
+        <scroll-view class="outRecord" :scroll-y="true" @scrolltolower="handleScrollIncome" :enhanced="true"
+          :show-scrollbar="false">
+          <view style="padding: 0 24rpx;">
+            <Record :list-data="listDataOut" :fields="fieldsOut" :show-title="true"></Record>
+          </view>
+          <view style="height: 20rpx;"></view>
         </scroll-view>
       </template>
     </view>
@@ -85,44 +67,50 @@ const handleScrollIncome = () => {
 
 <style scoped lang="scss">
 .scoreDetail {
-  padding: 24rpx 24rpx 60rpx 24rpx;
   height: 100%;
   @include page-background();
 }
+
 .content {
   display: flex;
   flex-direction: column;
-  padding: 0 24rpx;
   height: 85%;
 
   .tag {
+    margin-top: 24rpx;
+    padding: 0 24rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     .tag-item {
       text-align: center;
       width: 295rpx;
       height: 69rpx;
       line-height: 69rpx;
-      background: #ffffff;
+      background: $qs-card-bg;
       border-radius: 34rpx;
       font-size: 24rpx;
       font-weight: bold;
-      color: #1a1a1a;
+      color: $qs-font-title;
     }
+
     .active-item {
       background-color: $qs-brandColor;
     }
   }
+
   /*日期选择*/
   .my-select {
     width: 100%;
-    margin: 20rpx 0;
+    margin: 20rpx;
     @include customSelected();
   }
+
   .record {
     flex: 1;
   }
+
   .outRecord {
     flex: 1;
   }

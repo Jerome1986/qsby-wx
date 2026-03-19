@@ -62,33 +62,35 @@ const isMale = (item: UserItem) => item.gender === 1
   <view class="signupList">
     <NavHead title="查看报名人员" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
-      <view class="list-card">
-        <view class="list-item" v-for="(item, index) in signupList" :key="item._id">
-          <view class="index">{{ index + 1 }}</view>
-          <image class="avatar"
-            :src="item.avatarUrl || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
-            mode="aspectFill"></image>
-          <view class="user-info">
-            <view class="name-row">
-              <text class="name">{{ getDisplayName(item) }}</text>
-              <image class="gender-icon" :src="isMale(item)
-                ? 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/male.png'
-                : 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/female.png'" mode="aspectFit">
-              </image>
+      <view style="padding: 24rpx;">
+        <view class="list-card">
+          <view class="list-item" v-for="(item, index) in signupList" :key="item._id">
+            <view class="index">{{ index + 1 }}</view>
+            <image class="avatar"
+              :src="item.avatarUrl || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
+              mode="aspectFill"></image>
+            <view class="user-info">
+              <view class="name-row">
+                <text class="name">{{ getDisplayName(item) }}</text>
+                <image class="gender-icon" :src="isMale(item)
+                  ? 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/male.png'
+                  : 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/female.png'" mode="aspectFit">
+                </image>
+              </view>
+              <text class="phone">{{ item.mobile || '-' }}</text>
             </view>
-            <text class="phone">{{ item.mobile || '-' }}</text>
+            <view class="call-btn" @tap="handleCall(item.mobile)">拨号</view>
           </view>
-          <view class="call-btn" @tap="handleCall(item.mobile)">拨号</view>
         </view>
-      </view>
-      <view class="load-more-tip" v-if="signupList.length && (loading || !finish)">
-        <text v-if="loading">加载中...</text>
-        <text v-else>上拉加载更多</text>
-      </view>
-      <view class="empty" v-if="hasFetched && !loading && !signupList.length">
-        <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
-          mode="widthFix"></image>
-        <text class="empty-text">暂无报名人员</text>
+        <view class="load-more-tip" v-if="signupList.length && (loading || !finish)">
+          <text v-if="loading">加载中...</text>
+          <text v-else>上拉加载更多</text>
+        </view>
+        <view class="empty" v-if="hasFetched && !loading && !signupList.length">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="widthFix"></image>
+          <text class="empty-text">暂无报名人员</text>
+        </view>
       </view>
     </scroll-view>
   </view>
@@ -98,7 +100,6 @@ const isMale = (item: UserItem) => item.gender === 1
 .signupList {
   display: flex;
   flex-direction: column;
-  padding: 24rpx;
   height: 100%;
   @include page-background();
 }

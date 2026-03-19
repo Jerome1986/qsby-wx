@@ -60,18 +60,18 @@ const handleSign = () => {
   })
 }
 
-onLoad((options: any) => {
+onLoad(async (options: any) => {
   console.log('options:', options)
   // 获取页面参数
   if (options) {
     title.value = options.title
     productId.value = options.productId
     proType.value = options.proType
-    detailGet(productId.value, proType.value)
+    await detailGet(productId.value, proType.value)
+    await isSignUp(options?.productId, proType.value as OrderType, userStore.profile?._id as string)
   }
   // 获取底部安全区域高度
   getSafeAreaBottom()
-  isSignUp(options?.productId, proType.value as OrderType, userStore.profile?._id as string)
 })
 
 
@@ -319,7 +319,7 @@ onShareAppMessage((res) => {
           width: 130rpx;
           height: 44rpx;
           line-height: 44rpx;
-          background: #ffd018;
+          background: $qs-brandColor;
           border-radius: 22rpx;
           font-size: 22rpx;
           color: $qs-font-title;
@@ -431,7 +431,7 @@ onShareAppMessage((res) => {
       .text {
         margin-top: 4rpx;
         font-size: 24rpx;
-        color: #919191;
+        color: $qs-font-dec;
       }
     }
   }
@@ -538,7 +538,7 @@ onShareAppMessage((res) => {
     height: 80rpx;
     line-height: 80rpx;
     text-align: center;
-    background: #ffd018;
+    background-color: $qs-brandColor;
     border-radius: 40rpx;
     font-size: 30rpx;
     font-weight: bold;
