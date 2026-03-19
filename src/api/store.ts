@@ -71,3 +71,38 @@ export const shopPorductByOne = (productId: string) => {
     data: { productId },
   })
 }
+
+/**
+ *
+ * @param userId - 用户ID
+ * @param orderId - 业务订单号
+ * @param icCardFont - 身份证正面
+ * @param icCardBack - 身份证反面
+ * @param shopId - 门店ID
+ * @returns
+ */
+export const checkInShopApi = (
+  userId: string,
+  orderId: string,
+  icCardFont: string,
+  icCardBack: string,
+) => {
+  return request({
+    method: 'POST',
+    url: '/checkIn/updateOrder',
+    data: { userId, orderId, icCardFont, icCardBack },
+  })
+}
+
+/**
+ *
+ * @param userId - 用户ID
+ * @param orderId - 业务订单号
+ */
+export const checkInInspectApi = (userId: string, orderId: string) => {
+  return request<{ isOrder: boolean }>({
+    method: 'GET',
+    url: '/checkIn/inspect',
+    data: { userId, orderId },
+  })
+}

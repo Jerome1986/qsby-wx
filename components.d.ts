@@ -20,6 +20,7 @@ declare module 'vue' {
     PayMethod: typeof import('./src/components/PayMethod.vue')['default']
     ProductCard: typeof import('./src/components/ProductCard.vue')['default']
     Record: typeof import('./src/components/Record.vue')['default']
+    UpdateFIle: typeof import('./src/components/UpdateFIle.vue')['default']
     Voucher: typeof import('./src/components/Voucher.vue')['default']
   }
 }

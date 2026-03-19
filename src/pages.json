@@ -178,6 +178,15 @@
       "style": {
         "navigationBarTitleText": "测试"
       }
+    },
+    {
+      "path": "pages/shop/checkIn",
+      "style": {
+        "navigationBarTitleText": "办理入住",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
     }
   ],
   "tabBar": {

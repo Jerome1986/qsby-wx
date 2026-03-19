@@ -10,6 +10,7 @@ import { useShopStore } from '@/stores'
 
 const shopStore = useShopStore()
 
+// 获取门店的商品详情--返回门店信息shopInfo,和门店对应的商品列表product
 const shopId = ref('')
 const shopDetailData = ref<StoreDetail>()
 const shopDetailGet = async (shopId: string) => {
@@ -27,11 +28,13 @@ onLoad(async (options) => {
   }
 })
 
+// 跳转详情
 const handleDetail = (productId: string) => {
   uni.navigateTo({
     url: `/pages/shop/shopProductDetail?productId=${productId}`,
   })
 }
+
 </script>
 <template>
   <view class="shopDetail">
@@ -61,8 +64,6 @@ const handleDetail = (productId: string) => {
             <view class="nav-label" style="font-weight: bold;">周边推荐</view>
           </view>
         </view>
-        <!-- 门店办理入住 -->
-        <view class="checkIn" @tap="">办理入住</view>
         <!--   预约流程   -->
         <BookFlow type="shop" :shop-info="shopDetailData?.shopInfo as StoreItem"></BookFlow>
         <view class="title" style="margin: 20rpx 0">
@@ -71,8 +72,9 @@ const handleDetail = (productId: string) => {
         <!--   门店商品列表   -->
         <view class="product-list">
           <view v-if="!shopDetailData?.product?.length" class="empty">
-            <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
-              mode="aspectFit"></image>
+            <image class="empty-img"
+              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png" mode="aspectFit">
+            </image>
             <text class="empty-text">暂无商品</text>
           </view>
           <view class="product-item" v-else v-for="(item, index) in shopDetailData?.product" :key="item._id"
@@ -161,19 +163,7 @@ const handleDetail = (productId: string) => {
     }
   }
 
-  /* 办理入住 */
-  .checkIn {
-    margin-top: 24rpx;
-    height: 88rpx;
-    line-height: 88rpx;
-    text-align: center;
-    font-size: 30rpx;
-    font-weight: 600;
-    color: $qs-font-title;
-    background: $qs-card-bg;
-    border-radius: 30rpx;
-    @include customShadow();
-  }
+
 
   /* 门店商品列表 */
   .product-list {

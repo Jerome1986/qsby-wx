@@ -125,6 +125,7 @@ const handlePay = async () => {
       phone: contactInfo.value.phone as string,
     },
     shopInfo: {
+      shopId: shopStore.shopInfo?._id as string,
       shopName: shopStore.shopInfo?.name as string,
       address: shopStore.shopInfo?.address as string,
       phone: shopStore.shopInfo?.phone as string,
@@ -164,6 +165,7 @@ const handlePay = async () => {
     title: '提示',
     content: '确认提交订单，并支付吗',
     showCancel: true,
+    confirmColor: '#eed261',
     success: async ({ confirm, cancel }) => {
       if (confirm) {
         console.log('参数', params)
@@ -223,10 +225,12 @@ const handlePay = async () => {
           </view>
           <uni-forms :modelValue="contactInfo" labelWidth="140rpx">
             <uni-forms-item label="姓名" name="name">
-              <uni-easyinput v-model="contactInfo.name" placeholder="请输入姓名" :inputBorder="false" />
+              <uni-easyinput v-model="contactInfo.name" placeholder="请输入姓名" :inputBorder="false"
+                primaryColor="#ffd018" />
             </uni-forms-item>
             <uni-forms-item label="手机" name="phone">
-              <uni-easyinput v-model="contactInfo.phone" placeholder="请输入手机号" :inputBorder="false" type="number" />
+              <uni-easyinput v-model="contactInfo.phone" placeholder="请输入手机号" :inputBorder="false" type="number"
+                primaryColor="#ffd018" />
             </uni-forms-item>
           </uni-forms>
         </view>

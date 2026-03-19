@@ -28,11 +28,13 @@ export interface OrderUserInfo {
   /** 真实姓名 */
   realName?: string
   /** 身份证号 */
-  idCard?: string
+  icCardFont?: string
+  icCardBack?: string
 }
 
 // 门店信息
 export interface ShopInfo {
+  shopId: string
   /** 门店名称 */
   shopName: string
   /** 门店地址 */

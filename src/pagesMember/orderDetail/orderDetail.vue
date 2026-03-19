@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
 import { ref, computed, watch } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
 import UQRCode from 'uqrcodejs'
-import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info'
-import type { OrderItem, OrderType, ShopInfo } from '@/types/OrderItem'
+import { getSafeAreaBottom } from '@/utils/system-info'
+import type { OrderItem, OrderType } from '@/types/OrderItem'
 import { orderFindOne, orderPay, orderCancel, createQrCode } from '@/api/order'
 import { useUserStore } from '@/stores'
 import { formatTimestamp } from '@/utils/generateMonth'
-import BookFlow from '@/components/BookFlow.vue'
 
 
 // store
@@ -124,6 +123,18 @@ const handleRefund = () => {
   })
 }
 
+// 查询客户是否入住
+const isCheckIn = computed(() => {
+  return orderDetail.value?.status === 'paid'
+})
+
+// 办理入住（门店订单）
+const handleCheckIn = () => {
+  uni.navigateTo({
+    url: `/pages/shop/checkIn?orderId=${orderDetail.value?.out_trade_no || ''}`,
+  })
+}
+
 // 取消订单（待付款）
 const handleCancelOrder = () => {
   const order = orderDetail.value
@@ -186,15 +197,51 @@ const handleGoPay = async () => {
   }
 }
 
+// 订单轮询定时器（用于同步核销状态）
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+/** 清除轮询定时器 */
+const clearPollTimer = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+    console.log('[订单轮询] 定时器已清除')
+  }
+}
+
 onLoad((options?: { orderId?: string; type?: string }) => {
   orderId.value = options?.orderId || ''
   const type = options?.type as OrderType
   orderType.value = type
-  if (options?.orderId) {
-    orderDetailGet(options.orderId)
-  }
   getSafeAreaBottom()
+
+  if (orderId.value) {
+    // 1. 首次加载立即请求一次
+    orderDetailGet(orderId.value)
+    // 2. 每 3 秒轮询订单状态
+    pollTimer = setInterval(() => {
+      console.log('[订单轮询] 定时器已启动, orderId:', orderId.value)
+      orderDetailGet(orderId.value)
+    }, 3000)
+  }
 })
+
+// 离开页面时清除定时器，避免内存泄漏
+onUnload(() => {
+  clearPollTimer()
+})
+
+// 订单已核销时停止轮询
+watch(
+  () => orderDetail.value?.status,
+  (status) => {
+    if (status === 'verified') {
+      clearPollTimer()
+    }
+  },
+)
+
+
 </script>
 
 <template>
@@ -372,13 +419,14 @@ onLoad((options?: { orderId?: string; type?: string }) => {
           </view>
         </view>
 
-        <!-- 申请退款（二维码卡片下方 24rpx） -->
-        <view
-          class="refund-wrap"
-          v-if="orderDetail?.status === 'paid' && orderDetail.discountType !== 'voucher' && orderDetail.orderType !== 'project'"
-          @tap="handleRefund"
-        >
-          申请退款
+        <!-- 申请退款、办理入住（门店订单时两者并排） -->
+        <view class="action-wrap" v-if="orderDetail?.status === 'paid' && orderDetail.orderType !== 'project'">
+          <view class="action-btn-sm" v-if="orderDetail.discountType !== 'voucher'" @tap="handleRefund">
+            申请退款
+          </view>
+          <view class="action-btn-sm" v-if="orderDetail.orderType === 'shop' && isCheckIn" @tap="handleCheckIn">
+            办理入住
+          </view>
         </view>
 
         <!-- 待付款：取消订单、去支付 -->
@@ -413,19 +461,24 @@ onLoad((options?: { orderId?: string; type?: string }) => {
   @include customShadow();
 }
 
-/* 申请退款（与去支付按钮样式同步） */
-.refund-wrap {
-  margin: 0 8rpx 24rpx auto;
+/* 申请退款、办理入住（并排，靠右） */
+.action-wrap {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 24rpx;
+  justify-content: flex-end;
+}
+
+.action-btn-sm {
   padding: 0 32rpx;
-  width: fit-content;
   height: 60rpx;
   line-height: 60rpx;
   text-align: center;
   border-radius: 30rpx;
   font-size: 26rpx;
   font-weight: 500;
-  background: linear-gradient(135deg, $qs-brandColor 0%, darken($qs-brandColor, 6%) 100%);
   color: $qs-font-title;
+  background: linear-gradient(135deg, $qs-brandColor 0%, darken($qs-brandColor, 6%) 100%);
   @include customShadow();
 }
 
