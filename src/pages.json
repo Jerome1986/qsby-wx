@@ -364,6 +364,24 @@
           }
         },
         {
+          "path": "storeManage/storeOrderDetail",
+          "style": {
+            "navigationBarTitleText": "门店订单详情",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "storeManage/storeManage",
+          "style": {
+            "navigationBarTitleText": "门店管理",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
           "path": "orderManage/orderManage",
           "style": {
             "navigationBarTitleText": "订单管理",

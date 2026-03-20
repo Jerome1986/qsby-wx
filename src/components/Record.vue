@@ -23,7 +23,7 @@ defineProps<{
 .item {
   padding: 24rpx;
   margin-bottom: 20rpx;
-  background: #ffffff;
+  background: $qs-card-bg;
   border-radius: 30rpx;
   @include customShadow();
 

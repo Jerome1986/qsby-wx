@@ -42,6 +42,8 @@ export interface UserItem {
   avatarUpdateAt?: Date
   /** 用户的真实姓名,主理人身份实名必填 */
   username?: string
+  /** 店长关联的门店ID（仅店长角色有值） */
+  shopId?: string
 }
 
 // 用户角色

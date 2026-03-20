@@ -81,7 +81,10 @@ const getOrderTypeLabel = (type: OrderType) => {
 
 onLoad((options) => {
   if (options?.orderStatus) {
-    currentStatus.value = options?.orderStatus
+    currentStatus.value = options.orderStatus as PageOrderStatus
+  }
+  if (options?.orderType) {
+    currentOrderType.value = options.orderType as PageOrderType
   }
 })
 

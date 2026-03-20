@@ -25,8 +25,8 @@ const orderId = ref('')
 const orderType = ref<OrderType>('trip')
 
 const orderDetail = ref<OrderItem>()
-const orderDetailGet = async (id: string) => {
-  const res = await orderFindOne(userStore.profile?.openid as string, id)
+const orderDetailGet = async (orderId: string) => {
+  const res = await orderFindOne(orderId)
   orderDetail.value = res.data
   // 已支付但无核销码且不为项目订单时，请求创建
   if (res.data.status === 'paid' && !res.data.verifyCode && res.data.orderType !== 'project') {

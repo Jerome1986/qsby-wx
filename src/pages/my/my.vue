@@ -6,8 +6,8 @@ import Order from '@/pages/my/Order.vue'
 import Function from '@/pages/my/Function.vue'
 import { useUserStore } from '@/stores'
 import { userInfoGet } from '@/composables/userInfo.ts'
-import { watch } from 'vue'
 import SendList from '@/pages/my/SendList.vue'
+import StoreManageList from '@/pages/my/StoreManageList.vue'
 import MyUtile from '@/pages/my/MyUtile.vue'
 import { writeOrder } from '@/api/order'
 
@@ -98,6 +98,8 @@ const openCode = () => {
       <Order></Order>
       <!--  管理发布  -->
       <SendList v-if="userStore.profile?.role === 'manager'"></SendList>
+      <!--  门店管理  -->
+      <StoreManageList v-if="userStore.profile?.shopId"></StoreManageList>
       <!-- 我的工具  -->
       <MyUtile></MyUtile>
     </view>

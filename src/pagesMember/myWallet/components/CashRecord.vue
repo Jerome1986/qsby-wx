@@ -58,7 +58,7 @@ const getStatus = (status: CashWithdrawStatus) => statusMap[status] ?? statusMap
   margin-bottom: 20rpx;
   padding: 0 30rpx;
   height: 166rpx;
-  background: #ffffff;
+  background: $qs-card-bg;
   border-radius: 30rpx;
   @include customShadow();
 

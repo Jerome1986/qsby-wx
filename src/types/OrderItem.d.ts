@@ -27,8 +27,9 @@ export interface OrderUserInfo {
   phone: string
   /** 真实姓名 */
   realName?: string
-  /** 身份证号 */
+  /** 身份证正面图片链接 */
   icCardFont?: string
+  /** 身份证反面图片链接 */
   icCardBack?: string
 }
 
@@ -106,16 +107,8 @@ export interface OrderItem {
   /** 产品信息嵌套对象 */
   productInfo: ProductInfo
   /** 用户信息嵌套对象(报名人信息) */
-  userInfo: {
-    /** 用户对应的ID */
-    userId: string
-    /** 用户昵称 */
-    nickname: string
-    /** 性别（1-男/2-女/0-未知） */
-    gender: number
-    /** 用户手机号（脱敏前） */
-    phone: string
-  }
+  userInfo: OrderUserInfo
+  /** 门店信息 */
   shopInfo?: ShopInfo
   /** 发起人信息 */
   initiatorInfo?: InitiatorInfo

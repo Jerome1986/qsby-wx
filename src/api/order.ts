@@ -39,6 +39,20 @@ export const orderPay = (orderId: string, openid: string) => {
 }
 
 /**
+ * 按门店查询订单（店长管理门店订单）
+ * @param shopId - 门店ID
+ * @param pageNum - 页码
+ * @param pageSize - 条数
+ */
+export const orderFindByShop = (shopId: string, pageNum: number, pageSize: number) => {
+  return request<OrderPage>({
+    method: 'GET',
+    url: '/order/byShop',
+    data: { shopId, pageNum, pageSize },
+  })
+}
+
+/**
  * 订单查询
  * @param orderType - 订单类型
  * @param orderStatus - 订单状态
@@ -62,14 +76,13 @@ export const orderFindAll = (
 
 /**
  * 获取订单详情
- * @param userId - 用户ID
- * @param orderId - 订单ID
+ * @param orderId - 订单ID（MongoDB _id）
  */
-export const orderFindOne = (openid: string, orderId: string) => {
+export const orderFindOne = (orderId: string) => {
   return request<OrderItem>({
     method: 'GET',
     url: '/order/findOne',
-    data: { openid, orderId },
+    data: { orderId },
   })
 }
 
