@@ -59,6 +59,10 @@ const handleMore = () => {
 
 // 跳转发布
 const handleSend = () => {
+  if (userStore.profile?.role === 'user' || !userStore.profile) {
+    uni.showToast({ icon: 'none', title: '请先申请主理人' })
+    return
+  }
   uni.navigateTo({
     url: '/pages/project/sendProject',
   })
@@ -66,10 +70,6 @@ const handleSend = () => {
 
 // 跳转项目详情
 const handleGoDetail = (item: ProjectItem) => {
-  if (userStore.profile?.role === 'user') {
-    uni.showToast({ icon: 'none', message: '请先申请主理人' })
-    return
-  }
   uni.navigateTo({
     url: `/pages/project/projectDetail?projectId=${item._id}`,
   })

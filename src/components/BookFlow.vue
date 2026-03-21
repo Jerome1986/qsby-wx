@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { openLocation } from '@/composables/openLocation';
-import { useShopStore } from '@/stores';
+import { useShopStore, useUserStore } from '@/stores';
 import type { StoreItem } from '@/types/store';
 
 const props = withDefaults(
@@ -17,6 +17,7 @@ const props = withDefaults(
 
 // 门店store
 const shopStore = useShopStore()
+const userStore = useUserStore()
 
 const handleCallPhone = () => {
   uni.makePhoneCall({
@@ -43,7 +44,8 @@ console.log(shopStore.shopInfo)
       <text class="iconfont icon-shijian"></text>
       <view class="value" style="display: flex;align-items: flex-start;">
         <text style="margin-right: 40rpx;">价格:{{ price }}</text>
-        <text style="font-size: 28rpx;color: #919191;">佣金:{{ commission }}</text>
+        <text v-if="userStore.profile?.role === 'manager'" style="font-size: 28rpx;color: #919191;">佣金:{{ commission
+        }}</text>
       </view>
     </view>
     <!--   位置和商家名称   -->
@@ -57,8 +59,9 @@ console.log(shopStore.shopInfo)
           {{ shopInfo?.address ?? shopStore?.shopInfo?.address }}
         </view>
       </view>
-      <view class="info-action" @tap="openLocation(shopInfo?.latitude as number ?? shopStore.shopInfo?.latitude as number,
-        shopInfo?.longitude as number ?? shopStore.shopInfo?.longitude as number)">
+      <view class="info-action"
+        @tap="openLocation(shopInfo?.latitude as number ?? shopStore.shopInfo?.latitude as number,
+          shopInfo?.longitude as number ?? shopStore.shopInfo?.longitude as number, shopInfo?.name as string, shopInfo?.address as string)">
         <text class="iconfont icon-ditu" style="color: #f7821a; font-size: 40rpx"></text>
         <view style="font-size: 24rpx; color: #919191">地图</view>
       </view>

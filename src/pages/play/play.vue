@@ -90,8 +90,8 @@ const handleSelectedSort = (currentSortId: SortType) => {
 // 发布行程
 const handleSend = () => {
   // 验证身份
-  if (userStore.profile?.role === 'user') {
-    uni.showToast({ icon: 'none', message: '请先申请主理人' })
+  if (userStore.profile?.role === 'user' || !userStore.profile) {
+    uni.showToast({ icon: 'none', title: '请先申请主理人' })
     return
   }
   uni.navigateTo({
