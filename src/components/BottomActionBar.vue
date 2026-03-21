@@ -7,7 +7,7 @@ const props = defineProps<{
 // 立即兑换
 const exchange = () => {
   uni.navigateTo({
-    url: '/pagesMember/myScore/exchange',
+    url: props.productId ? `/pagesMember/myScore/exchange?productId=${props.productId}` : '/pagesMember/myScore/exchange',
   })
 }
 

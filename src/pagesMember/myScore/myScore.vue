@@ -1,19 +1,64 @@
 <script setup lang="ts">
+import { scoreProductGetApi } from '@/api/score'
 import NavHead from '@/components/NavHead.vue'
+import { useUserStore } from '@/stores'
+import type { ScoreProduct } from '@/types/Score'
+import { onLoad } from '@dcloudio/uni-app'
+import { ref } from 'vue'
 
-const handleScroll = () => {
-  console.log('触底')
+const userStore = useUserStore()
+// 分页
+const pageNum = ref(1)
+const pageSize = ref(10)
+const finish = ref(false)
+// 积分商品列表
+const scoreProdctData = ref<ScoreProduct[]>([])
+const loading = ref(false)
+
+/** 获取积分商品列表（分页追加） */
+const scoreProductGet = async () => {
+  if (finish.value || loading.value) return
+  loading.value = true
+  try {
+    const res = await scoreProductGetApi(pageNum.value, pageSize.value)
+    scoreProdctData.value.push(...res.data.list)
+    if (pageNum.value < res.data.totalPage) {
+      pageNum.value++
+    } else {
+      finish.value = true
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
-// 积分商品详情
-const goDetail = (index: number) => {
-  console.log(index)
+onLoad(() => scoreProductGet())
+
+/** 重置分页与列表 */
+const reset = () => {
+  pageNum.value = 1
+  scoreProdctData.value = []
+  finish.value = false
+}
+
+/** 触底加载更多 */
+const handleScroll = () => {
+  if (!finish.value) scoreProductGet()
+}
+
+/** 跳转积分商品详情 */
+const goDetail = (productId: string) => {
   uni.navigateTo({
-    url: `/pagesMember/myScore/scoreProductDetail?productId=${index}`,
+    url: `/pagesMember/myScore/scoreProductDetail?productId=${productId}`,
   })
 }
 
-//  处理TAP跳转
+/** 仅上架商品可点击进入详情 */
+const handleProductTap = (item: ScoreProduct) => {
+  if (item.status === 'active') goDetail(item._id)
+}
+
+/** 积分明细 / 积分订单 跳转 */
 const handelGo = (val: string) => {
   switch (val) {
     case 'detail':
@@ -38,7 +83,7 @@ const handelGo = (val: string) => {
       <view class="head">
         <view class="title">我的积分</view>
         <view class="value">
-          <view class="score">1299</view>
+          <view class="score">{{ userStore.profile?.score }}</view>
           <view class="btn">
             <view class="details item" @tap="handelGo('detail')">积分明细</view>
             <view class="order item" @tap="handelGo('order')">积分订单</view>
@@ -49,30 +94,41 @@ const handelGo = (val: string) => {
     <!-- 积分商品   -->
     <scroll-view class="productScore" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true"
       :show-scrollbar="false">
-      <view style="padding:0 24rpx;">
-        <view class="product-item" v-for="index in 10" :key="index" @tap="goDetail(index)">
-          <view class="cover">
-            <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/cover.jpg"
-              mode="aspectFill"></image>
+      <view class="product-list">
+        <view
+          class="product-item"
+          v-for="item in scoreProdctData"
+          :key="item._id"
+          :class="{ disabled: item.status === 'disabled' }"
+          @tap="handleProductTap(item)"
+        >
+          <view class="cover-wrap">
+            <image class="cover" :src="item.cover" mode="aspectFill"></image>
+            <view class="category-tag" v-if="item.categoryName">{{ item.categoryName }}</view>
           </view>
           <view class="info">
-            <view class="title">湖景大床房</view>
+            <view class="meta">
+              <view class="title">{{ item.name }}</view>
+              <view class="category" v-if="item.categoryName">{{ item.categoryName }}</view>
+              <view class="store-name" v-if="item.storeName">门店：{{ item.storeName }}</view>
+            </view>
             <view class="content">
-              <view class="needScore">100积分</view>
-              <view class="bottom">
-                <view class="price">价值199元</view>
-                <view class="exchange">立即兑换</view>
+              <view class="score-row">
+                <text class="label">所需</text>
+                <text class="score-price">{{ item.scorePrice }}积分</text>
               </view>
+              <view class="exchange-btn">{{ item.status === 'disabled' ? '暂不可兑' : '立即兑换' }}</view>
             </view>
           </view>
         </view>
       </view>
-      <view style="height:40rpx;"></view>
+      <view class="bottom-placeholder"></view>
     </scroll-view>
   </view>
 </template>
 
 <style scoped lang="scss">
+/* 页面容器 */
 .myScore {
   display: flex;
   flex-direction: column;
@@ -80,7 +136,7 @@ const handelGo = (val: string) => {
   @include page-background();
 }
 
-/*积分展示*/
+/* 积分展示卡片 */
 .head {
   padding: 30rpx;
   background-color: $qs-card-bg;
@@ -97,13 +153,14 @@ const handelGo = (val: string) => {
     display: flex;
     justify-content: space-between;
 
+    /* 积分数值 */
     .score {
       font-weight: bold;
       font-size: 40rpx;
       color: $qs-font-dec;
     }
 
-    /*按钮区域*/
+    /* 积分明细/订单按钮 */
     .btn {
       display: flex;
 
@@ -130,77 +187,148 @@ const handelGo = (val: string) => {
   }
 }
 
-/*积分商品*/
+/* 积分商品列表区域 */
 .productScore {
   flex: 1;
-  margin-top: 20rpx;
+  margin-top: 24rpx;
+}
 
-  .product-item {
-    margin-bottom: 20rpx;
-    display: flex;
-    align-items: center;
-    padding: 24rpx;
-    background-color: $qs-card-bg;
-    border-radius: 30rpx;
-    @include customShadow();
+.product-list {
+  padding: 0 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
 
-    &:nth-last-child(1) {
-      margin-bottom: 0;
+/* 单个商品卡片 */
+.product-item {
+  display: flex;
+  align-items: stretch;
+  padding: 24rpx;
+  background-color: $qs-card-bg;
+  border-radius: 24rpx;
+  @include customShadow();
+
+  /* 下架商品 */
+  &.disabled {
+    opacity: 0.6;
+
+    .cover-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 16rpx;
     }
 
-    /*封面*/
+    .exchange-btn {
+      background: $qs-font-dec2;
+      color: $qs-font-dec;
+    }
+  }
+
+  /* 商品封面 */
+  .cover-wrap {
+    position: relative;
+    width: 200rpx;
+    height: 200rpx;
+    flex-shrink: 0;
+    margin-right: 24rpx;
+    border-radius: 16rpx;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.04);
+
     .cover {
-      margin-right: 20rpx;
-      width: 180rpx;
-      height: 180rpx;
-      border-radius: 24rpx;
-      overflow: hidden;
+      width: 100%;
+      height: 100%;
     }
 
-    /*商品信息*/
-    .info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 180rpx;
+    .category-tag {
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 6rpx 14rpx;
+      font-size: 20rpx;
+      color: #fff;
+      background: linear-gradient(135deg, $qs-brandColor, darken($qs-brandColor, 10%));
+      border-radius: 16rpx 0 12rpx 0;
+      z-index: 1;
+    }
+  }
 
-      /*商品名称*/
+  /* 商品信息区 */
+  .info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .meta {
       .title {
-        font-size: 29rpx;
-        color: #0b0a0a;
+        font-size: 30rpx;
+        font-weight: bold;
+        color: $qs-font-title;
+        line-height: 1.4;
+        @include ellipsis(2);
       }
 
-      /*积分兑换*/
-      .content {
-        .needScore {
-          font-size: 28rpx;
-          color: #da1417;
+      .category {
+        margin-top: 6rpx;
+        font-size: 24rpx;
+        color: $qs-font-dec2;
+      }
+
+      .store-name {
+        margin-top: 6rpx;
+        font-size: 24rpx;
+        color: $qs-font-dec;
+      }
+    }
+
+    /* 积分价格 + 兑换按钮 */
+    .content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12rpx;
+      padding-top: 12rpx;
+      border-top: 1rpx solid rgba($qs-border, 0.6);
+
+      .score-row {
+        display: flex;
+        align-items: baseline;
+        gap: 6rpx;
+
+        .label {
+          font-size: 24rpx;
+          color: $qs-font-dec2;
         }
 
-        .bottom {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-
-          .price {
-            font-size: 21rpx;
-            color: $qs-font-dec2;
-          }
-
-          .exchange {
-            text-align: center;
-            width: 150rpx;
-            height: 47rpx;
-            line-height: 47rpx;
-            background: #ffd018;
-            border-radius: 24rpx;
-            font-size: 24rpx;
-            color: $qs-font-title;
-          }
+        .score-price {
+          font-size: 32rpx;
+          font-weight: bold;
+          color: $qs-brandColor;
         }
+      }
+
+      .exchange-btn {
+        padding: 0 28rpx;
+        height: 56rpx;
+        line-height: 56rpx;
+        font-size: 26rpx;
+        font-weight: 500;
+        color: $qs-font-title;
+        background: linear-gradient(135deg, $qs-brandColor 0%, darken($qs-brandColor, 6%) 100%);
+        border-radius: 28rpx;
+        box-shadow: 0 4rpx 12rpx rgba($qs-brandColor, 0.35);
       }
     }
   }
+}
+
+/* 底部占位，防止内容被裁切 */
+.bottom-placeholder {
+  height: 48rpx;
 }
 </style>
