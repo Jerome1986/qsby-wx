@@ -3,6 +3,7 @@ import NavHead from '@/components/NavHead.vue'
 import { computed, ref } from 'vue'
 import { safeAreaBottom, getSafeAreaBottom } from '@/utils/system-info'
 import NavTitle from '@/components/NavTitle.vue'
+import Note from '@/components/Note.vue'
 import PayMethod from '@/components/PayMethod.vue'
 import Voucher from '@/components/Voucher.vue'
 import { onLoad } from '@dcloudio/uni-app'
@@ -37,13 +38,6 @@ const contactInfo = ref({
   phone: '',
 })
 
-
-// 订单须知
-const noticeList = ref([
-  '下单后请在24小时内完成支付，超时订单将自动取消。',
-  '如需退款，请在入住前一天联系商家协商处理。',
-  '本平台仅提供预订服务，实际消费以商家为准。',
-])
 
 // 是否使用代金券抵扣
 const useVoucher = ref(true)
@@ -242,15 +236,8 @@ const handlePay = async () => {
         <Voucher v-if="userStore.profile?.role === 'manager'" :amount="userStore.profile.couponBalance"
           v-model:useVoucher="useVoucher" />
 
-        <!-- 订单须知 -->
-        <view class="card notice-card">
-          <view style="margin-bottom: 24rpx">
-            <NavTitle title="订单须知"></NavTitle>
-          </view>
-          <view class="notice-item" v-for="(item, index) in noticeList" :key="index">
-            <text>{{ index + 1 }}. {{ item }}</text>
-          </view>
-        </view>
+        <!-- 预约须知 -->
+        <Note />
 
         <view style="height: 140rpx"></view>
       </view>
@@ -345,15 +332,6 @@ const handlePay = async () => {
       font-size: 28rpx;
       color: $qs-font-title;
     }
-  }
-}
-
-/* 订单须知 */
-.notice-card {
-  .notice-item {
-    font-size: 26rpx;
-    color: $qs-font-dec;
-    line-height: 1.8;
   }
 }
 

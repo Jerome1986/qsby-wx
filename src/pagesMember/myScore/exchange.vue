@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
 import NavTitle from '@/components/NavTitle.vue'
+import TipsBlock from '@/components/TipsBlock.vue'
 
 // todo该页面根据订单ID获取订单信息并展示核销码
 </script>
@@ -26,13 +27,7 @@ import NavTitle from '@/components/NavTitle.vue'
       <!--  温馨提示  -->
       <view class="tips">
         <NavTitle title="温馨提示"></NavTitle>
-        <view class="tips-list">
-          <view class="tips-item">1. 本券一经兑换，不支持退换，请确认后再兑换</view>
-          <view class="tips-item">2. 使用前请提前致电商家预约，避免到店无房</view>
-          <view class="tips-item">3. 本券仅限本人使用，不可转让或转售</view>
-          <view class="tips-item">4. 如遇节假日或特殊时段，请以商家实际安排为准</view>
-          <view class="tips-item">5. 本券过期后自动作废，请在有效期内使用</view>
-        </view>
+        <TipsBlock type="project" />
       </view>
     </view>
   </view>
@@ -109,19 +104,8 @@ import NavTitle from '@/components/NavTitle.vue'
 .tips {
   margin-top: 30rpx;
 
-  /* 提示列表 */
-  .tips-list {
+  :deep(.tips-block) {
     margin-top: 20rpx;
-    display: flex;
-    flex-direction: column;
-    gap: 16rpx;
-
-    /* 提示项 */
-    .tips-item {
-      font-size: 24rpx;
-      color: $qs-font-dec;
-      line-height: 1.6;
-    }
   }
 }
 </style>

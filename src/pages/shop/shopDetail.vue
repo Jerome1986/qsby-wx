@@ -35,6 +35,20 @@ const handleDetail = (productId: string) => {
   })
 }
 
+// 门店介绍
+const handleNavIntro = () => {
+  uni.navigateTo({
+    url: `/pages/shop/shopIntro?shopId=${shopId.value}`,
+  })
+}
+
+// 周边推荐
+const handleNavSurround = () => {
+  uni.navigateTo({
+    url: `/pages/shop/shopSurround?shopId=${shopId.value}`,
+  })
+}
+
 </script>
 <template>
   <view class="shopDetail">
@@ -47,7 +61,7 @@ const handleDetail = (productId: string) => {
         </view>
         <!-- 快捷入口 -->
         <view class="nav-entry">
-          <view class="nav-item">
+          <view class="nav-item" @tap="handleNavIntro">
             <view class="nav-icon">
               <image mode="aspectFit"
                 src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/jieshao.png">
@@ -55,7 +69,7 @@ const handleDetail = (productId: string) => {
             </view>
             <view class="nav-label" style="font-weight: bold;">门店介绍</view>
           </view>
-          <view class="nav-item">
+          <view class="nav-item" @tap="handleNavSurround">
             <view class="nav-icon">
               <image mode="aspectFit"
                 src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/tuijian.png">

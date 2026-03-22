@@ -4,8 +4,7 @@ import { navBarOptions, rightsJump, type NavbarType } from './data';
 
 const handleGo = (type: NavbarType) => {
   console.log('跳转')
-  return
-  // rightsJump[type](type)
+  rightsJump[type](type)
 }
 </script>
 <template>

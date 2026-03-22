@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
+import TipsBlock from '@/components/TipsBlock.vue'
 import { computed, ref } from 'vue'
 import { safeAreaBottom, getSafeAreaBottom } from '@/utils/system-info'
 import { projectAllCateGetApi, projectDetailGetApi } from '@/api/project'
@@ -163,13 +164,6 @@ const handleSubmit = async () => {
   })
 }
 
-// 温馨提示
-const tipsList = ref([
-  '支付查看费用后，您将获取项目发布人的联系方式，请在有效期内联系。',
-  '本平台仅提供信息展示与对接服务，不参与任何合作决策，请自行甄别项目真实性。',
-  '如有疑问请联系平台客服处理。',
-])
-
 // 查看免责声明
 const handleDisclaimer = () => {
   // TODO: 跳转免责声明页面
@@ -238,10 +232,7 @@ const handleDisclaimer = () => {
 
         <!-- 温馨提示 -->
         <view class="card tips-card">
-          <view class="tips-title">温馨提示：</view>
-          <view class="tips-item" v-for="(tip, index) in tipsList" :key="index">
-            <text>{{ index + 1 }}. {{ tip }}</text>
-          </view>
+          <TipsBlock type="project" />
         </view>
 
         <!-- 免责声明勾选 -->

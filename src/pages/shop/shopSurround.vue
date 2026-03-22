@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { contentBrandApi } from '@/api/content'
-import type { BrandContent } from '@/types/Content'
+import { contentSurroundingApi } from '@/api/content'
+import type { ContentPageData } from '@/types/Content'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 const loading = ref(false)
-const brandData = ref<BrandContent | null>(null)
+const pageData = ref<ContentPageData | null>(null)
 
 const DEFAULT_COVER = 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/qiansubaiyuan.jpg'
 const DEFAULT_IMAGES = [
@@ -14,24 +14,24 @@ const DEFAULT_IMAGES = [
   'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/03.jpg',
 ]
 
-const fetchBrand = async () => {
+const fetchData = async () => {
   loading.value = true
   try {
-    const res = await contentBrandApi()
-    brandData.value = res.data
+    const res = await contentSurroundingApi()
+    pageData.value = res.data
   } catch {
-    uni.showToast({ icon: 'none', title: '获取品牌内容失败' })
+    uni.showToast({ icon: 'none', title: '获取周边推荐失败' })
   } finally {
     loading.value = false
   }
 }
 
-onLoad(() => fetchBrand())
+onLoad(() => fetchData())
 </script>
 
 <template>
-  <view class="brand">
-    <NavHead :title="brandData?.heroTitle || '千宿百院'" :show-back="false" />
+  <view class="shop-surround">
+    <NavHead :title="pageData?.heroTitle || '周边推荐'" :show-back="true" />
     <view v-if="loading" class="loading">
       <text>加载中...</text>
     </view>
@@ -40,22 +40,22 @@ onLoad(() => fetchBrand())
         <!-- 封面 + 主标题 -->
         <view class="hero-card">
           <view class="hero-cover">
-            <image :src="brandData?.cover || DEFAULT_COVER" mode="aspectFill" />
+            <image :src="pageData?.cover || DEFAULT_COVER" mode="aspectFill" />
             <view class="hero-mask"></view>
-            <view class="hero-title">{{ brandData?.heroTitle || '千宿百院' }}</view>
-            <view class="hero-subtitle">{{ brandData?.heroSubtitle || '品牌介绍' }}</view>
+            <view class="hero-title">{{ pageData?.heroTitle || '周边推荐' }}</view>
+            <view class="hero-subtitle">{{ pageData?.heroSubtitle || '探索周边' }}</view>
           </view>
         </view>
 
         <!-- 开篇 -->
-        <view class="card intro-card" v-if="brandData?.introText">
-          <view class="card-content">{{ brandData.introText }}</view>
+        <view class="card intro-card" v-if="pageData?.introText">
+          <view class="card-content">{{ pageData.introText }}</view>
         </view>
 
         <!-- 章节 -->
         <view
           class="card section-card"
-          v-for="(section, idx) in (brandData?.sections || [])"
+          v-for="(section, idx) in (pageData?.sections || [])"
           :key="idx"
         >
           <view class="section-header">
@@ -75,12 +75,12 @@ onLoad(() => fetchBrand())
         </view>
 
         <!-- 配图 -->
-        <view class="card images-card" v-if="(brandData?.galleryImages?.length || 0) > 0 || brandData === null">
-          <view class="card-title">{{ brandData?.galleryTitle || '品牌风采' }}</view>
+        <view class="card images-card" v-if="(pageData?.galleryImages?.length || 0) > 0 || pageData === null">
+          <view class="card-title">{{ pageData?.galleryTitle || '周边风采' }}</view>
           <view class="images-grid">
             <view
               class="image-item"
-              v-for="(img, index) in (brandData?.galleryImages ?? DEFAULT_IMAGES)"
+              v-for="(img, index) in (pageData?.galleryImages ?? DEFAULT_IMAGES)"
               :key="index"
             >
               <image :src="img" mode="aspectFill" />
@@ -95,7 +95,7 @@ onLoad(() => fetchBrand())
 </template>
 
 <style scoped lang="scss">
-.brand {
+.shop-surround {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -119,13 +119,19 @@ onLoad(() => fetchBrand())
   }
 }
 
-/* 卡片通用 */
 .card {
   padding: 24rpx;
   background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
   margin-top: 24rpx;
+}
+
+.hero-card {
+  margin-top: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .card-title {
@@ -144,19 +150,6 @@ onLoad(() => fetchBrand())
   &:last-child {
     margin-bottom: 0;
   }
-
-  &.highlight {
-    color: $qs-font-title;
-    font-weight: 500;
-  }
-}
-
-/* 封面 hero */
-.hero-card {
-  margin-top: 0;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
 }
 
 .hero-cover {
@@ -196,7 +189,6 @@ onLoad(() => fetchBrand())
   }
 }
 
-/* 章节卡片 */
 .section-card {
   .section-header {
     display: flex;
@@ -264,7 +256,6 @@ onLoad(() => fetchBrand())
   }
 }
 
-/* 配图 */
 .images-card {
   .images-grid {
     display: flex;

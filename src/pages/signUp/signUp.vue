@@ -10,6 +10,7 @@ import { formatTimestamp } from '@/utils/generateMonth'
 import { vaildateMoible } from '@/utils/validateMobile'
 import type { OrderSubmitParams, OrderUserInfo, InitiatorInfo, OrderType } from '@/types/OrderItem'
 import PayMethod from '@/components/PayMethod.vue'
+import TipsBlock from '@/components/TipsBlock.vue'
 import { createQrCode, createOrderFree, orderAdd } from '@/api/order'
 import { userInfoGetApi } from '@/api/user'
 import { activityDetail } from '@/api/activity'
@@ -310,12 +311,7 @@ onLoad(async (options: any) => {
         <PayMethod />
         <!--  温馨提示  -->
         <view class="tips">
-          <view class="tips-title">温馨提示：</view>
-          <view class="tips-item">1、报名成功后，请按照行程安排准时到达指定集合地点，逾期未到视为自动放弃，费用不予退还。</view>
-          <view class="tips-item">2、如需取消报名，请提前24小时联系组织方，逾期取消将扣除相应手续费。</view>
-          <view class="tips-item">3、活动期间请遵守组织方安排，注意人身及财产安全，如遇突发情况请及时与工作人员沟通。</view>
-          <view class="tips-item">4、请确保所填写的联系方式真实有效，以便组织方及时与您取得联系。</view>
-          <view class="tips-item">5、本平台仅提供信息展示及报名服务，活动最终解释权归组织方所有。</view>
+          <TipsBlock :type="proType === 'trip' ? 'trip' : proType === 'activity' ? 'activity' : 'project'" />
         </view>
         <!-- 底部占位 -->
         <view class="scroll-bottom-placeholder"></view>
@@ -526,24 +522,6 @@ onLoad(async (options: any) => {
   background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
-
-  .tips-title {
-    font-size: 26rpx;
-    font-weight: bold;
-    color: $qs-font-title;
-    margin-bottom: 16rpx;
-  }
-
-  .tips-item {
-    font-size: 26rpx;
-    color: $qs-font-dec;
-    line-height: 1.8;
-    margin-bottom: 16rpx;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
 }
 
 /* 底部操作区域 */

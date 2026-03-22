@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
+import TipsBlock from '@/components/TipsBlock.vue'
 import { ref } from 'vue'
 import { applyManagerApi, verifyManagerApplyApi } from '@/api/user.ts'
 import { useUserStore } from '@/stores'
@@ -152,20 +153,5 @@ const handleSubmit = async () => {
   background: #ffffff;
   border-radius: 30rpx;
   @include customShadow();
-
-  .title {
-    font-size: 28rpx;
-    font-weight: bold;
-    color: $qs-font-title;
-    margin-bottom: 16rpx;
-  }
-
-  .content {
-    .item {
-      font-size: 24rpx;
-      color: $qs-font-dec2;
-      line-height: 1.8;
-    }
-  }
 }
 </style>
