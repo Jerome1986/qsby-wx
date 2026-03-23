@@ -9,6 +9,10 @@ import type { StoreItem } from '@/types/store'
 import { openLocation } from '@/composables/openLocation'
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import { useUserStore } from '@/stores'
+import { createQrCode, scoreOrderCreate, type ScoreOrderParam } from '@/api/order'
+
+const userStore = useUserStore()
 
 const productId = ref('')
 const product = ref<ScoreProduct | null>(null)
@@ -22,10 +26,6 @@ const fetchDetail = async (id: string) => {
   try {
     const res = await scoreProductFindOneApi(id)
     product.value = Array.isArray(res.data) ? res.data[0] : res.data
-    if (product.value?.storeId) {
-      const storeRes = await shopDetailApi(product.value.storeId)
-      storeInfo.value = storeRes.data.shopInfo
-    }
   } catch {
     uni.showToast({ icon: 'none', title: '获取商品详情失败' })
   } finally {
@@ -49,6 +49,39 @@ const handleCallPhone = () => {
   const phone = storeInfo.value?.phone || ''
   if (phone) uni.makePhoneCall({ phoneNumber: phone })
   else uni.showToast({ icon: 'none', title: '暂无联系电话' })
+}
+
+// 点击立即兑换
+const handleExchange = () => {
+  uni.showModal({
+    title: '提示',
+    content: '确定要兑换吗？',
+    confirmColor: '#eed261',
+    success: async (res) => {
+      if (res.confirm) {
+        // 1.准备参数
+        console.log('立即兑换')
+        const params: ScoreOrderParam = {
+          openid: userStore.profile?.openid as string,
+          productName: product.value?.name as string,
+          productCover: product.value?.cover as string,
+          payScore: product.value?.scorePrice as number,
+        }
+
+        // 2. 提交积分订单
+        const res = await scoreOrderCreate(params)
+        console.log(res)
+
+        // 3.如果提交成功，生成卷码并跳入订单详情
+        await createQrCode(res.data?.orderId, userStore.profile?.openid as string, 'scoreOrder').catch((err) =>
+          console.error('核销码创建失败', err)
+        )
+        uni.redirectTo({
+          url: `/pagesMember/myScore/exchange?orderId=${res.data?.orderId}`,
+        })
+      }
+    },
+  })
 }
 
 onLoad((options) => {
@@ -103,7 +136,7 @@ onLoad((options) => {
           <view class="action-bar-placeholder"></view>
         </view>
       </scroll-view>
-      <BottomActionBar page-type="score" :product-id="productId"></BottomActionBar>
+      <BottomActionBar page-type="score" :product-id="productId" @exchange="handleExchange"></BottomActionBar>
     </template>
     <view v-else class="empty">
       <text>商品不存在或已下架</text>

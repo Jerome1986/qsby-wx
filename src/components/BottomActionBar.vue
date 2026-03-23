@@ -1,14 +1,19 @@
 <script setup lang="ts">
+
 const props = defineProps<{
   pageType: string
   price?: number
   productId?: string
 }>()
+
+
+
+const emits = defineEmits(['exchange'])
+
 // 立即兑换
 const exchange = () => {
-  uni.navigateTo({
-    url: props.productId ? `/pagesMember/myScore/exchange?productId=${props.productId}` : '/pagesMember/myScore/exchange',
-  })
+  emits('exchange')
+
 }
 
 // 立即购买

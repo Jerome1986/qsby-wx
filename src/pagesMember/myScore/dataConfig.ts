@@ -1,4 +1,19 @@
 import { ref } from 'vue'
+import { formatTimestamp } from '@/utils/generateMonth'
+import type { OrderStatus } from '@/types/Score'
+
+/** 积分订单字段配置（支持格式化） */
+export interface ScoreOrderFieldConfig {
+  label: string
+  key: string
+  formatter?: (value: unknown) => string
+}
+
+/** 积分订单状态文案 */
+const statusLabels: Record<OrderStatus, string> = {
+  paid: '未使用',
+  verified: '已使用',
+}
 
 // 收入积分类型
 interface ConsumptionIncomeItem {
@@ -48,11 +63,23 @@ export const fieldsOut: { label: string; key: string }[] = [
   { label: '产品名称', key: 'productName' },
 ]
 
-// 定义积分订单字段配置
-export const fieldsScoreOrder: { label: string; key: string }[] = [
-  { label: '门店', key: 'storeName' },
-  { label: '地址', key: 'address' },
-  { label: '积分价格', key: 'scoreNum' },
+// 定义积分订单字段配置（含时间、状态格式化）
+export const fieldsScoreOrder: ScoreOrderFieldConfig[] = [
+  {
+    label: '下单时间',
+    key: 'createdAt',
+    formatter: (v) => formatTimestamp(v, 2),
+  },
+  {
+    label: '积分价格',
+    key: 'payScore',
+    formatter: (v) => (v != null ? `${v}积分` : ''),
+  },
+  {
+    label: '订单状态',
+    key: 'status',
+    formatter: (v) => (v ? statusLabels[v as OrderStatus] ?? String(v) : ''),
+  },
 ]
 
 // 列表数据（后期从接口获取）-- 收入

@@ -95,13 +95,8 @@ const handelGo = (val: string) => {
     <scroll-view class="productScore" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true"
       :show-scrollbar="false">
       <view class="product-list">
-        <view
-          class="product-item"
-          v-for="item in scoreProdctData"
-          :key="item._id"
-          :class="{ disabled: item.status === 'disabled' }"
-          @tap="handleProductTap(item)"
-        >
+        <view class="product-item" v-for="item in scoreProdctData" :key="item._id"
+          :class="{ disabled: item.status === 'disabled' }" @tap="handleProductTap(item)">
           <view class="cover-wrap">
             <image class="cover" :src="item.cover" mode="aspectFill"></image>
             <view class="category-tag" v-if="item.categoryName">{{ item.categoryName }}</view>
@@ -110,7 +105,6 @@ const handelGo = (val: string) => {
             <view class="meta">
               <view class="title">{{ item.name }}</view>
               <view class="category" v-if="item.categoryName">{{ item.categoryName }}</view>
-              <view class="store-name" v-if="item.storeName">门店：{{ item.storeName }}</view>
             </view>
             <view class="content">
               <view class="score-row">

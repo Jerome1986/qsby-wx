@@ -9,6 +9,7 @@ import type {
   CreateOrderFreeResult,
   WriteOrderResult,
 } from '@/types/OrderItem'
+import type { ScoreOrder, ScoreOrderPage } from '@/types/Score'
 import type { PayResult } from '@/types/Pay'
 import type { UserRole } from '@/types/UserItem'
 import { request } from '@/utils/http'
@@ -104,11 +105,11 @@ export const orderCancel = (orderId: string, openid: string) => {
  * @param orderId - 订单ID
  * @param openid - 用户微信ID
  */
-export const createQrCode = (orderId: string, openid: string) => {
+export const createQrCode = (orderId: string, openid: string, type = 'order') => {
   return request<CreateQrCodeResult>({
     method: 'GET',
     url: '/utils/qrcode',
-    data: { orderId, openid },
+    data: { orderId, openid, type },
   })
 }
 
@@ -133,5 +134,51 @@ export const writeOrder = (verifyCode: string, publicUserId: string, role: UserR
     method: 'POST',
     url: '/order/write',
     data: { verifyCode, publicUserId, role },
+  })
+}
+
+// 积分商品参数
+export interface ScoreOrderParam {
+  openid: string
+  productName: string
+  productCover: string
+  payScore: number
+}
+
+/**
+ * 兑换积分商品
+ * @param params
+ */
+export const scoreOrderCreate = (params: ScoreOrderParam) => {
+  return request<{ orderId: string }>({
+    method: 'POST',
+    url: '/scoreOrder/add',
+    data: params,
+  })
+}
+
+/**
+ * 积分订单详情
+ * @param orderId 订单ID
+ */
+export const scoreOrderFindOne = (orderId: string) => {
+  return request<ScoreOrder>({
+    method: 'GET',
+    url: '/scoreOrder/findOne',
+    data: { orderId },
+  })
+}
+
+/**
+ * 根据核销状态请求积分订单列表
+ * @param tab - TAB切换
+ * @param pageNum - 页码
+ * @param pageSize - 条数
+ */
+export const scoreOrderFindAll = (tab: string, pageNum: number, pageSize: number) => {
+  return request<ScoreOrderPage>({
+    method: 'GET',
+    url: '/scoreOrder/findAll',
+    data: { tab, pageNum, pageSize },
   })
 }
