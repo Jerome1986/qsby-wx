@@ -128,7 +128,7 @@ const handleCheckIn = () => {
             <view class="product-info">
               <view class="product-head">
                 <view class="product-name">{{ item.name }}</view>
-                <view class="product-desc">含早餐 · 免费WiFi · 可加床</view>
+                <view class="product-desc">{{ item.tag }}</view>
               </view>
               <view class="product-foot">
                 <view class="product-price">￥{{ item.price.toFixed(2) }}</view>

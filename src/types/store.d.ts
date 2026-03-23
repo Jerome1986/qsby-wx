@@ -96,6 +96,8 @@ export interface ProductItem {
   cover?: string
   /** 详情图片 */
   images?: string[]
+  /** tag标签 比如房间 有WIFI的说明 */
+  tag?: string
   /** 简介 */
   description?: string
   /** 排序 */

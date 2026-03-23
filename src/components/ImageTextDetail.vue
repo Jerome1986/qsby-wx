@@ -3,6 +3,7 @@ import NavTitle from '@/components/NavTitle.vue'
 
 withDefaults(defineProps<{
   images: string[]
+  description: string
 }>(), {})
 
 
@@ -13,6 +14,7 @@ withDefaults(defineProps<{
     <view class="detail-content">
       <NavTitle title="图文详情"></NavTitle>
       <view class="detail-list">
+        <view class="detail-text">{{ description }}</view>
         <template v-for="(item, index) in images" :key="index">
           <!-- 图片 -->
           <image :src="item" mode="widthFix" class="detail-img"></image>

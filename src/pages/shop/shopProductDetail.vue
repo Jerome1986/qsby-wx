@@ -46,7 +46,8 @@ onLoad((options) => {
         <!--  预约须知  -->
         <Note :store-id="producntData?.storeId"></Note>
         <!--  图文详情    -->
-        <ImageTextDetail :images="producntData?.images as string[]"></ImageTextDetail>
+        <ImageTextDetail :images="producntData?.images as string[]" :description="producntData?.description as string">
+        </ImageTextDetail>
         <!-- 底部占位，防止内容被操作栏遮挡 -->
         <view class="action-bar-placeholder"></view>
       </view>

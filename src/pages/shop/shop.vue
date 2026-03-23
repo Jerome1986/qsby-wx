@@ -151,7 +151,7 @@ const sortedStoreList = computed(() => {
           </image>
         </view>
         <!--  主理人权益  -->
-        <view class="section">
+        <!-- <view class="section">
           <NavTitle title="千宿百院/主理人计划"></NavTitle>
           <view class="interests" @tap="handleRights">
             <view class="top">
@@ -170,7 +170,7 @@ const sortedStoreList = computed(() => {
               </view>
             </view>
           </view>
-        </view>
+        </view> -->
         <view class="section">
           <NavTitle title="千宿百院/自营门店"></NavTitle>
         </view>
@@ -201,7 +201,7 @@ const sortedStoreList = computed(() => {
             <view class="foot">
               <view class="distance" v-if="myLatitude && myLongitude">大约距您{{
                 formatDistance(getDistance(myLatitude, myLongitude, item.latitude as number, item.longitude as number))
-              }}</view>
+                }}</view>
               <view class="distance" v-else>暂时无法获取具体定位</view>
               <view class="btn">进店</view>
             </view>

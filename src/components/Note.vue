@@ -36,7 +36,9 @@ watch(
     <view class="note-list">
       <view class="note-item" v-for="(item, index) in noteList" :key="index">
         <view class="note-title">{{ index + 1 }}. {{ item.title }}</view>
-        <view class="note-content">{{ item.content }}</view>
+        <view class="note-content">
+          <view v-for="(para, pIdx) in (item.content || [])" :key="pIdx" class="note-paragraph">{{ para }}</view>
+        </view>
       </view>
     </view>
   </view>
@@ -71,6 +73,14 @@ watch(
         color: $qs-font-dec;
         line-height: 1.6;
         text-align: justify;
+
+        .note-paragraph {
+          margin-bottom: 8rpx;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
       }
     }
   }

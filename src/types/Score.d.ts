@@ -74,3 +74,28 @@ export interface ScoreOrderPage {
   /** 合计页数 */
   totalPage: number
 }
+
+// 流水变动类型
+export type changeType = 'income' | 'expense'
+
+// 积分明细流水
+export interface ScoreFlow {
+  /**  ID (MongoDB ObjectId) */
+  _id: string
+  /** 用户唯一标识 ID (MongoDB ObjectId) */
+  userId: string
+  /** 积分变动方向 (income: 收入, expense: 支出) */
+  direction: string
+  /** 本次积分变动数值 (正数，方向由 direction 字段标识) */
+  change: number
+  /** 变动后的积分余额 */
+  balance: number
+  /** 变动类型 (order: 订单相关, recharge: 充值, refund: 退款 等) */
+  type: changeType
+  /** 关联的业务源 ID (如订单号、项目编号等) */
+  sourceId: string
+  /** 变动备注/说明 */
+  remark: string
+  /** 创建时间 (MongoDB 时间格式) */
+  createdAt: Date
+}
