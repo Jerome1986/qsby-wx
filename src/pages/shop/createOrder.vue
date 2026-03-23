@@ -237,7 +237,7 @@ const handlePay = async () => {
           v-model:useVoucher="useVoucher" />
 
         <!-- 预约须知 -->
-        <Note />
+        <Note :store-id="productData?.storeId" />
 
         <view style="height: 140rpx"></view>
       </view>

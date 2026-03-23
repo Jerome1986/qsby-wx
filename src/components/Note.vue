@@ -2,20 +2,32 @@
 import NavTitle from '@/components/NavTitle.vue'
 import { contentBookingNoteApi } from '@/api/content'
 import type { BookingNoteItem } from '@/types/Content'
-import { onMounted, ref } from 'vue'
+import { watch, ref } from 'vue'
+
+const props = defineProps<{
+  storeId?: string
+}>()
 
 const noteList = ref<BookingNoteItem[]>([])
 
 const fetchBookingNote = async () => {
+  if (!props.storeId) return
   try {
-    const res = await contentBookingNoteApi()
+    const res = await contentBookingNoteApi(props.storeId)
     noteList.value = res.data?.items || []
   } catch {
     noteList.value = []
   }
 }
 
-onMounted(() => fetchBookingNote())
+watch(
+  () => props.storeId,
+  (val) => {
+    if (val) fetchBookingNote()
+    else noteList.value = []
+  },
+  { immediate: true },
+)
 </script>
 
 <template>

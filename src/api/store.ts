@@ -1,4 +1,7 @@
 import type {
+  CheckInExternalItem,
+  CheckInExternalPageResult,
+  CheckInExternalParams,
   CityItem,
   ProductItem,
   StoreCategoryListPageResult,
@@ -91,6 +94,37 @@ export const checkInShopApi = (
     method: 'POST',
     url: '/checkIn/updateOrder',
     data: { userId, orderId, icCardFont, icCardBack },
+  })
+}
+
+/** 抖音/外部订单办理入住（无 orderId） */
+export const checkInExternalApi = (params: CheckInExternalParams) => {
+  return request({
+    method: 'POST',
+    url: '/checkIn/external',
+    data: params,
+  })
+}
+
+/** 按门店查询外部入住记录（分页） */
+export const checkInExternalFindByShop = (
+  shopId: string,
+  pageNum: number,
+  pageSize: number,
+) => {
+  return request<CheckInExternalPageResult>({
+    method: 'GET',
+    url: '/checkIn/external/byShop',
+    data: { shopId, pageNum, pageSize },
+  })
+}
+
+/** 获取外部入住记录详情 */
+export const checkInExternalFindOne = (id: string) => {
+  return request<CheckInExternalItem>({
+    method: 'GET',
+    url: '/checkIn/external/findOne',
+    data: { id },
   })
 }
 

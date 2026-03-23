@@ -6,9 +6,10 @@ import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import type { StoreDetail, StoreItem } from '@/types/store'
 import { shopDetailApi } from '@/api/store'
-import { useShopStore } from '@/stores'
+import { useShopStore, useUserStore } from '@/stores'
 
 const shopStore = useShopStore()
+const userStore = useUserStore()
 
 // 获取门店的商品详情--返回门店信息shopInfo,和门店对应的商品列表product
 const shopId = ref('')
@@ -49,6 +50,19 @@ const handleNavSurround = () => {
   })
 }
 
+// 办理入住
+const handleCheckIn = () => {
+  if (!userStore.profile?._id) {
+    uni.navigateTo({
+      url: `/pages/login/login?shopId=${shopId.value}`,
+    })
+    return
+  }
+  uni.navigateTo({
+    url: `/pages/shop/checkIn?shopId=${shopId.value}`,
+  })
+}
+
 </script>
 <template>
   <view class="shopDetail">
@@ -77,6 +91,21 @@ const handleNavSurround = () => {
             </view>
             <view class="nav-label" style="font-weight: bold;">周边推荐</view>
           </view>
+        </view>
+        <!-- 办理入住（功能占位） -->
+        <view class="check-in-card" @tap="handleCheckIn">
+          <view class="check-in-main">
+            <view class="check-in-icon">
+              <image mode="aspectFit"
+                src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/ruzhu.png">
+              </image>
+            </view>
+            <view class="check-in-text">
+              <view class="check-in-title">办理入住</view>
+              <view class="check-in-desc">提交身份信息完成入住登记</view>
+            </view>
+          </view>
+          <text class="check-in-arrow">›</text>
         </view>
         <!--   预约流程   -->
         <BookFlow type="shop" :shop-info="shopDetailData?.shopInfo as StoreItem"></BookFlow>
@@ -177,7 +206,55 @@ const handleNavSurround = () => {
     }
   }
 
+  /* 办理入住 */
+  .check-in-card {
+    margin-top: 24rpx;
+    padding: 28rpx 24rpx;
+    background: #fef8e5;
+    border-radius: 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    @include customShadow();
 
+    .check-in-main {
+      display: flex;
+      align-items: center;
+      gap: 20rpx;
+    }
+
+    .check-in-icon {
+      width: 48rpx;
+      height: 48rpx;
+      flex-shrink: 0;
+
+      image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .check-in-text {
+      .check-in-title {
+        font-size: 30rpx;
+        font-weight: bold;
+        color: $qs-font-title;
+        margin-bottom: 6rpx;
+      }
+
+      .check-in-desc {
+        font-size: 24rpx;
+        color: $qs-font-dec;
+      }
+    }
+
+    .check-in-arrow {
+      font-size: 36rpx;
+      font-weight: 300;
+      color: $qs-font-dec;
+      line-height: 1;
+    }
+  }
 
   /* 门店商品列表 */
   .product-list {

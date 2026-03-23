@@ -50,29 +50,23 @@ const handleUpdate = (type: string) => {
         上传身份证
       </view>
       <!-- 证件正面 -->
-      <view class="updateItem">
-        <view class="left" @click="handleUpdate('font')">
+      <view class="updateItem" @click="handleUpdate('font')">
+        <view class="left">
           <text class="iconfont icon-tupian add-icon"></text>
           <text class="hint">上传身份证正面</text>
         </view>
         <view class="right">
-          <image
-            :src="icCardFont ? icCardFont : icCardBackPlaceholder"
-            mode="aspectFill"
-          />
+          <image :src="icCardFont ? icCardFont : icCardBackPlaceholder" mode="aspectFill" />
         </view>
       </view>
       <!-- 证件反面 -->
-      <view class="updateItem">
-        <view class="left" @click="handleUpdate('back')">
+      <view class="updateItem" @click="handleUpdate('back')">
+        <view class="left">
           <text class="iconfont icon-tupian add-icon"></text>
           <text class="hint">上传身份证反面</text>
         </view>
         <view class="right">
-          <image
-            :src="icCardBack ? icCardBack : icCardFontPlaceholder"
-            mode="aspectFill"
-          />
+          <image :src="icCardBack ? icCardBack : icCardFontPlaceholder" mode="aspectFill" />
         </view>
       </view>
     </view>
@@ -109,7 +103,7 @@ const handleUpdate = (type: string) => {
 
     .hint {
       font-size: 24rpx;
-      color: $qs-font-dec;
+      color: $qs-font-title;
     }
 
     .updateItem {
@@ -122,6 +116,7 @@ const handleUpdate = (type: string) => {
       border: 2rpx solid $qs-border;
       border-radius: 16rpx;
       background-color: #fafafa;
+      border: 1px solid #cfcfcf;
 
       &:nth-last-child(1) {
         margin-bottom: 0;

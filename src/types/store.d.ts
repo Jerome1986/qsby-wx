@@ -62,8 +62,10 @@ export interface StoreItem {
   latitude?: number
   /** 经度 */
   longitude?: number
-  /** 门店介绍 */
-  description: string
+  /** 门店介绍内容ID */
+  storeIntroId?: string
+  /** 周边推荐内容ID */
+  surroundingId?: string
   status?: StoreStatus
   createdAt?: string
   updatedAt?: string
@@ -107,4 +109,66 @@ export interface ProductItem {
 export interface StoreDetail {
   shopInfo: StoreItem
   product: ProductItem[]
+}
+
+/** 门店介绍 - 区块类型 */
+export type StoreIntroBlockType = 'text' | 'image'
+
+/** 门店介绍 - 单个区块 */
+export interface StoreIntroBlock {
+  type: StoreIntroBlockType
+  /** 文本内容或图片 URL */
+  content: string
+}
+
+/** 门店介绍扩展数据（按 storeId 存储） */
+export interface StoreIntroData {
+  _id?: string
+  type: 'store-intro'
+  storeId: string
+  blocks: StoreIntroBlock[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+/** 周边推荐扩展数据（按 storeId 存储，结构同门店介绍） */
+export interface StoreSurroundData {
+  _id?: string
+  type: 'surrounding'
+  storeId: string
+  blocks: StoreIntroBlock[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+/** 抖音/外部订单办理入住参数（无 orderId） */
+export interface CheckInExternalParams {
+  userId: string
+  shopId: string
+  icCardFont: string
+  icCardBack: string
+  nickname?: string
+  phone?: string
+  roomNumber: string
+  source?: 'douyin' | 'miniprogram' | 'offline'
+}
+
+/** 外部入住记录（CheckInExternal 集合文档） */
+export interface CheckInExternalItem {
+  _id: string
+  userId: string
+  shopId: string
+  icCardFont: string
+  icCardBack: string
+  nickname?: string
+  phone?: string
+  roomNumber?: string
+  source?: 'douyin' | 'miniprogram' | 'offline'
+  createdAt?: Date | string
+}
+
+/** 外部入住分页结果 */
+export interface CheckInExternalPageResult {
+  list: CheckInExternalItem[]
+  totalPage: number
 }

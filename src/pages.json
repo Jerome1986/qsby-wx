@@ -391,6 +391,15 @@
           }
         },
         {
+          "path": "storeManage/storeExternalCheckInDetail",
+          "style": {
+            "navigationBarTitleText": "外部入住详情",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
           "path": "storeManage/storeManage",
           "style": {
             "navigationBarTitleText": "门店管理",

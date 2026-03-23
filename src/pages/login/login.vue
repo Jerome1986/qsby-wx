@@ -58,6 +58,13 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
         })
         return
       }
+      // 如果从门店详情办理入住进入，登录后返回门店详情
+      if (shopId.value) {
+        await uni.redirectTo({
+          url: `/pages/shop/shopDetail?shopId=${shopId.value}`,
+        })
+        return
+      }
       // 如果没有就跳转首页
       await uni.switchTab({
         url: '/pages/home/home',
@@ -72,6 +79,7 @@ const freshCode = ref('')
 const inviterCode = ref('')
 const productId = ref('')
 const projectId = ref('')
+const shopId = ref('')
 const proType = ref('')
 onLoad((options: any) => {
   // 进页面就重新获取code，防止过期
@@ -96,6 +104,7 @@ onLoad((options: any) => {
   inviterCode.value = options.inviterCode
   productId.value = options.productId
   projectId.value = options.projectId
+  shopId.value = options.shopId
   proType.value = options.proType
   setTimeout(() => {
     console.log('1秒后打印 inviterCode.value', inviterCode.value, 'and', options.inviterCode)

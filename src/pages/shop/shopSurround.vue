@@ -1,24 +1,31 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { contentSurroundingApi } from '@/api/content'
-import type { ContentPageData } from '@/types/Content'
+import { contentSurroundingByStoreIdApi } from '@/api/content'
+import { shopDetailApi } from '@/api/store'
+import type { StoreSurroundData, StoreItem } from '@/types/store'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
+const shopId = ref('')
 const loading = ref(false)
-const pageData = ref<ContentPageData | null>(null)
+const storeInfo = ref<StoreItem | null>(null)
+const surroundData = ref<StoreSurroundData | null>(null)
 
 const DEFAULT_COVER = 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/qiansubaiyuan.jpg'
-const DEFAULT_IMAGES = [
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/02.jpg',
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/brand/03.jpg',
-]
 
 const fetchData = async () => {
+  if (!shopId.value) {
+    loading.value = false
+    return
+  }
   loading.value = true
   try {
-    const res = await contentSurroundingApi()
-    pageData.value = res.data
+    const [shopRes, surroundRes] = await Promise.all([
+      shopDetailApi(shopId.value),
+      contentSurroundingByStoreIdApi(shopId.value),
+    ])
+    storeInfo.value = shopRes.data?.shopInfo || null
+    surroundData.value = surroundRes.data
   } catch {
     uni.showToast({ icon: 'none', title: '获取周边推荐失败' })
   } finally {
@@ -26,66 +33,41 @@ const fetchData = async () => {
   }
 }
 
-onLoad(() => fetchData())
+onLoad((options) => {
+  shopId.value = options?.shopId || ''
+  fetchData()
+})
 </script>
 
 <template>
   <view class="shop-surround">
-    <NavHead :title="pageData?.heroTitle || '周边推荐'" :show-back="true" />
+    <NavHead :title="storeInfo?.name || '周边推荐'" :show-back="true" />
     <view v-if="loading" class="loading">
       <text>加载中...</text>
     </view>
     <scroll-view v-else class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <view style="padding: 24rpx;">
-        <!-- 封面 + 主标题 -->
+      <view class="content-inner">
+        <!-- 封面 + 主标题（使用门店数据） -->
         <view class="hero-card">
           <view class="hero-cover">
-            <image :src="pageData?.cover || DEFAULT_COVER" mode="aspectFill" />
+            <image :src="storeInfo?.cover || DEFAULT_COVER" mode="aspectFill" />
             <view class="hero-mask"></view>
-            <view class="hero-title">{{ pageData?.heroTitle || '周边推荐' }}</view>
-            <view class="hero-subtitle">{{ pageData?.heroSubtitle || '探索周边' }}</view>
+            <view class="hero-title">{{ storeInfo?.name || '周边推荐' }}</view>
           </view>
         </view>
 
-        <!-- 开篇 -->
-        <view class="card intro-card" v-if="pageData?.introText">
-          <view class="card-content">{{ pageData.introText }}</view>
-        </view>
-
-        <!-- 章节 -->
-        <view
-          class="card section-card"
-          v-for="(section, idx) in (pageData?.sections || [])"
-          :key="idx"
-        >
-          <view class="section-header">
-            <view class="section-num">{{ section.num }}</view>
-            <view class="section-title">{{ section.title }}</view>
-          </view>
-          <view class="card-content" v-if="section.content">{{ section.content }}</view>
-          <view class="bullet-list" v-if="section.bulletItems?.length">
-            <view class="bullet-item" v-for="(bullet, bi) in section.bulletItems" :key="bi">
-              {{ bullet }}
+        <!-- 图文区块（统一背景） -->
+        <view class="blocks-card" v-if="surroundData?.blocks?.length">
+          <template v-for="(block, idx) in surroundData.blocks" :key="idx">
+            <view v-if="block.type === 'text'" class="block-text">{{ block.content }}</view>
+            <view v-else-if="block.type === 'image'" class="block-image">
+              <image :src="block.content" mode="widthFix" />
             </view>
-          </view>
-          <view class="sub-block" v-for="(sub, si) in (section.subBlocks || [])" :key="si">
-            <view class="sub-title">{{ sub.subTitle }}</view>
-            <view class="card-content">{{ sub.content }}</view>
-          </view>
+          </template>
         </view>
 
-        <!-- 配图 -->
-        <view class="card images-card" v-if="(pageData?.galleryImages?.length || 0) > 0 || pageData === null">
-          <view class="card-title">{{ pageData?.galleryTitle || '周边风采' }}</view>
-          <view class="images-grid">
-            <view
-              class="image-item"
-              v-for="(img, index) in (pageData?.galleryImages ?? DEFAULT_IMAGES)"
-              :key="index"
-            >
-              <image :src="img" mode="aspectFill" />
-            </view>
-          </view>
+        <view v-else-if="!loading && !surroundData?.blocks?.length" class="empty-tip">
+          <text>{{ !shopId ? '请从门店详情页进入' : '暂无周边推荐' }}</text>
         </view>
 
         <view class="scroll-bottom-placeholder"></view>
@@ -113,43 +95,29 @@ onLoad(() => fetchData())
 
 .content {
   flex: 1;
+}
+
+.content-inner {
+  padding: 24rpx;
 
   .scroll-bottom-placeholder {
     height: 20rpx;
   }
 }
 
-.card {
-  padding: 24rpx;
-  background-color: $qs-card-bg;
-  border-radius: 24rpx;
-  @include customShadow();
-  margin-top: 24rpx;
+.empty-tip {
+  padding: 60rpx 0;
+  text-align: center;
+  font-size: 28rpx;
+  color: $qs-font-dec;
 }
 
+/* 封面 hero */
 .hero-card {
-  margin-top: 0;
+  margin-bottom: 24rpx;
   padding: 0;
   background: transparent;
   box-shadow: none;
-}
-
-.card-title {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: $qs-font-title;
-  margin-bottom: 20rpx;
-}
-
-.card-content {
-  font-size: 26rpx;
-  color: $qs-font-dec;
-  line-height: 1.85;
-  margin-bottom: 20rpx;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
 }
 
 .hero-cover {
@@ -189,89 +157,37 @@ onLoad(() => fetchData())
   }
 }
 
-.section-card {
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 16rpx;
-    margin-bottom: 20rpx;
-  }
+/* 图文区块（统一背景） */
+.blocks-card {
+  padding: 24rpx;
+  background-color: $qs-card-bg;
+  border-radius: 20rpx;
+  @include customShadow();
 
-  .section-num {
-    width: 56rpx;
-    height: 56rpx;
-    line-height: 56rpx;
-    text-align: center;
-    font-size: 24rpx;
-    font-weight: bold;
-    color: #ffffff;
-    background: $qs-brandColor;
-    border-radius: 12rpx;
-    flex-shrink: 0;
-  }
-
-  .section-title {
-    flex: 1;
-    font-size: 30rpx;
-    font-weight: bold;
-    color: $qs-font-title;
-    line-height: 1.4;
-  }
-
-  .sub-block {
-    margin-top: 24rpx;
-    padding-left: 20rpx;
-    border-left: 4rpx solid $qs-brandColor;
-  }
-
-  .sub-title {
-    font-size: 26rpx;
-    font-weight: 600;
-    color: $qs-font-title;
-    margin-bottom: 12rpx;
-  }
-
-  .bullet-list {
-    margin: 16rpx 0 20rpx;
-  }
-
-  .bullet-item {
-    position: relative;
-    padding-left: 24rpx;
-    font-size: 26rpx;
+  .block-text {
+    font-size: 28rpx;
     color: $qs-font-dec;
     line-height: 1.85;
-    margin-bottom: 12rpx;
+    text-align: justify;
+    margin-bottom: 24rpx;
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 14rpx;
-      width: 8rpx;
-      height: 8rpx;
-      background: $qs-brandColor;
-      border-radius: 50%;
+    &:last-child {
+      margin-bottom: 0;
     }
   }
-}
 
-.images-card {
-  .images-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 20rpx;
-  }
-
-  .image-item {
-    width: 100%;
-    height: 360rpx;
-    border-radius: 16rpx;
+  .block-image {
+    margin-bottom: 24rpx;
+    border-radius: 12rpx;
     overflow: hidden;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     image {
       width: 100%;
-      height: 100%;
+      display: block;
     }
   }
 }

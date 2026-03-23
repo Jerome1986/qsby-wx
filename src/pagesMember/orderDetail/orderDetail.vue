@@ -123,17 +123,17 @@ const handleRefund = () => {
   })
 }
 
-// 查询客户是否入住
-const isCheckIn = computed(() => {
-  return orderDetail.value?.status === 'paid'
-})
+// // 查询客户是否入住
+// const isCheckIn = computed(() => {
+//   return orderDetail.value?.status === 'paid'
+// })
 
-// 办理入住（门店订单）
-const handleCheckIn = () => {
-  uni.navigateTo({
-    url: `/pages/shop/checkIn?orderId=${orderDetail.value?.out_trade_no || ''}`,
-  })
-}
+// // 办理入住（门店订单）
+// const handleCheckIn = () => {
+//   uni.navigateTo({
+//     url: `/pages/shop/checkIn?orderId=${orderDetail.value?.out_trade_no || ''}`,
+//   })
+// }
 
 // 取消订单（待付款）
 const handleCancelOrder = () => {
@@ -419,14 +419,14 @@ watch(
           </view>
         </view>
 
-        <!-- 申请退款、办理入住（门店订单时两者并排） -->
+        <!-- 申请退款（办理入住已注释） -->
         <view class="action-wrap" v-if="orderDetail?.status === 'paid' && orderDetail.orderType !== 'project'">
           <view class="action-btn-sm" v-if="orderDetail.discountType !== 'voucher'" @tap="handleRefund">
             申请退款
           </view>
-          <view class="action-btn-sm" v-if="orderDetail.orderType === 'shop' && isCheckIn" @tap="handleCheckIn">
+          <!-- <view class="action-btn-sm" v-if="orderDetail.orderType === 'shop' && isCheckIn" @tap="handleCheckIn">
             办理入住
-          </view>
+          </view> -->
         </view>
 
         <!-- 待付款：取消订单、去支付 -->
@@ -461,7 +461,7 @@ watch(
   @include customShadow();
 }
 
-/* 申请退款、办理入住（并排，靠右） */
+/* 申请退款（办理入住已注释，并排靠右） */
 .action-wrap {
   display: flex;
   gap: 24rpx;

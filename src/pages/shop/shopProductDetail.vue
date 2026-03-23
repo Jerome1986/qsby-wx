@@ -44,7 +44,7 @@ onLoad((options) => {
         <!--  商品信息  -->
         <BookFlow type="product" :price="producntData?.price" :commission="producntData?.commission"></BookFlow>
         <!--  预约须知  -->
-        <Note></Note>
+        <Note :store-id="producntData?.storeId"></Note>
         <!--  图文详情    -->
         <ImageTextDetail :images="producntData?.images as string[]"></ImageTextDetail>
         <!-- 底部占位，防止内容被操作栏遮挡 -->

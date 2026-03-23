@@ -5,7 +5,7 @@ import { useUserStore } from '@/stores'
 const userStore = useUserStore()
 
 const handleStoreManage = () => {
-  if (userStore.profile?.role === 'manager' && userStore.profile._id) {
+  if (userStore.profile?.role === 'manager' || userStore.profile?._id as string) {
     const shopId = userStore.profile?.shopId || ''
     if (!shopId) {
       uni.showToast({ icon: 'none', title: '暂无关联门店' })
@@ -25,10 +25,7 @@ const handleStoreManage = () => {
     <NavTitle title="门店管理"></NavTitle>
     <view class="dec">店长管理门店订单丨待核销丨已核销丨办理入住</view>
     <view class="bg">
-      <image
-        src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/minsu.png"
-        mode="aspectFit"
-      />
+      <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/minsu.png" mode="aspectFit" />
     </view>
   </view>
 </template>
