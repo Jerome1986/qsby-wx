@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import GroupQrPopup from '@/components/GroupQrPopup.vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
   pageType: string
@@ -6,7 +8,7 @@ const props = defineProps<{
   productId?: string
 }>()
 
-
+const showGroupQr = ref(false)
 
 const emits = defineEmits(['exchange'])
 
@@ -22,9 +24,14 @@ const buy = () => {
     url: `/pages/shop/createOrder?productId=${props.productId}`,
   })
 }
+
+const openGroupQr = () => {
+  showGroupQr.value = true
+}
 </script>
 
 <template>
+  <GroupQrPopup v-model="showGroupQr" />
   <view class="action-bar">
     <view class="action-tools">
       <!--
@@ -33,7 +40,7 @@ const buy = () => {
       点击逻辑：点击 label 会触发关联的 button，从而唤起客服会话。
       -->
       <button id="contactBtn" open-type="contact" class="contact-btn-hidden" />
-      <view class="action-tool-item">
+      <view class="action-tool-item" @tap="openGroupQr">
         <text class="iconfont icon-erweima action-tool-icon"></text>
         <text class="action-tool-text">进群</text>
       </view>
