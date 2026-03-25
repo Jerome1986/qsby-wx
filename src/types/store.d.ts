@@ -88,6 +88,8 @@ export interface ProductItem {
   prodcutTypeId: string
   /** 产品名称，如：大床房、双床房 */
   name: string
+  /** 规格单位文案，如：晚、次 */
+  specLabel?: string
   /** 价格 */
   price: number
   /** 主理人佣金/折扣 固定值 */

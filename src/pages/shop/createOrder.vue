@@ -209,7 +209,7 @@ const handlePay = async () => {
         <!-- 商品信息 -->
         <view class="card product-row">
           <text class="product-name">{{ productData?.name }}</text>
-          <text class="product-price">¥{{ productData?.price }}/晚</text>
+          <text class="product-price">¥{{ productData?.price ?? 0 }}{{ productData?.specLabel ? '/' + productData.specLabel : '' }}</text>
         </view>
 
         <!-- 订单联系人 -->
@@ -233,7 +233,7 @@ const handlePay = async () => {
         <PayMethod />
 
         <!-- 代金券 -->
-        <Voucher v-if="userStore.profile?.role === 'manager'" :amount="userStore.profile.couponBalance"
+        <Voucher v-if="userStore.profile?.role === 'manager'" :amount="userStore.profile?.couponBalance"
           v-model:useVoucher="useVoucher" />
 
         <!-- 预约须知 -->
@@ -248,11 +248,11 @@ const handlePay = async () => {
       <view class="price">
         <view class="row">
           <text class="label">合计</text>
-          <text class="value">¥{{ realPayAmount.toFixed(2) }}</text>
+          <text class="value">¥{{ realPayAmount?.toFixed(2) }}</text>
         </view>
         <view class="row discount" v-if="userStore.profile?.role === 'manager'">
           <text class="label">主理人折扣</text>
-          <text class="value">-¥{{ productData?.commission.toFixed(2) }}</text>
+          <text class="value">-¥{{ productData?.commission?.toFixed(2) }}</text>
         </view>
       </view>
       <view class="pay-btn" @tap="handlePay">微信支付</view>

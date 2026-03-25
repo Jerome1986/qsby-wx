@@ -10,6 +10,7 @@ declare module 'vue' {
     BookFlow: typeof import('./src/components/BookFlow.vue')['default']
     BottomActionBar: typeof import('./src/components/BottomActionBar.vue')['default']
     FilterBar: typeof import('./src/components/FilterBar.vue')['default']
+    GroupQrPopup: typeof import('./src/components/GroupQrPopup.vue')['default']
     ImageTextDetail: typeof import('./src/components/ImageTextDetail.vue')['default']
     NavHead: typeof import('./src/components/NavHead.vue')['default']
     NavTitle: typeof import('./src/components/NavTitle.vue')['default']
