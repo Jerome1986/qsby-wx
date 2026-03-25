@@ -13,7 +13,6 @@ const emits = defineEmits(['exchange'])
 // 立即兑换
 const exchange = () => {
   emits('exchange')
-
 }
 
 // 立即购买

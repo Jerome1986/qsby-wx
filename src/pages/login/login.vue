@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { wxLogin } from '@/api/login.ts'
 import { onLoad } from '@dcloudio/uni-app'
 import { useUserStore } from '@/stores'
+import { sceneFindOneApi } from '@/api/poster'
 
 // store
 const userStore = useUserStore()
@@ -81,7 +82,7 @@ const productId = ref('')
 const projectId = ref('')
 const shopId = ref('')
 const proType = ref('')
-onLoad((options: any) => {
+onLoad(async (options: any) => {
   // 进页面就重新获取code，防止过期
   uni.login({
     success: async (res) => {
@@ -101,11 +102,26 @@ onLoad((options: any) => {
   console.log('立即打印 options', options)
 
   // 先判断分享链接进入且是分享商品/项目详情进入（多页面统一）
-  inviterCode.value = options.inviterCode
-  productId.value = options.productId
-  projectId.value = options.projectId
-  shopId.value = options.shopId
-  proType.value = options.proType
+  // 海报分享
+  if (options.scene) {
+    const scene = decodeURIComponent(options.scene || '')
+    console.log(scene)
+    // 请求分享码数据，获取具体参数
+    const result = await sceneFindOneApi(scene)
+    console.log('海报进入', result)
+    proType.value = result.data.proType
+    inviterCode.value = result.data.inviterCode
+    productId.value = result.data.productId
+  } else {
+    // 按钮分享
+    console.log('按钮分享')
+    inviterCode.value = options.inviterCode
+    productId.value = options.productId
+    projectId.value = options.projectId
+    shopId.value = options.shopId
+    proType.value = options.proType
+  }
+
   setTimeout(() => {
     console.log('1秒后打印 inviterCode.value', inviterCode.value, 'and', options.inviterCode)
   }, 1000)
