@@ -46,9 +46,18 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
     setTimeout(async () => {
       await uni.showToast({ icon: 'success', title: '登录成功', duration: 1000 })
       // 如果携带了商品链接直接跳转商品详情
-      if (productId.value) {
+      if (productId.value && proType.value !== 'shop') {
         await uni.redirectTo({
           url: `/pages/productDetail/productDetail?productId=${productId.value}&proType=${proType.value}`,
+        })
+        return
+      }
+      // 门店商品
+      if (proType.value === 'shop' && productId.value) {
+        console.log('shop')
+
+        await uni.redirectTo({
+          url: `/pages/shop/createOrder?productId=${productId.value}&proType=${proType.value}`,
         })
         return
       }

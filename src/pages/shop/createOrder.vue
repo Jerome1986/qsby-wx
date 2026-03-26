@@ -86,7 +86,7 @@ const handlePay = async () => {
 
   // 检查用户是否有openid,如果没有就跳转登录
   if (!userStore.profile?.openid) {
-    uni.navigateTo({ url: `/pages/login/login?productId=${productData.value?._id}` })
+    uni.navigateTo({ url: `/pages/login/login?productId=${productData.value?._id}&proType=shop` })
     return
   }
 
@@ -209,7 +209,8 @@ const handlePay = async () => {
         <!-- 商品信息 -->
         <view class="card product-row">
           <text class="product-name">{{ productData?.name }}</text>
-          <text class="product-price">¥{{ productData?.price ?? 0 }}{{ productData?.specLabel ? '/' + productData.specLabel : '' }}</text>
+          <text class="product-price">¥{{ productData?.price ?? 0 }}{{ productData?.specLabel ? '/' +
+            productData.specLabel : '' }}</text>
         </view>
 
         <!-- 订单联系人 -->
