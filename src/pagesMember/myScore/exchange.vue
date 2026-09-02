@@ -3,7 +3,7 @@ import NavHead from '@/components/NavHead.vue'
 import NavTitle from '@/components/NavTitle.vue'
 import TipsBlock from '@/components/TipsBlock.vue'
 import { ref, watch } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
 import UQRCode from 'uqrcodejs'
 import type { ScoreOrder } from '@/types/Score'
 import { scoreOrderFindOne } from '@/api/order'
@@ -12,6 +12,7 @@ import { formatTimestamp } from '@/utils/generateMonth'
 const orderId = ref('')
 const orderDetail = ref<ScoreOrder | null>(null)
 const loading = ref(false)
+let openerEventChannel: UniApp.EventChannel | undefined
 
 const fetchOrderDetail = async () => {
   if (!orderId.value) return
@@ -63,8 +64,17 @@ const handleCopyVerifyCode = () => {
 }
 
 onLoad((options) => {
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1] as unknown as {
+    getOpenerEventChannel?: () => UniApp.EventChannel
+  }
+  openerEventChannel = currentPage?.getOpenerEventChannel?.()
   orderId.value = options?.orderId || ''
   fetchOrderDetail()
+})
+
+onUnload(() => {
+  if (orderDetail.value) openerEventChannel?.emit('order-updated', orderDetail.value)
 })
 </script>
 

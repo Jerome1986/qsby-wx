@@ -23,6 +23,14 @@ const orderId = ref('')
 const orderDetail = ref<OrderItem>()
 const loading = ref(false)
 
+const hasAmount = (amount?: number | null) => {
+  return typeof amount === 'number' && Number.isFinite(amount)
+}
+
+const formatAmount = (amount?: number | null) => {
+  return hasAmount(amount) ? amount.toFixed(2) : '0.00'
+}
+
 const orderDetailGet = async (orderId: string) => {
   loading.value = true
   try {
@@ -90,8 +98,14 @@ onLoad((options) => {
                 <text class="value">{{ orderDetail.shopInfo.address }}</text>
               </view>
               <view class="price-row">
-                <text class="label">价格：</text>
-                <text class="price">¥{{ orderDetail.payAmount.toFixed(2) }}元/晚</text>
+                <view class="amount-row" v-if="hasAmount(orderDetail.totalAmount)">
+                  <text class="label">订单价格：</text>
+                  <text class="price">¥{{ formatAmount(orderDetail.totalAmount) }}元</text>
+                </view>
+                <view class="amount-row" v-if="hasAmount(orderDetail.payAmount)">
+                  <text class="label">实付：</text>
+                  <text class="price paid-price">¥{{ formatAmount(orderDetail.payAmount) }}元</text>
+                </view>
               </view>
             </view>
           </view>
@@ -265,7 +279,7 @@ onLoad((options) => {
         padding: 6rpx 16rpx;
         font-size: 20rpx;
         color: #ffffff;
-        background: linear-gradient(135deg, $qs-brandColor, darken($qs-brandColor, 10%));
+        background: linear-gradient(135deg, $qs-brandColor, color.adjust($qs-brandColor, $lightness: -10%));
         border-radius: 10rpx 0 10rpx 0;
         z-index: 1;
       }
@@ -322,6 +336,15 @@ onLoad((options) => {
       }
 
       .price-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4rpx;
+
+        .amount-row {
+          display: flex;
+          align-items: center;
+        }
+
         .label {
           font-size: 28rpx;
           color: $qs-font-dec2;
@@ -331,6 +354,10 @@ onLoad((options) => {
           font-size: 28rpx;
           font-weight: bold;
           color: #ff3b3b;
+        }
+
+        .paid-price {
+          color: $qs-brandColor;
         }
       }
     }

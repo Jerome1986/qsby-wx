@@ -1,5 +1,5 @@
 /** 页面TAB类型 */
-export type Tab = 'income' | 'withdraw'
+export type Tab = 'withdraw' | 'commission' | 'activityIncome'
 
 export interface TabList {
   label: string

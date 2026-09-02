@@ -56,6 +56,10 @@
         "desc": "用于大致定位,获取最近门店商品信息"
       }
     },
+    "requiredPrivateInfos": [
+      "getFuzzyLocation",
+      "chooseLocation"
+    ],
     "optimization": {
       "subPackages": true
     },

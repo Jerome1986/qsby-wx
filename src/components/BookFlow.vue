@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { openLocation } from '@/composables/openLocation';
-import { useShopStore, useUserStore } from '@/stores';
-import type { StoreItem } from '@/types/store';
+import { computed } from 'vue'
+import { openLocation } from '@/composables/openLocation'
+import { useShopStore, useUserStore } from '@/stores'
+import type { StoreItem } from '@/types/store'
 
 const props = withDefaults(
   defineProps<{
     type: string
     shopInfo?: StoreItem
     price?: number
+    specLabel?: string
     commission?: number
   }>(),
   {
@@ -19,15 +21,33 @@ const props = withDefaults(
 const shopStore = useShopStore()
 const userStore = useUserStore()
 
+const currentShopInfo = computed(() => props.shopInfo ?? shopStore.shopInfo)
+
 const handleCallPhone = () => {
+  const phone = currentShopInfo.value?.phone
+  if (!phone) {
+    uni.showToast({ icon: 'none', title: '暂无联系电话' })
+    return
+  }
+
   uni.makePhoneCall({
-    phoneNumber: props.shopInfo?.phone as string ?? shopStore.shopInfo?.phone,
+    phoneNumber: phone,
     success: (success) => {
     },
     fail: (fail) => {
       uni.showToast({ icon: 'none', title: '已取消/无法联系' })
     },
   })
+}
+
+const handleOpenLocation = () => {
+  const shopInfo = currentShopInfo.value
+  if (shopInfo?.latitude == null || shopInfo.longitude == null) {
+    uni.showToast({ icon: 'none', title: '暂无位置信息' })
+    return
+  }
+
+  openLocation(shopInfo.latitude, shopInfo.longitude, shopInfo.name, shopInfo.address)
 }
 console.log(shopStore.shopInfo)
 
@@ -43,9 +63,9 @@ console.log(shopStore.shopInfo)
     <view class="price" v-if="type === 'product'">
       <text class="iconfont icon-shijian"></text>
       <view class="value" style="display: flex;align-items: flex-start;">
-        <text style="margin-right: 40rpx;">价格:{{ price }}</text>
-        <text v-if="userStore.profile?.role === 'manager'" style="font-size: 28rpx;color: #919191;">佣金:{{ commission
-        }}</text>
+        <text style="margin-right: 40rpx;">价格:{{ price }}{{ specLabel ? `/${specLabel}` : '' }}</text>
+        <text v-if="userStore.isValidManager" style="font-size: 28rpx;color: #919191;">佣金:{{ commission
+          }}</text>
       </view>
     </view>
     <!--   位置和商家名称   -->
@@ -53,15 +73,13 @@ console.log(shopStore.shopInfo)
       <view class="info-main">
         <view class="info-title">
           <text class="iconfont icon-dingwei"></text>
-          <text class="title-text" style="margin-left: 10rpx">{{ shopInfo?.name ?? shopStore?.shopInfo?.name }}</text>
+          <text class="title-text" style="margin-left: 10rpx">{{ currentShopInfo?.name }}</text>
         </view>
         <view class="info-desc">
-          {{ shopInfo?.address ?? shopStore?.shopInfo?.address }}
+          {{ currentShopInfo?.address }}
         </view>
       </view>
-      <view class="info-action"
-        @tap="openLocation(shopInfo?.latitude as number ?? shopStore.shopInfo?.latitude as number,
-          shopInfo?.longitude as number ?? shopStore.shopInfo?.longitude as number, shopInfo?.name as string, shopInfo?.address as string)">
+      <view class="info-action" @tap="handleOpenLocation">
         <text class="iconfont icon-ditu" style="color: #f7821a; font-size: 40rpx"></text>
         <view style="font-size: 24rpx; color: #919191">地图</view>
       </view>
@@ -73,7 +91,7 @@ console.log(shopStore.shopInfo)
           <text class="iconfont icon-shoucang"></text>
           <text class="title-text" style="margin-left: 10rpx">预约流程</text>
         </view>
-        <view class="info-desc"> 购买商品→致电商家预约→商家确认→进店消费 </view>
+        <view class="info-desc"> 购买商品→致电商家预约→商家确认后→再进店消费 </view>
       </view>
       <view class="info-action" @tap="handleCallPhone">
         <text class="iconfont icon-dianhuabodadianhua" style="color: #f7821a; font-size: 40rpx"></text>

@@ -144,35 +144,3 @@ export interface StoreSurroundData {
   createdAt?: Date | string
   updatedAt?: Date | string
 }
-
-/** 抖音/外部订单办理入住参数（无 orderId） */
-export interface CheckInExternalParams {
-  userId: string
-  shopId: string
-  icCardFont: string
-  icCardBack: string
-  nickname?: string
-  phone?: string
-  roomNumber: string
-  source?: 'douyin' | 'miniprogram' | 'offline'
-}
-
-/** 外部入住记录（CheckInExternal 集合文档） */
-export interface CheckInExternalItem {
-  _id: string
-  userId: string
-  shopId: string
-  icCardFont: string
-  icCardBack: string
-  nickname?: string
-  phone?: string
-  roomNumber?: string
-  source?: 'douyin' | 'miniprogram' | 'offline'
-  createdAt?: Date | string
-}
-
-/** 外部入住分页结果 */
-export interface CheckInExternalPageResult {
-  list: CheckInExternalItem[]
-  totalPage: number
-}

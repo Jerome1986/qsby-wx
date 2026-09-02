@@ -35,6 +35,14 @@ const formData = ref<FormData>({
 // 申请单状态
 const status = ref<ApplyForStatus>('no')
 
+// 预览二维码，长按可保存到相册
+const previewQrcode = () => {
+  uni.previewImage({
+    current: '/static/code.jpg',
+    urls: ['/static/code.jpg'],
+  })
+}
+
 // 提交申请
 const handleSubmit = async () => {
   // 表单验证
@@ -86,9 +94,51 @@ const handleSubmit = async () => {
       <view class="btn" @tap="handleSubmit">{{ applyForStatusText[status]() }}</view>
     </view>
 
+    <!-- 主理人权益 -->
+    <view class="benefits">
+      <view class="card-title">主理人权益</view>
+      <view class="content">
+        <view class="item">
+          <text class="index">1</text>
+          <view class="item-content">
+            <text class="item-title">文旅资源体验权益</text>
+            <text>平台会不定期提供免费民宿客房、特色文旅体验资源，供主理人体验采风。</text>
+          </view>
+        </view>
+        <view class="item">
+          <text class="index">2</text>
+          <view class="item-content">
+            <text class="item-title">IP账号孵化扶持</text>
+            <text>平台带队指导，助力主理人打造个人自媒体账号，成长为旅行、民宿、文旅类博主。</text>
+          </view>
+        </view>
+        <view class="item">
+          <text class="index">3</text>
+          <view class="item-content">
+            <text class="item-title">内容流量协同</text>
+            <text>优质内容可获得平台曝光加持，拓宽个人自媒体影响力。</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 二维码 -->
+    <view class="qrcode-card">
+      <view class="card-title">扫码咨询</view>
+      <view class="qrcode-content">
+        <image
+          class="qrcode-image"
+          src="/static/code.jpg"
+          mode="aspectFit"
+          @tap="previewQrcode"
+        ></image>
+        <text class="qrcode-tip">点击二维码放大，长按可保存至相册</text>
+      </view>
+    </view>
+
     <!--  温馨提示  -->
     <view class="tips">
-      <view class="title">温馨提示</view>
+      <view class="card-title">温馨提示</view>
       <view class="content">
         <view class="item">1. 请确保填写的信息真实有效，审核通过后不可修改;</view>
         <view class="item">2. 主理人需年满18周岁，具有完全民事行为能力;</view>
@@ -103,15 +153,18 @@ const handleSubmit = async () => {
 
 <style scoped lang="scss">
 .applyFor {
-  padding: 24rpx 24rpx 60rpx 24rpx;
+  box-sizing: border-box;
+  padding: 20rpx 24rpx 40rpx;
   min-height: 100vh;
   @include page-background();
+  height: auto;
+  overflow: visible;
 }
 
 /* 表单容器 */
 .form {
   padding: 20rpx 30rpx;
-  background: #ffffff;
+  background: #fef8e5;
   border-radius: 30rpx;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
 }
@@ -131,13 +184,13 @@ const handleSubmit = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 60rpx;
+  margin-top: 32rpx;
 
   .btn {
     text-align: center;
     width: 100%;
-    height: 108rpx;
-    line-height: 108rpx;
+    height: 96rpx;
+    line-height: 96rpx;
     background: $qs-brandColor;
     border-radius: 30rpx;
     font-size: 28rpx;
@@ -146,12 +199,101 @@ const handleSubmit = async () => {
   }
 }
 
+/* 主理人权益 */
+.benefits {
+  margin-top: 28rpx;
+  padding: 28rpx 30rpx;
+  background: #fef8e5;
+  border-radius: 24rpx;
+  @include customShadow();
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+
+    .index {
+      flex-shrink: 0;
+      width: 36rpx;
+      height: 36rpx;
+      margin-top: 3rpx;
+      margin-right: 18rpx;
+      border-radius: 50%;
+      background: $qs-brandColor;
+      color: $qs-font-title;
+      font-size: 22rpx;
+      font-weight: bold;
+      line-height: 36rpx;
+      text-align: center;
+    }
+
+    .item-content {
+      flex: 1;
+    }
+
+    .item-title {
+      display: block;
+      margin-bottom: 6rpx;
+      color: $qs-font-title;
+      font-weight: 600;
+    }
+  }
+}
+
+/* 二维码 */
+.qrcode-card {
+  margin-top: 28rpx;
+  padding: 28rpx 30rpx 32rpx;
+  background: #fef8e5;
+  border-radius: 24rpx;
+  @include customShadow();
+
+  .qrcode-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qrcode-image {
+    width: 320rpx;
+    height: 320rpx;
+    border-radius: 12rpx;
+  }
+
+  .qrcode-tip {
+    margin-top: 16rpx;
+    color: $qs-font-dec;
+    font-size: 24rpx;
+    line-height: 1.5;
+  }
+}
+
 /* 温馨提示 */
 .tips {
-  margin-top: 40rpx;
-  padding: 24rpx 30rpx;
-  background: #ffffff;
-  border-radius: 30rpx;
+  margin-top: 28rpx;
+  padding: 28rpx 30rpx;
+  background: #fef8e5;
+  border-radius: 24rpx;
   @include customShadow();
+}
+
+.card-title {
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+  border-left: 8rpx solid $qs-brandColor;
+  color: $qs-font-title;
+  font-size: 30rpx;
+  font-weight: bold;
+  line-height: 36rpx;
+}
+
+.content {
+  color: $qs-font-dec;
+  font-size: 26rpx;
+  line-height: 1.7;
+
+  .item + .item {
+    margin-top: 16rpx;
+  }
 }
 </style>

@@ -116,7 +116,7 @@ const props = withDefaults(
       padding: 6rpx 16rpx;
       font-size: 20rpx;
       color: #ffffff;
-      background: linear-gradient(135deg, $qs-brandColor, darken($qs-brandColor, 10%));
+      background: linear-gradient(135deg, $qs-brandColor, color.adjust($qs-brandColor, $lightness: -10%));
       border-radius: 10rpx 0 10rpx 0;
       z-index: 1;
     }

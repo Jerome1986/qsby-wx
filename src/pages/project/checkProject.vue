@@ -112,6 +112,8 @@ const handleSubmit = async () => {
       title: detailData.value.title as string,
       address_name: detailData.value.address_name ?? '',
       event_address: detailData.value.event_address ?? detailData.value.address ?? '',
+      latitude: detailData.value.latitude,
+      longitude: detailData.value.longitude,
     },
     userInfo: {
       userId: userStore.profile?._id as string,
@@ -123,7 +125,7 @@ const handleSubmit = async () => {
     commission: 0,
     totalAmount: detailData.value.viewFee,
     discountAmount: 0,
-    discountType: 'cash',
+    discountType: 'none',
     payAmount,
     description: detailData.value.title as string,
     industryCategory: industryMap[detailData.value.industry] ?? '-',

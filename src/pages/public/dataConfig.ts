@@ -1,5 +1,7 @@
+import type { PublicFormData } from '@/types/Public'
+
 // 创建表单
-export const initFormData = () => {
+export const initFormData = (): PublicFormData => {
   return {
     cover: '', // 封面
     title: '', // 行程主题
@@ -11,11 +13,11 @@ export const initFormData = () => {
     longitude: 0, // 经度
     wechat: '', // 联系微信
     phone: '', // 联系电话
-    maxPeople: 0, // 人数限制
-    maleCount: 0, // 男士报名
-    femaleCount: 0, // 女士报名
-    userFee: 0, // 用户报名费用
-    commission: 0, // 主理人佣金
+    maxPeople: '', // 人数限制（默认留空，显示输入提示）
+    maleCount: '', // 男士报名（默认留空，提交时按 0 处理）
+    femaleCount: '', // 女士报名（默认留空，提交时按 0 处理）
+    userFee: '', // 用户报名费用（默认留空，提交时按 0 处理）
+    commission: '', // 主理人佣金（默认留空，提交时按 0 处理）
     requirement: '', // 行程需求
     images: [],
   }

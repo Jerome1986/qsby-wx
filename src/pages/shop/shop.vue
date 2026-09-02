@@ -46,17 +46,25 @@ const cateId = ref('')
 const finish = ref(false)
 const pageNum = ref(1)
 const pageSize = ref(10)
+const storeLoading = ref(false)
+const storeHasFetched = ref(false)
 const storeListGet = async (cityId: string, cateId: string) => {
-  if (finish.value) return
-  const res = await filterSotreListAll('', cityId, cateId, pageNum.value, pageSize.value)
-  console.log('store', res.data)
+  if (finish.value || storeLoading.value) return
+  storeLoading.value = true
+  try {
+    const res = await filterSotreListAll('', cityId, cateId, pageNum.value, pageSize.value)
+    console.log('store', res.data)
 
-  storeList.value = res.data.list
+    storeList.value = res.data.list
 
-  if (pageNum.value < res.data.totalPage) {
-    pageNum.value++
-  } else {
-    finish.value = true
+    if (pageNum.value < res.data.totalPage) {
+      pageNum.value++
+    } else {
+      finish.value = true
+    }
+  } finally {
+    storeLoading.value = false
+    storeHasFetched.value = true
   }
 }
 
@@ -64,6 +72,7 @@ const reset = () => {
   pageNum.value = 1
   storeList.value = []
   finish.value = false
+  storeHasFetched.value = false
 }
 
 const handleMore = () => {
@@ -182,7 +191,7 @@ const sortedStoreList = computed(() => {
       </view>
       <!--   门店列表   -->
       <view class="shopList">
-        <view v-if="sortedStoreList.length === 0" class="empty">
+        <view v-if="storeHasFetched && !storeLoading && sortedStoreList.length === 0" class="empty">
           <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
             mode="aspectFit"></image>
           <text class="empty-text">暂无门店</text>

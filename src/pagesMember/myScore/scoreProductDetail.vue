@@ -7,7 +7,7 @@ import { shopDetailApi } from '@/api/store'
 import type { ScoreProduct } from '@/types/Score'
 import type { StoreItem } from '@/types/store'
 import { openLocation } from '@/composables/openLocation'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useUserStore } from '@/stores'
 import { createQrCode, scoreOrderCreate, type ScoreOrderParam } from '@/api/order'
@@ -18,6 +18,28 @@ const productId = ref('')
 const product = ref<ScoreProduct | null>(null)
 const storeInfo = ref<StoreItem | null>(null)
 const loading = ref(false)
+const exchanging = ref(false)
+
+const currentScore = computed(() => Number(userStore.profile?.score ?? 0))
+const hasEnoughScore = computed(() => {
+  if (!product.value) return false
+  return currentScore.value > 0 && currentScore.value >= Number(product.value.scorePrice)
+})
+const exchangeDisabled = computed(
+  () => !product.value || product.value.stock <= 0 || !hasEnoughScore.value || exchanging.value,
+)
+const exchangeActionText = computed(() => {
+  if (!product.value || product.value.stock <= 0) return '已兑完'
+  if (currentScore.value <= 0) return '暂无积分'
+  if (!hasEnoughScore.value) return '积分不足'
+  return exchanging.value ? '兑换中...' : '立即兑换'
+})
+
+const validateScore = () => {
+  if (hasEnoughScore.value) return true
+  uni.showToast({ icon: 'none', title: currentScore.value <= 0 ? '暂无可用积分' : '积分不足' })
+  return false
+}
 
 /** 获取商品详情，有 storeId 时顺带拉取门店信息 */
 const fetchDetail = async (id: string) => {
@@ -25,6 +47,8 @@ const fetchDetail = async (id: string) => {
   loading.value = true
   try {
     const res = await scoreProductFindOneApi(id)
+    console.log('详情', res.data)
+
     product.value = Array.isArray(res.data) ? res.data[0] : res.data
   } catch {
     uni.showToast({ icon: 'none', title: '获取商品详情失败' })
@@ -53,32 +77,64 @@ const handleCallPhone = () => {
 
 // 点击立即兑换
 const handleExchange = () => {
+  if (!product.value) return
+
+  if (product.value.stock < 1) {
+    uni.showToast({
+      icon: 'none',
+      title: '商品已售罄',
+    })
+    return
+  }
+
+  if (product.value.status !== 'active') {
+    uni.showToast({ icon: 'none', title: '商品暂不可兑换' })
+    return
+  }
+
+  if (!validateScore()) return
+
+  if (exchanging.value) return
+
   uni.showModal({
     title: '提示',
     content: '确定要兑换吗？',
     confirmColor: '#eed261',
     success: async (res) => {
       if (res.confirm) {
+        if (!validateScore()) return
+        exchanging.value = true
         // 1.准备参数
         console.log('立即兑换')
         const params: ScoreOrderParam = {
           openid: userStore.profile?.openid as string,
+          productId: product.value?._id as string,
           productName: product.value?.name as string,
           productCover: product.value?.cover as string,
           payScore: product.value?.scorePrice as number,
         }
 
-        // 2. 提交积分订单
-        const res = await scoreOrderCreate(params)
-        console.log(res)
+        try {
+          // 2. 提交积分订单，由服务端校验并扣减商品库存
+          const orderRes = await scoreOrderCreate(params)
+          console.log(orderRes)
 
-        // 3.如果提交成功，生成卷码并跳入订单详情
-        await createQrCode(res.data?.orderId, userStore.profile?.openid as string, 'scoreOrder').catch((err) =>
-          console.error('核销码创建失败', err)
-        )
-        uni.redirectTo({
-          url: `/pagesMember/myScore/exchange?orderId=${res.data?.orderId}`,
-        })
+          // 3.如果提交成功，生成卷码并跳入订单详情
+          await createQrCode(
+            orderRes.data?.orderId,
+            userStore.profile?.openid as string,
+            'scoreOrder',
+          ).catch((err) => console.error('核销码创建失败', err))
+          uni.redirectTo({
+            url: `/pagesMember/myScore/exchange?orderId=${orderRes.data?.orderId}`,
+          })
+        } catch (err) {
+          console.error('积分商品兑换失败', err)
+          uni.showToast({ icon: 'none', title: '兑换失败，请重试' })
+          await fetchDetail(productId.value)
+        } finally {
+          exchanging.value = false
+        }
       }
     },
   })
@@ -108,8 +164,17 @@ onLoad((options) => {
           <view class="productInfo">
             <view class="title">{{ product.name }}</view>
             <view class="score-row">
-              <text class="label">所需</text>
-              <text class="score-price">{{ product.scorePrice }}积分</text>
+              <view class="score-main">
+                <text class="label">所需</text>
+                <text class="score-price">{{ product.scorePrice }}</text>
+                <text class="score-unit">积分</text>
+              </view>
+              <view
+                class="stock-tag"
+                :class="{ warning: product.stock > 0 && product.stock <= 5, empty: product.stock <= 0 }"
+              >
+                {{ product.stock > 0 ? `剩余 ${product.stock} 件` : '暂无库存' }}
+              </view>
             </view>
           </view>
           <!-- 门店信息 -->
@@ -132,11 +197,21 @@ onLoad((options) => {
             </view>
           </view>
           <!-- 图文详情 -->
-          <ImageTextDetail v-if="product.images?.length" :images="product.images || []"></ImageTextDetail>
+          <ImageTextDetail
+            v-if="product.coverDescription || product.images?.length"
+            :description="product.coverDescription || ''"
+            :images="product.images || []"
+          ></ImageTextDetail>
           <view class="action-bar-placeholder"></view>
         </view>
       </scroll-view>
-      <BottomActionBar page-type="score" :product-id="productId" @exchange="handleExchange"></BottomActionBar>
+      <BottomActionBar
+        page-type="score"
+        :product-id="productId"
+        :disabled="exchangeDisabled"
+        :action-text="exchangeActionText"
+        @exchange="handleExchange"
+      ></BottomActionBar>
     </template>
     <view v-else class="empty">
       <text>商品不存在或已下架</text>
@@ -192,13 +267,13 @@ onLoad((options) => {
     padding: 10rpx 20rpx;
     font-size: 24rpx;
     color: #fff;
-    background: linear-gradient(135deg, $qs-brandColor, darken($qs-brandColor, 10%));
+    background: linear-gradient(135deg, $qs-brandColor, color.adjust($qs-brandColor, $lightness: -10%));
     border-radius: 24rpx 0 16rpx 0;
     z-index: 1;
   }
+
 }
 
-/* 商品信息（名称、积分价格） */
 .productInfo {
   margin-top: 24rpx;
   padding: 28rpx;
@@ -214,20 +289,53 @@ onLoad((options) => {
   }
 
   .score-row {
-    margin-top: 16rpx;
     display: flex;
-    align-items: baseline;
-    gap: 8rpx;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20rpx;
+    padding-top: 18rpx;
+    border-top: 1rpx solid rgba($qs-border, 0.6);
 
-    .label {
-      font-size: 26rpx;
-      color: $qs-font-dec2;
+    .score-main {
+      display: flex;
+      align-items: baseline;
+      gap: 6rpx;
+
+      .label {
+        margin-right: 4rpx;
+        font-size: 24rpx;
+        color: $qs-font-dec2;
+      }
+
+      .score-price {
+        font-size: 38rpx;
+        font-weight: bold;
+        line-height: 1;
+        color: #e49a14;
+      }
+
+      .score-unit {
+        font-size: 24rpx;
+        color: #b87910;
+      }
     }
 
-    .score-price {
-      font-size: 36rpx;
-      font-weight: bold;
-      color: $qs-brandColor;
+    .stock-tag {
+      padding: 6rpx 16rpx;
+      border-radius: 20rpx;
+      font-size: 23rpx;
+      color: #4f7c63;
+      background: #edf8f1;
+
+      &.warning {
+        color: #c76b16;
+        background: #fff3e5;
+      }
+
+      &.empty {
+        color: $qs-font-dec2;
+        background: #f1f1f1;
+      }
     }
   }
 }

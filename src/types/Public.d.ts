@@ -1,6 +1,18 @@
 import type { EventItem } from '@/types/PublicManagement'
+
+type PublicNumberField = number | ''
+
 // 发布行程表单和发布活动表单数据类型 (共用)
-export type PublicFormData = Partial<EventItem>
+export type PublicFormData = Omit<
+  Partial<EventItem>,
+  'maxPeople' | 'maleCount' | 'femaleCount' | 'userFee' | 'commission'
+> & {
+  maxPeople?: PublicNumberField
+  maleCount?: PublicNumberField
+  femaleCount?: PublicNumberField
+  userFee?: PublicNumberField
+  commission?: PublicNumberField
+}
 
 // 提交表单数据类型
 export interface SubmitFormData extends PublicFormData {

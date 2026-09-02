@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import NavTitle from '@/components/NavTitle.vue'
 
-withDefaults(defineProps<{
-  images: string[]
-  description: string
-}>(), {})
+withDefaults(
+  defineProps<{
+    images?: string[]
+    description?: string
+  }>(),
+  {
+    images: () => [],
+    description: '',
+  },
+)
 
 
 </script>
@@ -47,6 +53,8 @@ withDefaults(defineProps<{
         color: $qs-font-dec;
         line-height: 1.8;
         text-align: justify;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
       }
 
       .detail-img {

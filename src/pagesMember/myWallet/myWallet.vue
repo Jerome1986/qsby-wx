@@ -1,31 +1,75 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { generateMonthOptions, getCurrentMonth } from '@/utils/generateMonth.ts'
+import { formatTimestamp, generateMonthOptions, getCurrentMonth } from '@/utils/generateMonth.ts'
 import CashRecord from '@/pagesMember/myWallet/components/CashRecord.vue'
-import Record from '@/components/Record.vue'
-import { fields } from './dataCofing.ts'
 import NavHead from '@/components/NavHead.vue'
 import { useUserStore } from '@/stores/index.ts'
-import { cashWithdrawListApi, checkApplyForCash, incomeListGetApi } from '@/api/myWallet.ts'
-import { onLoad } from '@dcloudio/uni-app'
-import type { OrderItem } from '@/types/OrderItem.js'
+import {
+  cashWithdrawListApi,
+  checkApplyForCash,
+  incomeFlowListGetApi,
+} from '@/api/myWallet.ts'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import type { CashWithdrawItem, Tab, TabList } from '@/types/Cash.js'
+import type { UserBalanceFlow } from '@/types/UserBalanceFlow'
+import { userInfoGet } from '@/composables/userInfo.ts'
 
 const userStore = useUserStore()
 const pageSize = 10
 
-// 收入记录：独立分页状态，避免与提现记录共享导致数据错乱
-const listData = ref<OrderItem[]>([])
-const incomePageNum = ref(1)
-const incomeFinish = ref(false)
-const incomeListGet = async (userId: string, time: string) => {
-  if (incomeFinish.value) return
-  const res = await incomeListGetApi(userId, time, incomePageNum.value, pageSize)
-  listData.value.push(...res.data.list)
-  if (incomePageNum.value < res.data.totalPage) {
-    incomePageNum.value++
-  } else {
-    incomeFinish.value = true
+// 佣金收入：独立分页状态
+const commissionIncomeListData = ref<UserBalanceFlow[]>([])
+const commissionIncomePageNum = ref(1)
+const commissionIncomeFinish = ref(false)
+const commissionIncomeLoading = ref(false)
+const commissionIncomeListGet = async (userId: string, time: string) => {
+  if (!userId || commissionIncomeFinish.value || commissionIncomeLoading.value) return
+  commissionIncomeLoading.value = true
+  try {
+    const res = await incomeFlowListGetApi(
+      userId,
+      time,
+      'commission',
+      commissionIncomePageNum.value,
+      pageSize,
+    )
+    const list = res.data?.list ?? []
+    commissionIncomeListData.value.push(...list)
+    if (commissionIncomePageNum.value < (res.data?.totalPage ?? 0)) {
+      commissionIncomePageNum.value++
+    } else {
+      commissionIncomeFinish.value = true
+    }
+  } finally {
+    commissionIncomeLoading.value = false
+  }
+}
+
+// 活动收入：独立分页状态
+const activityIncomeListData = ref<UserBalanceFlow[]>([])
+const activityIncomePageNum = ref(1)
+const activityIncomeFinish = ref(false)
+const activityIncomeLoading = ref(false)
+const activityIncomeListGet = async (userId: string, time: string) => {
+  if (!userId || activityIncomeFinish.value || activityIncomeLoading.value) return
+  activityIncomeLoading.value = true
+  try {
+    const res = await incomeFlowListGetApi(
+      userId,
+      time,
+      'activity',
+      activityIncomePageNum.value,
+      pageSize,
+    )
+    const list = res.data?.list ?? []
+    activityIncomeListData.value.push(...list)
+    if (activityIncomePageNum.value < (res.data?.totalPage ?? 0)) {
+      activityIncomePageNum.value++
+    } else {
+      activityIncomeFinish.value = true
+    }
+  } finally {
+    activityIncomeLoading.value = false
   }
 }
 
@@ -33,54 +77,86 @@ const incomeListGet = async (userId: string, time: string) => {
 const withdrawListData = ref<CashWithdrawItem[]>([])
 const withdrawPageNum = ref(1)
 const withdrawFinish = ref(false)
+const withdrawLoading = ref(false)
 const withdrawListGet = async (userId: string, time: string) => {
-  if (withdrawFinish.value) return
-  const res = await cashWithdrawListApi(userId, time, withdrawPageNum.value, pageSize)
-  withdrawListData.value.push(...res.data.list)
-  if (withdrawPageNum.value < res.data.totalPage) {
-    withdrawPageNum.value++
-  } else {
-    withdrawFinish.value = true
+  if (!userId || withdrawFinish.value || withdrawLoading.value) return
+  withdrawLoading.value = true
+  try {
+    const res = await cashWithdrawListApi(userId, time, withdrawPageNum.value, pageSize)
+    const list = res.data?.list ?? []
+    withdrawListData.value.push(...list)
+    if (withdrawPageNum.value < (res.data?.totalPage ?? 0)) {
+      withdrawPageNum.value++
+    } else {
+      withdrawFinish.value = true
+    }
+  } finally {
+    withdrawLoading.value = false
   }
 }
 
-const getUserId = () => userStore.profile?._id as string
+const activeTab = ref<Tab>('commission')
+const tabList: TabList[] = [
+  { label: '主理人佣金', value: 'commission' },
+  { label: '活动收入', value: 'activityIncome' },
+  { label: '提现记录', value: 'withdraw' },
+]
+
+type IncomeTab = Extract<Tab, 'commission' | 'activityIncome'>
+
+interface IncomeRow {
+  label: string
+  value: string
+  isAmount?: boolean
+}
+
+const incomeLabelMap: Record<IncomeTab, string> = {
+  commission: '佣金收入',
+  activityIncome: '活动收入',
+}
+
+const selectedMonth = ref(getCurrentMonth())
+const range = ref(generateMonthOptions())
+
+const getUserId = () => userStore.profile?._id ?? ''
+
+const reset = (target: Tab) => {
+  if (target === 'commission') {
+    commissionIncomePageNum.value = 1
+    commissionIncomeFinish.value = false
+    commissionIncomeLoading.value = false
+    commissionIncomeListData.value = []
+  } else if (target === 'activityIncome') {
+    activityIncomePageNum.value = 1
+    activityIncomeFinish.value = false
+    activityIncomeLoading.value = false
+    activityIncomeListData.value = []
+  } else {
+    withdrawPageNum.value = 1
+    withdrawFinish.value = false
+    withdrawLoading.value = false
+    withdrawListData.value = []
+  }
+}
 
 /** 加载当前激活 tab 的数据 */
 const loadActiveTabData = () => {
   const userId = getUserId()
   const time = selectedMonth.value
-  if (activeTab.value === 'income') {
-    incomeListGet(userId, time)
-  } else {
+  if (activeTab.value === 'withdraw') {
     withdrawListGet(userId, time)
-  }
-}
-
-const activeTab = ref<Tab>('withdraw')
-const tabList: TabList[] = [
-  { label: '提现记录', value: 'withdraw' },
-  { label: '收入记录', value: 'income' },
-]
-
-const selectedMonth = ref(getCurrentMonth())
-const range = ref(generateMonthOptions())
-
-const reset = (target: Tab) => {
-  if (target === 'income') {
-    incomePageNum.value = 1
-    incomeFinish.value = false
-    listData.value = []
+  } else if (activeTab.value === 'commission') {
+    commissionIncomeListGet(userId, time)
   } else {
-    withdrawPageNum.value = 1
-    withdrawFinish.value = false
-    withdrawListData.value = []
+    activityIncomeListGet(userId, time)
   }
 }
 
 const handleTab = (tab: Tab) => {
+  if (activeTab.value === tab) return
   activeTab.value = tab
-  selectedMonth.value = getCurrentMonth()
+  reset(tab)
+  loadActiveTabData()
 }
 
 const change = (value: string | number) => {
@@ -90,13 +166,50 @@ const change = (value: string | number) => {
 }
 
 onLoad(() => {
-  incomeListGet(getUserId(), selectedMonth.value)
-  withdrawListGet(getUserId(), selectedMonth.value)
+  loadActiveTabData()
+})
+
+onShow(() => {
+  if (userStore.profile?._id) {
+    userInfoGet(userStore.profile._id)
+  }
 })
 
 const isApplyForCash = async (userId: string) => {
   const res = await checkApplyForCash(userId)
   return res.data.isApplyFor
+}
+
+const formatIncomeAmount = (amount?: number | string | null) => {
+  const value = Number(amount || 0)
+  return value.toFixed(2)
+}
+
+const formatOptionalMoney = (amount?: number | string | null) => {
+  if (amount === undefined || amount === null || amount === '') return ''
+  const value = Number(amount)
+  return Number.isFinite(value) ? `￥${value.toFixed(2)}` : ''
+}
+
+const formatIncomeTime = (time?: string | Date) => {
+  return time ? formatTimestamp(time, 2) : ''
+}
+
+const getIncomeRows = (item: UserBalanceFlow, incomeTab: IncomeTab): IncomeRow[] => {
+  const rows: IncomeRow[] = [
+    { label: '购买人', value: item.buyerName || '' },
+    { label: '产品金额', value: formatOptionalMoney(item.totalAmount) },
+    { label: '下单时间', value: formatIncomeTime(item.orderTime) },
+    { label: '产品名称', value: item.productName || '' },
+    { label: '订单编号', value: item.out_trade_no || '' },
+    {
+      label: incomeLabelMap[incomeTab],
+      value: `￥${formatIncomeAmount(item.amount)}`,
+      isAmount: true,
+    },
+  ]
+
+  return rows.filter((row) => row.value)
 }
 
 // 处理提现跳转
@@ -143,17 +256,49 @@ const handleBalance = async () => {
     </view>
     <!--  提现记录  -->
     <scroll-view v-show="activeTab === 'withdraw'" class="scroll-view" :scroll-y="true" :enhanced="true"
-      :show-scrollbar="false">
+      :show-scrollbar="false" @scrolltolower="loadActiveTabData">
       <view style="padding: 0 24rpx;">
         <CashRecord :withdrawListData="withdrawListData"></CashRecord>
       </view>
     </scroll-view>
 
-    <!--  收入记录  -->
-    <scroll-view v-show="activeTab === 'income'" class="scroll-view" :scroll-y="true" :enhanced="true"
-      :show-scrollbar="false">
+    <!--  佣金收入  -->
+    <scroll-view v-show="activeTab === 'commission'" class="scroll-view" :scroll-y="true" :enhanced="true"
+      :show-scrollbar="false" @scrolltolower="loadActiveTabData">
       <view style="padding:0 24rpx;">
-        <Record v-if="listData.length" :fields="fields" :list-data="listData"></Record>
+        <view v-if="commissionIncomeListData.length" class="income-list">
+          <view class="income-card" v-for="item in commissionIncomeListData" :key="item._id">
+            <view class="income-row" :class="{ 'amount-row': row.isAmount }"
+              v-for="row in getIncomeRows(item, 'commission')" :key="row.label">
+              <view class="income-label">{{ row.label }}</view>
+              <view class="income-value">{{ row.value }}</view>
+            </view>
+          </view>
+          <view v-if="commissionIncomeLoading" class="loading-tip">加载中...</view>
+        </view>
+        <view v-else class="empty">
+          <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="widthFix"></image>
+          <text class="empty-text">暂无数据</text>
+        </view>
+        <view style="height: 40rpx;"></view>
+      </view>
+    </scroll-view>
+
+    <!--  活动收入  -->
+    <scroll-view v-show="activeTab === 'activityIncome'" class="scroll-view" :scroll-y="true" :enhanced="true"
+      :show-scrollbar="false" @scrolltolower="loadActiveTabData">
+      <view style="padding:0 24rpx;">
+        <view v-if="activityIncomeListData.length" class="income-list">
+          <view class="income-card" v-for="item in activityIncomeListData" :key="item._id">
+            <view class="income-row" :class="{ 'amount-row': row.isAmount }"
+              v-for="row in getIncomeRows(item, 'activityIncome')" :key="row.label">
+              <view class="income-label">{{ row.label }}</view>
+              <view class="income-value">{{ row.value }}</view>
+            </view>
+          </view>
+          <view v-if="activityIncomeLoading" class="loading-tip">加载中...</view>
+        </view>
         <view v-else class="empty">
           <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
             mode="widthFix"></image>
@@ -275,6 +420,64 @@ const handleBalance = async () => {
 
   .scroll-view {
     flex: 1;
+
+    .income-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20rpx;
+    }
+
+    .income-card {
+      padding: 24rpx;
+      background: $qs-card-bg;
+      border-radius: 30rpx;
+      @include customShadow();
+
+      .income-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 20rpx;
+        font-size: 28rpx;
+
+        &:last-of-type {
+          margin-bottom: 0;
+        }
+
+        .income-label {
+          flex-shrink: 0;
+          color: $qs-font-dec2;
+        }
+
+        .income-value {
+          flex: 1;
+          min-width: 0;
+          margin-left: 24rpx;
+          text-align: right;
+          color: $qs-font-title;
+          word-break: break-all;
+        }
+      }
+
+      .amount-row {
+
+        .income-label {
+          color: $qs-font-dec2;
+        }
+
+        .income-value {
+          font-weight: bold;
+          color: #ff3b3b;
+        }
+      }
+    }
+
+    .loading-tip {
+      padding: 20rpx 0;
+      text-align: center;
+      font-size: 24rpx;
+      color: $qs-font-dec;
+    }
 
     .empty {
       display: flex;

@@ -2,11 +2,21 @@
 import GroupQrPopup from '@/components/GroupQrPopup.vue'
 import { ref } from 'vue'
 
-const props = defineProps<{
-  pageType: string
-  price?: number
-  productId?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    pageType: string
+    price?: number
+    specLabel?: string
+    productId?: string
+    inviterCode?: string
+    disabled?: boolean
+    actionText?: string
+    showGroup?: boolean
+  }>(),
+  {
+    showGroup: true,
+  },
+)
 
 const showGroupQr = ref(false)
 
@@ -14,14 +24,31 @@ const emits = defineEmits(['exchange'])
 
 // 立即兑换
 const exchange = () => {
+  if (props.disabled) return
   emits('exchange')
 }
 
 // 立即购买
 const buy = () => {
   console.log('立即购买')
+
+  if (!props.productId) {
+    uni.showToast({
+      icon: 'none',
+      title: '商品信息加载中，请稍后',
+    })
+    return
+  }
+
+  const query = [
+    `productId=${encodeURIComponent(props.productId)}`,
+    props.inviterCode ? `inviterCode=${encodeURIComponent(props.inviterCode)}` : '',
+  ]
+    .filter(Boolean)
+    .join('&')
+
   uni.navigateTo({
-    url: `/pages/shop/createOrder?productId=${props.productId}`,
+    url: `/pages/shop/createOrder?${query}`,
   })
 }
 
@@ -31,7 +58,7 @@ const openGroupQr = () => {
 </script>
 
 <template>
-  <GroupQrPopup v-model="showGroupQr" />
+  <GroupQrPopup v-if="showGroup" v-model="showGroupQr" />
   <view class="action-bar">
     <view class="action-tools">
       <!--
@@ -40,7 +67,7 @@ const openGroupQr = () => {
       点击逻辑：点击 label 会触发关联的 button，从而唤起客服会话。
       -->
       <button id="contactBtn" open-type="contact" class="contact-btn-hidden" />
-      <view class="action-tool-item" @tap="openGroupQr">
+      <view v-if="showGroup" class="action-tool-item" @tap="openGroupQr">
         <text class="iconfont icon-erweima action-tool-icon"></text>
         <text class="action-tool-text">进群</text>
       </view>
@@ -49,8 +76,17 @@ const openGroupQr = () => {
         <text class="action-tool-text">客服</text>
       </label>
     </view>
-    <view class="action-submit-btn" @tap="exchange" v-if="pageType === 'score'">立即兑换</view>
-    <view class="action-submit-btn" @tap="buy" v-if="pageType === 'product'">立即购买(￥{{ price }})</view>
+    <view
+      class="action-submit-btn"
+      :class="{ disabled }"
+      @tap="exchange"
+      v-if="pageType === 'score'"
+    >
+      {{ actionText || '立即兑换' }}
+    </view>
+    <view class="action-submit-btn" @tap="buy" v-if="pageType === 'product'">
+      立即购买(￥{{ price }}{{ specLabel ? `/${specLabel}` : '' }})
+    </view>
   </view>
 </template>
 
@@ -113,6 +149,11 @@ const openGroupQr = () => {
     font-size: 28rpx;
     font-weight: 500;
     color: #ffb034;
+
+    &.disabled {
+      color: #ffffff;
+      background: #b8b8b8;
+    }
   }
 }
 </style>

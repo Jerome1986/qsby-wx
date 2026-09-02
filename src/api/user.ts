@@ -1,4 +1,10 @@
-import type { ApplyManagerResult, ChangerAvatarResult, UserItem } from '@/types/UserItem'
+import type {
+  ApplyManagerResult,
+  AvatarAuditLog,
+  AvatarCheckResult,
+  ChangerAvatarResult,
+  UserItem,
+} from '@/types/UserItem'
 import { request } from '@/utils/http'
 import type { UpdateResult } from '@/types/Gobal'
 import type { ApplyForStatusResult } from '@/types/ApplyFor'
@@ -26,6 +32,22 @@ export const changeAvatarApi = (userId: string, avatarUrl: string) => {
     method: 'POST',
     url: '/user/changeAvatar',
     data: { userId, avatarUrl },
+  })
+}
+
+export const checkAvatarImgApi = (url: string, openid: string) => {
+  return request<AvatarCheckResult>({
+    method: 'GET',
+    url: '/upload/media_check_async',
+    data: { url, openid },
+  })
+}
+
+export const avatarAuditLogGetApi = (openid: string) => {
+  return request<AvatarAuditLog | null>({
+    method: 'GET',
+    url: '/user/media_audit_logs',
+    data: { openid },
   })
 }
 

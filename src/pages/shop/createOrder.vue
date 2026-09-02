@@ -5,22 +5,35 @@ import { safeAreaBottom, getSafeAreaBottom } from '@/utils/system-info'
 import NavTitle from '@/components/NavTitle.vue'
 import Note from '@/components/Note.vue'
 import PayMethod from '@/components/PayMethod.vue'
-import Voucher from '@/components/Voucher.vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { useShopStore, useUserStore } from '@/stores'
-import { shopPorductByOne } from '@/api/store'
+import { shopDetailApi, shopPorductByOne } from '@/api/store'
 import type { ProductItem } from '@/types/store'
 import { vaildateMoible } from '@/utils/validateMobile'
 import type { OrderSubmitParams } from '@/types/OrderItem'
-import { createOrderFree, createQrCode, orderAdd } from '@/api/order'
+import { createQrCode, orderAdd } from '@/api/order'
 
 const userStore = useUserStore()
 const shopStore = useShopStore()
+const inviterCode = ref('')
 // 获取产品信息
 const productData = ref<ProductItem>()
 const productDetailGet = async (productId: string) => {
   const res = await shopPorductByOne(productId)
   productData.value = res.data
+}
+
+const refreshShopInfo = async () => {
+  const shopId = productData.value?.storeId || shopStore.shopInfo?._id
+
+  if (!shopId) {
+    uni.showToast({ icon: 'none', title: '门店信息缺失，请返回重试' })
+    throw new Error('缺少门店ID')
+  }
+
+  const res = await shopDetailApi(shopId)
+  shopStore.setShopInfo(res.data.shopInfo)
+  return res.data.shopInfo
 }
 
 onLoad(async (options) => {
@@ -30,6 +43,7 @@ onLoad(async (options) => {
   if (options?.productId) {
     await productDetailGet(options?.productId as string)
   }
+  inviterCode.value = options?.inviterCode || ''
 })
 
 // 订单联系人
@@ -39,27 +53,16 @@ const contactInfo = ref({
 })
 
 
-// 是否使用代金券抵扣
-const useVoucher = ref(true)
-
 // 抵扣金额
 const discountAmount = computed(() => {
-  const userFee = productData.value?.price || 0
-
   // 非主理人无抵扣
-  if (userStore.profile?.role !== 'manager') {
+  if (!userStore.isValidManager) {
     return 0
   }
 
   const commission = productData.value?.commission || 0
-  const couponBalance = userStore.profile?.couponBalance || 0
 
-  // 代金券和主理人折扣二选一，不可叠加
-  if (useVoucher.value && couponBalance > 0) {
-    // 使用代金券抵扣，最多抵扣原价
-    return Number(Math.min(couponBalance, userFee).toFixed(2))
-  } else if (commission > 0) {
-    // 使用主理人折扣
+  if (commission > 0) {
     return Number(commission.toFixed(2))
   }
 
@@ -86,7 +89,14 @@ const handlePay = async () => {
 
   // 检查用户是否有openid,如果没有就跳转登录
   if (!userStore.profile?.openid) {
-    uni.navigateTo({ url: `/pages/login/login?productId=${productData.value?._id}&proType=shop` })
+    const query = [
+      `productId=${encodeURIComponent(productData.value?._id || '')}`,
+      'proType=shop',
+      inviterCode.value ? `inviterCode=${encodeURIComponent(inviterCode.value)}` : '',
+    ]
+      .filter(Boolean)
+      .join('&')
+    uni.navigateTo({ url: `/pages/login/login?${query}` })
     return
   }
 
@@ -96,63 +106,9 @@ const handlePay = async () => {
 
   // 确定抵扣类型
   const getDiscountType = () => {
-    if (userStore.profile?.role !== 'manager') return 'cash'
-    if (useVoucher.value && (userStore.profile?.couponBalance || 0) > 0) return 'voucher'
+    if (!userStore.isValidManager) return 'none'
     if (commission > 0) return 'commission'
-    return 'cash'
-  }
-
-  // 准备提交参数
-  const params: OrderSubmitParams = {
-    openid: userStore.profile?.openid,
-    orderType: 'shop',
-    productInfo: {
-      productId: productData.value?._id as string,
-      cover: productData.value?.cover as string,
-      title: productData.value?.name as string,
-      time: productData.value?.createdAt as string,
-    },
-    userInfo: {
-      userId: userStore.profile?._id as string,
-      nickname: contactInfo.value.name as string,
-      gender: userStore.profile.gender as string | number,
-      phone: contactInfo.value.phone as string,
-    },
-    shopInfo: {
-      shopId: shopStore.shopInfo?._id as string,
-      shopName: shopStore.shopInfo?.name as string,
-      address: shopStore.shopInfo?.address as string,
-      phone: shopStore.shopInfo?.phone as string,
-      latitude: shopStore.shopInfo?.latitude,
-      longitude: shopStore.shopInfo?.longitude
-    },
-    totalAmount,
-    commission,
-    discountAmount: discountAmount.value,
-    discountType: getDiscountType(),
-    payAmount,
-    description: '酒店房间团购',
-  }
-
-  // 如果是代金券抵扣，且支付金额抵扣完为0就走下单流程，不用支付
-  if (payAmount === 0 && params.discountType === 'voucher') {
-    console.log('提交参数', params)
-
-    try {
-      const res = await createOrderFree(params)
-      console.log('创建订单', res)
-
-      await createQrCode(res.data?.orderId, userStore.profile?.openid as string).catch((err) =>
-        console.error('核销码创建失败', err)
-      )
-      await uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&type=shop`,
-      })
-    } catch (err) {
-      console.error('免支付下单失败', err)
-      uni.showToast({ icon: 'none', title: '下单失败，请重试' })
-    }
-    return
+    return 'none'
   }
 
   uni.showModal({
@@ -160,41 +116,85 @@ const handlePay = async () => {
     content: '确认提交订单，并支付吗',
     showCancel: true,
     confirmColor: '#eed261',
-    success: async ({ confirm, cancel }) => {
+    success: async ({ confirm }) => {
       if (confirm) {
-        console.log('参数', params)
-        //  调用生成订单+支付接口
-        const payRes = await orderAdd(params)
-        console.log('支付返回结果', payRes)
-        // 2.通过后端返回参数、发起前端微信支付
-        wx.requestPayment({
-          timeStamp: payRes.data.timeStamp,
-          nonceStr: payRes.data.nonceStr,
-          package: payRes.data.packageValue,
-          signType: payRes.data.signType,
-          paySign: payRes.data.paySign,
-          async success() {
-            try {
-              const qrCodeRes = await createQrCode(payRes.data.orderId, userStore.profile?.openid as string)
-              console.log(qrCodeRes)
+        try {
+          uni.showLoading({ title: '提交中...', mask: true })
+          const latestShopInfo = await refreshShopInfo()
 
-            } catch (err) {
-              console.error('核销码创建失败', err)
-            }
-            await uni.redirectTo({
-              url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=shop`,
-            })
-          },
-          fail(err) {
-            console.error('支付失败', err)
-            uni.showToast({
-              icon: 'none',
-              title: '取消支付',
-            })
-          },
-        })
+          // 准备提交参数
+          const params: OrderSubmitParams = {
+            openid: userStore.profile?.openid as string,
+            orderType: 'shop',
+            productInfo: {
+              productId: productData.value?._id as string,
+              cover: productData.value?.cover as string,
+              title: productData.value?.name as string,
+              time: productData.value?.createdAt as string,
+            },
+            userInfo: {
+              userId: userStore.profile?._id as string,
+              nickname: contactInfo.value.name as string,
+              gender: userStore.profile?.gender as string | number,
+              phone: contactInfo.value.phone as string,
+            },
+            shopInfo: {
+              shopId: latestShopInfo._id,
+              shopName: latestShopInfo.name,
+              address: latestShopInfo.address,
+              phone: latestShopInfo.managerPhone || latestShopInfo.phone,
+              latitude: latestShopInfo.latitude,
+              longitude: latestShopInfo.longitude,
+            },
+            totalAmount,
+            commission,
+            discountAmount: discountAmount.value,
+            discountType: getDiscountType(),
+            payAmount,
+            description: '酒店房间团购',
+          }
+
+          console.log('参数', params)
+          //  调用生成订单+支付接口
+          const payRes = await orderAdd(params)
+          console.log('支付返回结果', payRes)
+          uni.hideLoading()
+          // 2.通过后端返回参数、发起前端微信支付
+          wx.requestPayment({
+            timeStamp: payRes.data.timeStamp,
+            nonceStr: payRes.data.nonceStr,
+            package: payRes.data.packageValue,
+            signType: payRes.data.signType,
+            paySign: payRes.data.paySign,
+            async success() {
+              try {
+                const qrCodeRes = await createQrCode(payRes.data.orderId, userStore.profile?.openid as string)
+                console.log(qrCodeRes)
+              } catch (err) {
+                console.error('核销码创建失败', err)
+              }
+              await uni.redirectTo({
+                url: `/pagesMember/orderDetail/orderDetail?orderId=${payRes.data.orderId}&type=shop`,
+              })
+            },
+            fail(err) {
+              console.error('支付失败', err)
+              uni.showToast({
+                icon: 'none',
+                title: '取消支付',
+              })
+            },
+          })
+        } catch (err) {
+          uni.hideLoading()
+          uni.showToast({
+            icon: 'none',
+            title: '提交失败，请重试',
+          })
+          console.error(err)
+        }
       }
-    }
+    },
   })
 
 
@@ -233,9 +233,7 @@ const handlePay = async () => {
         <!-- 支付方式 -->
         <PayMethod />
 
-        <!-- 代金券 -->
-        <Voucher v-if="userStore.profile?.role === 'manager'" :amount="userStore.profile?.couponBalance"
-          v-model:useVoucher="useVoucher" />
+        <!-- 代金券功能暂时隐藏 -->
 
         <!-- 预约须知 -->
         <Note :store-id="productData?.storeId" />
@@ -251,7 +249,7 @@ const handlePay = async () => {
           <text class="label">合计</text>
           <text class="value">¥{{ realPayAmount?.toFixed(2) }}</text>
         </view>
-        <view class="row discount" v-if="userStore.profile?.role === 'manager'">
+        <view class="row discount" v-if="userStore.isValidManager">
           <text class="label">主理人折扣</text>
           <text class="value">-¥{{ productData?.commission?.toFixed(2) }}</text>
         </view>

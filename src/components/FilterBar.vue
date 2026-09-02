@@ -1,32 +1,67 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+type FilterTypeItem = {
+  label: string
+  value: string
+}
+
+type FilterCateItem = {
+  _id: string
+  name: string
+}
+
+type FilterSortItem = {
+  _id: string
+  cateName: string
+}
+
 const props = withDefaults(
   defineProps<{
-    cateData?: any[]
-    sortData?: any[]
+    typeData?: FilterTypeItem[]
+    cateData?: FilterCateItem[]
+    sortData?: FilterSortItem[]
+    typeTitle?: string
     title?: string
     isIcon?: boolean
   }>(),
   {
+    typeData: () => [],
     cateData: () => [],
     sortData: () => [],
+    typeTitle: '',
     title: '',
     isIcon: false,
   },
 )
 
-const emits = defineEmits(['selectedCate', 'selectSort'])
+const emits = defineEmits(['selectedType', 'selectedCate', 'selectSort'])
 
-// 选择行程分类
-const currentCateData = ref(props.title ?? props.cateData[0].name)
-const filterCateActive = ref(false)
-const handleFilterCate = () => {
-  filterCateActive.value = !filterCateActive.value
+// 选择内容类型
+const currentTypeData = ref(props.typeTitle || props.typeData[0]?.label || '全部')
+const filterTypeActive = ref(false)
+const handleFilterType = () => {
+  filterTypeActive.value = !filterTypeActive.value
+  filterCateActive.value = false
   filterSortActive.value = false
 }
 
-const selectedCate = (item: any) => {
+const selectedType = (item: FilterTypeItem) => {
+  currentTypeData.value = item.label
+  filterTypeActive.value = false
+  emits('selectedType', item.value)
+}
+
+// 选择行程分类
+const currentCateData = ref(props.title || props.cateData[0]?.name || '全部')
+const filterCateActive = ref(false)
+const handleFilterCate = () => {
+  filterCateActive.value = !filterCateActive.value
+  filterTypeActive.value = false
+  filterSortActive.value = false
+}
+
+const selectedCate = (item: FilterCateItem) => {
   currentCateData.value = item.name
   filterCateActive.value = false
   emits('selectedCate', item._id)
@@ -37,22 +72,27 @@ const currentSortData = ref(props.sortData[0]?.cateName || '全部')
 const filterSortActive = ref(false)
 const handleFilterSort = () => {
   filterSortActive.value = !filterSortActive.value
+  filterTypeActive.value = false
   filterCateActive.value = false
 }
-const selectedSort = (item: any) => {
-  console.log('changeSort', item);
-
+const selectedSort = (item: FilterSortItem) => {
   currentSortData.value = item.cateName
   filterSortActive.value = false
   emits('selectSort', item._id)
 }
-console.log('currentSortData', currentSortData.value);
-
 </script>
 
 <template>
   <view class="filter-wrapper">
     <view class="filter-list">
+      <!--   类型   -->
+      <view class="filter-item" v-if="typeData.length" @tap="handleFilterType">
+        <view class="text">{{ currentTypeData }}</view>
+        <text v-show="!filterTypeActive" class="iconfont icon-laxiatubiao"
+          style="font-size: 16rpx; color: #0b0a0a"></text>
+        <text v-show="filterTypeActive" class="iconfont icon-xiangshangtubiao"
+          style="font-size: 16rpx; color: #0b0a0a"></text>
+      </view>
       <!--   行程   -->
       <view class="filter-item" @tap="handleFilterCate">
         <!--   当前所选值   -->
@@ -75,6 +115,18 @@ console.log('currentSortData', currentSortData.value);
           style="font-size: 16rpx; color: #0b0a0a"></text>
       </view>
     </view>
+    <!--  类型弹框 - 筛选下方弹出   -->
+    <view class="dialog-overlay" v-if="filterTypeActive">
+      <view class="dialog-mask" @tap="filterTypeActive = false"></view>
+      <view class="dialog-box" @tap.stop>
+        <view class="dialog-title">选择类型</view>
+        <view class="dialog-options filterType">
+          <view class="option-item" :class="{ active: item.label === currentTypeData }" v-for="item in typeData"
+            :key="item.value" @tap="selectedType(item)">{{ item.label }}</view>
+        </view>
+      </view>
+    </view>
+
     <!--  分类弹框 - 筛选下方弹出   -->
     <view class="dialog-overlay" v-if="filterCateActive">
       <view class="dialog-mask" @tap="filterCateActive = false"></view>
@@ -202,7 +254,8 @@ console.log('currentSortData', currentSortData.value);
   }
 }
 
-/* 排序为单列，每个选项独立一行 */
+/* 类型、排序为单列，每个选项独立一行 */
+.filterType .option-item,
 .filterSort .option-item {
   text-align: left;
 }

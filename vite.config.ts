@@ -28,9 +28,9 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         api: 'modern',
-        additionalData: `@use "style/base" as *;`,
+        additionalData: `@use "sass:color"; @use "style/base" as *;`,
         includePaths: [resolve(__dirname, 'src')],
-        silenceDeprecations: ['import', 'global-builtin'],
+        silenceDeprecations: ['import', 'global-builtin', 'legacy-js-api'],
       },
     },
   },

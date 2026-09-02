@@ -15,12 +15,13 @@ export const functionData: FeatureItem[] = [
     type: 'wallet',
     iconSize: 60,
   },
-  {
-    icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/voucher.png',
-    text: '代金券',
-    type: 'voucher',
-    iconSize: 60,
-  },
+  // 代金券功能暂时隐藏，保留跳转配置便于后续恢复
+  // {
+  //   icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/voucher.png',
+  //   text: '代金券',
+  //   type: 'voucher',
+  //   iconSize: 60,
+  // },
   {
     icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/score.png',
     text: '我的积分',

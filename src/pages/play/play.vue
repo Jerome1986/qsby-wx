@@ -4,22 +4,15 @@ import FilterBar from '@/components/FilterBar.vue'
 import { ref } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
 import NavTitle from '@/components/NavTitle.vue'
-import { tripListGetAllApi, tripTypeGetAllApi } from '@/api/trip.ts'
-import type { TripTypeItem } from '@/types/Public'
+import { activityListFindAll, activityTypeFindAll } from '@/api/activity'
+import type { ActivityTypeItem } from '@/types/Public'
 import { onLoad } from '@dcloudio/uni-app'
-import type { PlayListItem, SortType } from '@/types/Play'
+import type { SortType } from '@/types/Play'
+import type { ActivityListItem } from '@/types/Activity'
 import { useUserStore } from '@/stores'
 
 const userStore = useUserStore()
-
-// 分类
-const cateData = ref<TripTypeItem[]>([])
-const tripTypeGet = async () => {
-  const res = await tripTypeGetAllApi()
-  console.log('分类', res)
-  cateData.value = res.data
-  cateData.value.push({ _id: 'all', name: '全部' })
-}
+const activityBanner = 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/activity/fabuhd2.png'
 
 // 排序
 const sortData = ref([
@@ -30,100 +23,111 @@ const sortData = ref([
 ])
 
 // 筛选默认值
-const cateId = ref('all')
-const sortId = ref<SortType>('composite')
+const activityCateData = ref<ActivityTypeItem[]>([])
+const activityCateId = ref('all')
+const activitySortId = ref<SortType>('composite')
+const activityList = ref<ActivityListItem[]>([])
+const activityPageNum = ref(1)
+const activityPageSize = ref(10)
+const activityFinish = ref(false)
+const activityLoading = ref(false)
+const activityHasFetched = ref(false)
 
-//  根据分类和排序获取行程列表
-const pageNum = ref(1)
-const pageSize = ref(6)
-const finish = ref(false)
-const loading = ref(false)
-// 行程列表类型
-const tripList = ref<PlayListItem[]>([])
+const activityCateDataGet = async () => {
+  const res = await activityTypeFindAll()
+  console.log('活动分类', res)
+  activityCateData.value = [{ _id: 'all', name: '全部' }, ...res.data]
+}
 
-const tripListGet = async (tripTypeId: string, sortType: SortType) => {
-  if (finish.value || loading.value) return
-  loading.value = true
+const activityListGet = async (activityTypeId: string, sortType: SortType) => {
+  if (activityFinish.value || activityLoading.value) return
+  activityLoading.value = true
   try {
-    const res = await tripListGetAllApi(tripTypeId, sortType, pageNum.value, pageSize.value)
-    tripList.value.push(...res.data.list)
-    if (pageNum.value < res.data.totalPage) {
-      pageNum.value++
+    const res = await activityListFindAll(
+      activityTypeId,
+      sortType,
+      activityPageNum.value,
+      activityPageSize.value,
+    )
+    activityList.value.push(...res.data.list)
+    if (activityPageNum.value < res.data.totalPage) {
+      activityPageNum.value++
     } else {
-      finish.value = true
+      activityFinish.value = true
     }
   } finally {
-    loading.value = false
+    activityLoading.value = false
+    activityHasFetched.value = true
   }
 }
 
-// 重置列表并加载（切换分类/排序时调用）
-const resetAndFetch = (tripTypeId: string, sortType: SortType) => {
-  tripList.value = []
-  pageNum.value = 1
-  finish.value = false
-  tripListGet(tripTypeId, sortType)
+const resetActivityAndFetch = (activityTypeId: string, sortType: SortType) => {
+  activityList.value = []
+  activityPageNum.value = 1
+  activityFinish.value = false
+  activityHasFetched.value = false
+  activityListGet(activityTypeId, sortType)
 }
 
 onLoad(() => {
-  tripTypeGet()
-  resetAndFetch(cateId.value, sortId.value)
+  activityCateDataGet()
+  resetActivityAndFetch(activityCateId.value, activitySortId.value)
 })
 
 // 加载更多（scrolltolower 可能连续触发，需加 loading 锁）
 const handleMore = () => {
-  if (!finish.value) tripListGet(cateId.value, sortId.value)
+  if (!activityFinish.value) activityListGet(activityCateId.value, activitySortId.value)
 }
 
-// 处理分类选择
-const handleSelectedCate = (currentCateId: string) => {
-  cateId.value = currentCateId
-  resetAndFetch(currentCateId, sortId.value)
+const handleSelectedActivityCate = (currentCateId: string) => {
+  activityCateId.value = currentCateId
+  resetActivityAndFetch(currentCateId, activitySortId.value)
 }
 
-// 处理排序选择
-const handleSelectedSort = (currentSortId: SortType) => {
-  sortId.value = currentSortId
-  resetAndFetch(cateId.value, currentSortId)
+const handleSelectedActivitySort = (currentSortId: SortType) => {
+  activitySortId.value = currentSortId
+  resetActivityAndFetch(activityCateId.value, currentSortId)
 }
 
-// 发布行程
+// 发布活动
 const handleSend = () => {
   // 验证身份
-  if (userStore.profile?.role === 'user' || !userStore.profile) {
+  const isAdmin = userStore.profile?.role === 'admin'
+  if (!isAdmin && !userStore.isValidManager) {
     uni.showToast({ icon: 'none', title: '请先申请主理人' })
     return
   }
   uni.navigateTo({
-    url: `/pages/public/public?sendType=trip`,
+    url: '/pages/public/public',
   })
 }
 </script>
 <template>
   <view class="play">
-    <NavHead title="趣哪•游 " :show-back="true"></NavHead>
-    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false" @scrolltolower="handleMore">
+    <NavHead title="同城趣玩 " :show-back="true"></NavHead>
+    <view class="content">
       <!--  发布  -->
       <view class="banner" @tap="handleSend">
-        <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/play/fbxc.jpg"
-          mode="aspectFill">
+        <image class="img" :src="activityBanner" mode="aspectFill">
         </image>
       </view>
       <!--  title    -->
       <view class="title">
-        <NavTitle title="发现有趣好玩的行程"></NavTitle>
+        <NavTitle title="发现同城好玩的活动"></NavTitle>
       </view>
       <!--   筛选   -->
       <view class="filter">
-        <FilterBar :cateData="cateData" :sortData="sortData" title="所有行程" @selected-cate="handleSelectedCate"
-          @select-sort="handleSelectedSort"></FilterBar>
+        <FilterBar :cateData="activityCateData" :sortData="sortData" title="所有活动"
+          @selected-cate="handleSelectedActivityCate" @select-sort="handleSelectedActivitySort"></FilterBar>
       </view>
-      <!--   行程列表   -->
-      <view class="list" v-if="tripList.length > 0">
-        <ProductCard :list="tripList" pro-type="trip"></ProductCard>
+    </view>
+    <scroll-view class="list-scroll" :scroll-y="true" :enhanced="true" :show-scrollbar="false"
+      @scrolltolower="handleMore">
+      <!--   活动列表   -->
+      <view class="list" v-if="activityList.length">
+        <ProductCard :list="activityList" pro-type="activity"></ProductCard>
       </view>
-      <!--   空状态   -->
-      <view class="empty" v-else>
+      <view class="empty" v-else-if="activityHasFetched && !activityLoading">
         <image class="empty-img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
           mode="widthFix"></image>
         <text class="empty-text">暂无数据</text>
@@ -144,7 +148,7 @@ const handleSend = () => {
 
 /* 内容区域 */
 .content {
-  flex: 1;
+  flex-shrink: 0;
 
   /* 顶部横幅 */
   .banner {
@@ -167,8 +171,15 @@ const handleSend = () => {
     color: $qs-font-title;
     font-weight: bold;
   }
+}
 
-  /* 行程列表 */
+/* 列表滚动区域 */
+.list-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+
+  /* 活动列表 */
   .list {
     padding: 0 24rpx;
     margin-top: 24rpx;

@@ -5,6 +5,8 @@ export interface ScoreProduct {
   name: string
   /** 封面图 */
   cover: string
+  /** 封面详情简介 */
+  coverDescription?: string
   /** 详情图 */
   images: string[]
   /** 分类ID */
@@ -13,6 +15,8 @@ export interface ScoreProduct {
   categoryName: string
   /** 积分价格 */
   scorePrice: number
+  /** 可兑换库存，0 表示已兑完 */
+  stock: number
   /** 商品状态 */
   status: 'active' | 'disabled'
   /** 创建时间 */

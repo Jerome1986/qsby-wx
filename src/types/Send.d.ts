@@ -17,6 +17,10 @@ export interface SendListItem {
   userId: string
   cover: string
   title: string
+  /** 活动分类 ID */
+  type?: string
+  /** 活动分类名称 */
+  typeName?: string
   /** 行程/活动时间，项目无此字段 */
   time?: string
   /** 地点/基地名称 */

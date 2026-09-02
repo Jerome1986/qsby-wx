@@ -13,24 +13,36 @@ const scoreOrder = ref<ScoreOrder[]>([])
 const finish = ref(false)
 const pageNum = ref(1)
 const pageSize = ref(10)
+const loading = ref(false)
+const hasFetched = ref(false)
 
 const reset = () => {
   pageNum.value = 1
   scoreOrder.value = []
   finish.value = false
+  hasFetched.value = false
 }
 
 const socreOrderGet = async (tab: string) => {
-  if (finish.value) return
-  const res = await scoreOrderFindAll(tab, pageNum.value, pageSize.value)
-  console.log('list', res.data)
+  if (finish.value || loading.value) return
+  loading.value = true
+  try {
+    const res = await scoreOrderFindAll(tab, pageNum.value, pageSize.value)
+    console.log('list', res.data)
 
-  scoreOrder.value.push(...res.data.list)
+    scoreOrder.value.push(...res.data.list)
 
-  if (pageNum.value < res.data.totalPage) {
-    pageNum.value++
-  } else {
-    finish.value = true
+    if (pageNum.value < res.data.totalPage) {
+      pageNum.value++
+    } else {
+      finish.value = true
+    }
+  } catch (err) {
+    console.error('获取积分订单失败', err)
+    uni.showToast({ icon: 'none', title: '获取订单失败' })
+  } finally {
+    loading.value = false
+    hasFetched.value = true
   }
 }
 
@@ -43,6 +55,16 @@ const tabList = ref([
 ])
 const activeTab = ref('all')
 const activeTabIndex = ref(0)
+
+const handleOrderUpdated = (updatedOrder: ScoreOrder) => {
+  const index = scoreOrder.value.findIndex((order) => order._id === updatedOrder._id)
+  if (index < 0) return
+  if (activeTab.value !== 'all' && updatedOrder.status !== activeTab.value) {
+    scoreOrder.value.splice(index, 1)
+    return
+  }
+  scoreOrder.value.splice(index, 1, { ...scoreOrder.value[index], ...updatedOrder })
+}
 const changeTab = (index: number, tab: string) => {
   console.log(index, tab)
   reset()
@@ -73,8 +95,22 @@ const handleScroll = () => {
     </view>
     <!-- 订单列表   -->
     <scroll-view class="list" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true" :show-scrollbar="false">
-      <view style="padding:0 24rpx;">
-        <OrderItem :list-data="scoreOrder" :fields="fieldsScoreOrder"></OrderItem>
+      <view class="list-content">
+        <view class="loading" v-if="loading && scoreOrder.length === 0">加载中...</view>
+        <view class="empty" v-else-if="hasFetched && scoreOrder.length === 0">
+          <image
+            class="empty-img"
+            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png"
+            mode="aspectFit"
+          ></image>
+          <text class="empty-text">暂无积分订单</text>
+        </view>
+        <OrderItem
+          v-else
+          :list-data="scoreOrder"
+          :fields="fieldsScoreOrder"
+          @order-updated="handleOrderUpdated"
+        ></OrderItem>
         <view style="height: 40rpx;"></view>
       </view>
     </scroll-view>
@@ -125,5 +161,35 @@ const handleScroll = () => {
 
 .list {
   flex: 1;
+}
+
+.list-content {
+  padding: 0 24rpx;
+}
+
+.loading {
+  padding: 120rpx 0;
+  text-align: center;
+  font-size: 28rpx;
+  color: $qs-font-dec;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+
+  .empty-img {
+    width: 240rpx;
+    height: 240rpx;
+    margin-bottom: 20rpx;
+  }
+
+  .empty-text {
+    font-size: 28rpx;
+    color: $qs-font-dec2;
+  }
 }
 </style>

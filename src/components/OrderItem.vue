@@ -12,8 +12,15 @@ const goDetail = (orderId: string) => {
   console.log('goDetail')
   uni.navigateTo({
     url: `/pagesMember/myScore/exchange?orderId=${orderId}`,
+    events: {
+      'order-updated': (order: ScoreOrder) => emit('order-updated', order),
+    },
   })
 }
+
+const emit = defineEmits<{
+  'order-updated': [order: ScoreOrder]
+}>()
 </script>
 
 <template>

@@ -1,7 +1,27 @@
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { useUserStore } from '@/stores'
 
 const userStore = useUserStore()
+const avatarDisplayUrl = computed(() => {
+  return userStore.profile?.avatarReviewStatus === 'pending'
+    ? userStore.profile?.avatarReviewUrl || userStore.profile?.avatarUrl
+    : userStore.profile?.avatarUrl
+})
+const managerEndTimeText = computed(() => {
+  if (!userStore.isManager) return '普通用户'
+  if (userStore.managerExpired) return '主理人已过期'
+
+  const endTime = userStore.profile?.managerEndTime
+  if (endTime == null) return '主理人已过期'
+  const date = new Date(endTime)
+  if (Number.isNaN(date.getTime())) return '主理人已过期'
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}.${month}.${day}到期`
+})
 
 console.log('UserInfo组件加载，用户状态:', userStore.profile)
 
@@ -48,9 +68,11 @@ const handleEditInfo = () => {
     <!-- 头像 -->
     <view class="avatarInfo" @tap="handleEditInfo">
       <view class="avatarUrl">
-        <image
-          :src="userStore.profile.avatarUrl ?? 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
-          mode="aspectFit" />
+        <image :src="avatarDisplayUrl ?? 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
+          mode="aspectFill" />
+        <view class="avatar-review-mask" v-if="userStore.profile?.avatarReviewStatus === 'pending'">
+          <text>审核中</text>
+        </view>
       </view>
       <view class="editInfo">编辑资料</view>
     </view>
@@ -58,11 +80,10 @@ const handleEditInfo = () => {
     <view class="info">
       <view class="info-1">
         <view class="nickname">{{ userStore.profile?.nickname }}</view>
-        <view class="timeOut" v-if="userStore.profile?.role === 'manager'">2026.12.12到期</view>
-        <view class="timeOut" v-else>普通用户</view>
+        <view class="timeOut">{{ managerEndTimeText }}</view>
       </view>
       <!-- 主理人标识 -->
-      <view class="role" v-if="userStore.profile?.role === 'manager'">
+      <view class="role" v-if="userStore.isValidManager">
         <image class="role-bg" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/roleBg.png"
           mode="aspectFit" />
       </view>
@@ -85,10 +106,26 @@ const handleEditInfo = () => {
       height: 106rpx;
       border-radius: 50%;
       overflow: hidden;
+      position: relative;
 
       image {
         width: 100%;
         height: 100%;
+      }
+
+      .avatar-review-mask {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.46);
+        color: #ffffff;
+        font-size: 20rpx;
+        font-weight: 500;
       }
     }
 

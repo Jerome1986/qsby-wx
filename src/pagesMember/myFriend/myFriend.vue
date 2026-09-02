@@ -3,7 +3,7 @@ import NavTitle from '@/components/NavTitle.vue'
 import NoData from '@/components/NoData.vue'
 import NavHead from '@/components/NavHead.vue'
 import { useUserStore } from '@/stores'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import type { FriendData } from '@/types/Friend'
 import { friendListApi } from '@/api/friend'
 import { onLoad } from '@dcloudio/uni-app'
@@ -20,7 +20,7 @@ const finish = ref(false)
 const friendDataGet = async (userId: string) => {
   if (finish.value) return
   const res = await friendListApi(userId, pageNum.value, pageSize.value)
-  console.log('好友列表', res)
+  console.log('好友列表', res.data)
 
   friendData.value.push(...res.data.list)
   totalFriend.value = res.data.totalFriend
@@ -31,11 +31,6 @@ const friendDataGet = async (userId: string) => {
   }
 }
 
-// 团队消费金额
-const teamTotal = computed(() => {
-  return friendData.value.reduce((sum, item) => sum + item.totalConsumption, 0)
-})
-
 const handleScroll = () => {
   console.log('触底')
   if (finish.value) return
@@ -45,7 +40,7 @@ const handleScroll = () => {
 // 跳转好友详情
 const handleDetail = (item: FriendData) => {
   uni.navigateTo({
-    url: `/pagesMember/myFriend/friendDetail?userId=${item._id}&totalConsumption=${item.totalConsumption}`,
+    url: `/pagesMember/myFriend/friendDetail?userId=${item._id}`,
   })
 }
 
@@ -54,8 +49,8 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
 <template>
   <view class="myFriend">
     <NavHead title="我的好友" :show-back="true"></NavHead>
+    <!-- 顶部邀请统计区域暂不显示
     <view class="head">
-      <!-- 邀请人数  -->
       <view class="item">
         <image class="img" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/friend/person.png"
           mode="aspectFit"></image>
@@ -64,7 +59,6 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
           <view class="value">{{ totalFriend }}</view>
         </view>
       </view>
-      <!-- 团队消费  -->
       <view class="item">
         <image class="img" style="width: 93rpx; height: 99rpx"
           src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/friend/box.png" mode="aspectFit"></image>
@@ -74,6 +68,7 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
         </view>
       </view>
     </view>
+    -->
     <!--  好友列表  -->
     <scroll-view class="content" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true"
       :show-scrollbar="false">
@@ -162,10 +157,11 @@ onLoad(() => friendDataGet(userStore.profile?._id as string))
 
   .content {
     flex: 1;
+    min-height: 0;
+    height: 0;
     padding: 28rpx;
     margin-top: 20rpx;
     width: 100%;
-    height: calc(100% - 188rpx);
     background-color: $qs-card-bg;
     border-radius: 30rpx;
     @include customShadow();

@@ -13,6 +13,10 @@ const handleNav = (val: FeatureType) => {
     uni.showToast({ icon: 'none', title: '请登录后使用', duration: 1000, mask: true })
     return
   }
+  if ((val === 'friend' || val === 'wallet') && !userStore.isValidManager) {
+    uni.showToast({ icon: 'none', title: '请先申请主理人' })
+    return
+  }
   // 跳转
   functionJumpMap[val]()
 }

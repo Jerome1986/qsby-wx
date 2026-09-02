@@ -1,10 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { homeData, HomeJump, type NavType } from '@/pages/home/data.ts'
 import { getNavBarHeight, navBarHeight } from '@/utils/system-info.ts'
+import { useUserStore } from '@/stores'
 
-const shareInfo = ref()
+const userStore = useUserStore()
+const visibleHomeData = computed(() => homeData.filter((item) => item.type !== 'interesting'))
+
+const getInviterCode = () => userStore.profile?.referralCode
+
+const getInviteLoginPath = () => {
+  const inviterCode = getInviterCode()
+  return inviterCode
+    ? `/pages/login/login?inviterCode=${encodeURIComponent(inviterCode)}`
+    : '/pages/login/login'
+}
+
+const getInviteTimelineQuery = () => {
+  const inviterCode = getInviterCode()
+  return inviterCode ? `inviterCode=${encodeURIComponent(inviterCode)}` : ''
+}
+
+const getHomeTitle = (item: (typeof homeData)[number]) => {
+  return item.type === 'play' ? '同城趣玩' : item.title
+}
 
 // 跳转页面
 const handleGo = (val: NavType) => {
@@ -12,11 +32,18 @@ const handleGo = (val: NavType) => {
 }
 
 onShareAppMessage(() => {
-  return shareInfo.value
+  return {
+    title: '千宿百院',
+    path: getInviteLoginPath(),
+  }
 })
 
 onShareTimeline(() => {
-  return shareInfo.value
+  const query = getInviteTimelineQuery()
+  return {
+    title: '千宿百院',
+    ...(query ? { query } : {}),
+  }
 })
 
 onLoad(() =>
@@ -38,13 +65,19 @@ onLoad(() =>
     <view class="main">
       <view class="head" :style="{ height: navBarHeight + 'px' }"></view>
       <view class="nav-list">
-        <view class="nav-item" v-for="(item, index) in homeData" :key="index" @tap="handleGo(item.type)">
+        <view
+          class="nav-item"
+          :class="`nav-item--${item.type}`"
+          v-for="(item, index) in visibleHomeData"
+          :key="index"
+          @tap="handleGo(item.type)"
+        >
           <view class="icon">
             <image :src="item.icon"></image>
           </view>
           <view class="text">
             <view class="dec">{{ item.dec }}</view>
-            <view class="title">{{ item.title }}</view>
+            <view class="title">{{ getHomeTitle(item) }}</view>
           </view>
         </view>
       </view>
@@ -89,17 +122,37 @@ onLoad(() =>
 
   .nav-item {
     display: flex;
-    justify-content: space-evenly;
+    box-sizing: border-box;
+    justify-content: center;
     align-items: center;
+    gap: 16rpx;
     width: calc((100% - 20rpx) / 2);
     height: 184rpx;
+    padding: 20rpx 18rpx;
     background-color: rgba(255, 255, 255, 0.8);
     border-radius: 20rpx;
 
+    &--city {
+      width: 100%;
+      height: 196rpx;
+      gap: 28rpx;
+      background-color: rgba(255, 255, 255, 0.86);
+
+      .icon {
+        width: 144rpx;
+        height: 144rpx;
+      }
+
+      .text {
+        min-width: 180rpx;
+      }
+    }
+
     /*图标*/
     .icon {
-      width: 136rpx;
-      height: 136rpx;
+      flex-shrink: 0;
+      width: 128rpx;
+      height: 128rpx;
       overflow: hidden;
 
       image {
@@ -110,6 +163,8 @@ onLoad(() =>
 
     /*文字*/
     .text {
+      flex-shrink: 0;
+      min-width: 112rpx;
       text-align: center;
 
       .dec {

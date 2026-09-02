@@ -39,6 +39,15 @@
       }
     },
     {
+      "path": "pages/agreement/agreement",
+      "style": {
+        "navigationBarTitleText": "协议详情",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
       "path": "pages/play/play",
       "style": {
         "navigationBarTitleText": "趣哪•游",
@@ -66,9 +75,27 @@
       }
     },
     {
+      "path": "pages/public/requirementEdit",
+      "style": {
+        "navigationBarTitleText": "填写活动需求",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
       "path": "pages/activity/activity",
       "style": {
         "navigationBarTitleText": "同城活动",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/activity/publishPlan",
+      "style": {
+        "navigationBarTitleText": "民宿博主计划",
         "enablePullDownRefresh": false,
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
@@ -192,18 +219,27 @@
       }
     },
     {
-      "path": "pages/test/test",
+      "path": "pages/shop/scenicList",
       "style": {
-        "navigationBarTitleText": "测试"
-      }
-    },
-    {
-      "path": "pages/shop/checkIn",
-      "style": {
-        "navigationBarTitleText": "办理入住",
+        "navigationBarTitleText": "景区列表",
         "enablePullDownRefresh": false,
         "navigationBarBackgroundColor": "#fff4b9",
         "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/shop/scenicDetail",
+      "style": {
+        "navigationBarTitleText": "景区详情",
+        "enablePullDownRefresh": false,
+        "navigationBarBackgroundColor": "#fff4b9",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/test/test",
+      "style": {
+        "navigationBarTitleText": "测试"
       }
     }
   ],
@@ -366,7 +402,7 @@
         {
           "path": "publishManagement/publishManagement",
           "style": {
-            "navigationBarTitleText": "发布管理",
+            "navigationBarTitleText": "活动管理",
             "enablePullDownRefresh": false,
             "navigationBarBackgroundColor": "#fff4b9",
             "navigationStyle": "custom"
@@ -382,18 +418,27 @@
           }
         },
         {
-          "path": "storeManage/storeOrderDetail",
+          "path": "publishManagement/verificationList",
           "style": {
-            "navigationBarTitleText": "门店订单详情",
+            "navigationBarTitleText": "核销列表",
             "enablePullDownRefresh": false,
             "navigationBarBackgroundColor": "#fff4b9",
             "navigationStyle": "custom"
           }
         },
         {
-          "path": "storeManage/storeExternalCheckInDetail",
+          "path": "publishManagement/verificationOrderDetail",
           "style": {
-            "navigationBarTitleText": "外部入住详情",
+            "navigationBarTitleText": "核销订单详情",
+            "enablePullDownRefresh": false,
+            "navigationBarBackgroundColor": "#fff4b9",
+            "navigationStyle": "custom"
+          }
+        },
+        {
+          "path": "storeManage/storeOrderDetail",
+          "style": {
+            "navigationBarTitleText": "门店订单详情",
             "enablePullDownRefresh": false,
             "navigationBarBackgroundColor": "#fff4b9",
             "navigationStyle": "custom"

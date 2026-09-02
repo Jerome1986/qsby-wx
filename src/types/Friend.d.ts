@@ -21,9 +21,21 @@ export interface FriendListPageResult {
 // 单个好友详情返回类型
 export interface FriendDetailOrderResult {
   userInfo: UserItem
+  /** 当前查询月份，格式为 YYYY-MM */
+  time: string
   list: OrderItem[]
-  total: number
-  pageNum: number
-  pageSize: number
-  totalPage: number
+  summary: {
+    /** 当前月份已核销订单数量 */
+    totalVerifiedCount: number
+    /** 当前月份已核销订单消费总额 */
+    totalConsumption: number
+    /** 当前页订单消费小计 */
+    pageConsumption: number
+  }
+  pagination: {
+    pageNum: number
+    pageSize: number
+    total: number
+    totalPage: number
+  }
 }

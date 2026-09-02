@@ -169,6 +169,8 @@ onLoad((options) => {
     color: $qs-font-dec;
     line-height: 1.85;
     text-align: justify;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     margin-bottom: 24rpx;
 
     &:last-child {

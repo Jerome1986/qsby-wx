@@ -1,5 +1,6 @@
 import type {
   OrderSubmitParams,
+  OrderType,
   PageOrderStatus,
   PageOrderType,
   OrderPage,
@@ -8,10 +9,11 @@ import type {
   CreateQrCodeResult,
   CreateOrderFreeResult,
   WriteOrderResult,
+  StorePerformanceParams,
+  StorePerformanceSummary,
 } from '@/types/OrderItem'
 import type { ScoreOrder, ScoreOrderPage } from '@/types/Score'
 import type { PayResult } from '@/types/Pay'
-import type { UserRole } from '@/types/UserItem'
 import { request } from '@/utils/http'
 
 /**
@@ -44,12 +46,62 @@ export const orderPay = (orderId: string, openid: string) => {
  * @param shopId - 门店ID
  * @param pageNum - 页码
  * @param pageSize - 条数
+ * @param orderStatus - 订单状态
+ * @param startDate - 开始日期（YYYY-MM-DD）
+ * @param endDate - 结束日期（YYYY-MM-DD）
  */
-export const orderFindByShop = (shopId: string, pageNum: number, pageSize: number) => {
+export const orderFindByShop = (
+  shopId: string,
+  pageNum: number,
+  pageSize: number,
+  orderStatus?: PageOrderStatus,
+  startDate?: string,
+  endDate?: string,
+) => {
   return request<OrderPage>({
     method: 'GET',
     url: '/order/byShop',
-    data: { shopId, pageNum, pageSize },
+    data: {
+      shopId,
+      pageNum,
+      pageSize,
+      orderStatus,
+      ...(startDate && endDate ? { startDate, endDate } : {}),
+    },
+  })
+}
+
+/**
+ * 获取门店经营概览
+ * 页面暂时使用模拟数据，后端接口完成后接入此方法
+ */
+export const orderShopPerformance = (params: StorePerformanceParams) => {
+  return request<StorePerformanceSummary>({
+    method: 'GET',
+    url: '/order/shopPerformance',
+    data: params,
+  })
+}
+
+/**
+ * 按产品查询订单（发布管理核销列表）
+ * @param productId - 产品ID
+ * @param orderType - 订单类型
+ * @param orderStatus - 订单状态
+ * @param pageNum - 页码
+ * @param pageSize - 条数
+ */
+export const orderFindByProduct = (
+  productId: string,
+  orderType: OrderType,
+  orderStatus: PageOrderStatus,
+  pageNum: number,
+  pageSize: number,
+) => {
+  return request<OrderPage>({
+    method: 'GET',
+    url: '/order/byProduct',
+    data: { productId, orderType, orderStatus, pageNum, pageSize },
   })
 }
 
@@ -60,6 +112,7 @@ export const orderFindByShop = (shopId: string, pageNum: number, pageSize: numbe
  * @param openid - 用户微信ID
  * @param pageNum - 页码
  * @param pageSize - 条数
+ * @param activityTypeId - 活动分类ID
  */
 export const orderFindAll = (
   orderType: PageOrderType,
@@ -67,11 +120,19 @@ export const orderFindAll = (
   openid: string,
   pageNum: number,
   pageSize: number,
+  activityTypeId?: string,
 ) => {
   return request<OrderPage>({
     method: 'GET',
     url: '/order/filterOrder',
-    data: { orderType, orderStatus, openid, pageNum, pageSize },
+    data: {
+      orderType,
+      orderStatus,
+      openid,
+      pageNum,
+      pageSize,
+      ...(activityTypeId ? { activityTypeId } : {}),
+    },
   })
 }
 
@@ -98,6 +159,29 @@ export const orderCancel = (orderId: string, openid: string) => {
     url: '/order/cancel',
     data: { orderId, openid },
   })
+}
+
+/**
+ * 申请订单退款
+ * @param outTradeNo - 业务订单号
+ * @param openid - 当前用户微信ID
+ */
+export interface OrderRefundResult {
+  code: number
+  message: string
+  data?: {
+    outTradeNo: string
+    outRefundNo: string
+    status: 'refunding' | 'refunded'
+  }
+}
+
+export const orderRefund = (outTradeNo: string, openid: string) => {
+  return request<never>({
+    method: 'POST',
+    url: '/order/refund',
+    data: { out_trade_no: outTradeNo, openid },
+  }) as unknown as Promise<OrderRefundResult>
 }
 
 /**
@@ -129,17 +213,19 @@ export const createOrderFree = (params: OrderSubmitParams) => {
  * 核销订单
  * @param verifyCode
  */
-export const writeOrder = (verifyCode: string, publicUserId: string, role: UserRole) => {
+export const writeOrder = (verifyCode: string, publicUserId: string) => {
   return request<WriteOrderResult>({
     method: 'POST',
     url: '/order/write',
-    data: { verifyCode, publicUserId, role },
+    data: { verifyCode, publicUserId },
   })
 }
 
 // 积分商品参数
 export interface ScoreOrderParam {
   openid: string
+  /** 积分商品ID，用于服务端校验并扣减库存 */
+  productId: string
   productName: string
   productCover: string
   payScore: number

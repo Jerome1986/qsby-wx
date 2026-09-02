@@ -62,6 +62,22 @@ export const TIPS_TYPE_MAP: Record<TipsType, string> = {
   project: '有趣的项目温馨提示',
 }
 
+/** 软文内容块 */
+export interface PublishPlanBlock {
+  type: 'text' | 'image' | string
+  text: string
+  image: string
+}
+
+/** 民宿博主计划软文内容 */
+export interface PublishPlanData {
+  _id?: string
+  title: string
+  blocks: PublishPlanBlock[]
+  createdAt?: string
+  updatedAt?: string
+}
+
 /** 预约须知单项（标题+内容） */
 export interface BookingNoteItem {
   title: string

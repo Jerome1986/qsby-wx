@@ -3,7 +3,7 @@ import NavHead from '@/components/NavHead.vue'
 import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
 import { getSafeAreaBottom, safeAreaBottom } from '@/utils/system-info.ts'
 import { useUserStore } from '@/stores'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import OrganizerInfo from '@/components/OrganizerInfo.vue'
 import { tripDetailGetApi } from '@/api/trip.ts'
 import type { PlayListItem } from '@/types/Play'
@@ -15,16 +15,48 @@ import type { ActivityListItem } from '@/types/Activity'
 import { openLocation } from '@/composables/openLocation'
 import { isSignUp, isVerify } from '@/composables/isVerifySignUp'
 import type { OrderType } from '@/types/OrderItem'
-import ProductDetailModal from './ProductDetailModal.vue'
-import type { PosterCanvasData } from './posterCanvasDraw'
-import { posterCodeApi } from '@/api/poster'
+// 海报生成功能暂时下线，恢复时同步恢复按钮、弹窗和生成逻辑。
+// import ProductDetailModal from './ProductDetailModal.vue'
+// import type { PosterCanvasData } from './posterCanvasDraw'
+// import { posterCodeApi } from '@/api/poster'
 
 // 页面标题
 const title = ref('详情')
 const productId = ref<string>('')
 const proType = ref('')
+const sourceShareUserId = ref('')
 
 const userStore = useUserStore()
+
+const buildShareQuery = (query: Record<string, string | undefined>) => {
+  return Object.entries(query)
+    .filter(([, value]) => value)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`)
+    .join('&')
+}
+
+const getInviterCode = () => userStore.profile?.referralCode
+const getShareUserId = () => userStore.profile?._id
+
+const getLoginSharePath = () => {
+  const query = buildShareQuery({
+    inviterCode: getInviterCode(),
+    shareUserId: getShareUserId(),
+    productId: productId.value,
+    proType: proType.value,
+  })
+  return query ? `/pages/login/login?${query}` : '/pages/login/login'
+}
+
+const getProductDetailSharePath = () => {
+  const query = buildShareQuery({
+    productId: productId.value,
+    proType: proType.value,
+    inviterCode: getInviterCode(),
+    shareUserId: getShareUserId(),
+  })
+  return query ? `/pages/productDetail/productDetail?${query}` : '/pages/productDetail/productDetail'
+}
 
 // 获取详情
 const detailData = ref<PlayListItem | ActivityListItem>({} as PlayListItem | ActivityListItem)
@@ -58,8 +90,18 @@ const handleSign = () => {
     uni.showToast({ icon: 'none', title: '当前行程人数已满', mask: true })
     return
   }
+  const query = buildShareQuery({
+    productId: detailData.value._id as string,
+    proType: proType.value,
+    shareUserId: sourceShareUserId.value,
+  })
+  const url = `/pages/signUp/signUp?${query}`
+  console.log('[shareUserId][productDetail -> signUp]', {
+    shareUserId: sourceShareUserId.value,
+    url,
+  })
   uni.navigateTo({
-    url: `/pages/signUp/signUp?productId=${detailData.value._id}&proType=${proType.value}`,
+    url,
   })
 }
 
@@ -70,6 +112,12 @@ onLoad(async (options: any) => {
     title.value = options.title
     productId.value = options.productId
     proType.value = options.proType
+    sourceShareUserId.value = options.shareUserId || ''
+    console.log('[shareUserId][productDetail received]', {
+      optionValue: options.shareUserId,
+      storedValue: sourceShareUserId.value,
+      options,
+    })
     await detailGet(productId.value, proType.value)
     await isSignUp(options?.productId, proType.value as OrderType, userStore.profile?._id as string)
   }
@@ -124,54 +172,66 @@ const handleCallPhone = () => {
 }
 
 // 生成海报
-const showPoster = ref(false)
-const qrCodeUrl = ref('')
-const handleGeneratePoster = async () => {
-  const res = await posterCodeApi(
-    userStore.profile?.referralCode as string,
-    detailData.value._id as string,
-    proType.value
-  )
-  if (res.data.qrCodeUrl) {
-    qrCodeUrl.value = res.data.qrCodeUrl
-    showPoster.value = true
-    console.log(res.data.qrCodeUrl)
-  } else {
-    uni.showToast({ icon: 'none', title: '请稍微再试' })
-  }
-}
+// const showPoster = ref(false)
+// const qrCodeUrl = ref('')
+// const handleGeneratePoster = async () => {
+//   const res = await posterCodeApi(
+//     userStore.profile?.referralCode as string,
+//     detailData.value._id as string,
+//     proType.value
+//   )
+//   if (res.data.qrCodeUrl) {
+//     qrCodeUrl.value = res.data.qrCodeUrl
+//     showPoster.value = true
+//     console.log(res.data.qrCodeUrl)
+//   } else {
+//     uni.showToast({ icon: 'none', title: '请稍微再试' })
+//   }
+// }
 
-const defaultAvatar =
-  'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'
+// const defaultAvatar =
+//   'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'
 
-/** 弹窗与 Canvas 海报共用数据 */
-const posterData = computed<PosterCanvasData>(() => {
-  const d = detailData.value
-  const addr = [d.event_address, d.address_name].filter(Boolean).join(' ')
-  return {
-    avatarUrl: (userStore.profile?.avatarUrl as string) || defaultAvatar,
-    nickname: (userStore.profile?.nickname as string) || '游客',
-    coverUrl: (d.cover as string) || '',
-    title: (d.title as string) || '',
-    address: addr || '—',
-    priceText: d.userFee != null ? `￥${d.userFee}` : '—',
-    qrCodeUrl: qrCodeUrl.value || undefined,
-  }
-})
+// 弹窗与 Canvas 海报共用数据
+// const posterData = computed<PosterCanvasData>(() => {
+//   const d = detailData.value
+//   const addr = [d.event_address, d.address_name].filter(Boolean).join(' ')
+//   return {
+//     avatarUrl: (userStore.profile?.avatarUrl as string) || defaultAvatar,
+//     nickname: (userStore.profile?.nickname as string) || '游客',
+//     coverUrl: (d.cover as string) || '',
+//     title: (d.title as string) || '',
+//     address: addr || '—',
+//     priceText: d.userFee != null ? `￥${d.userFee}` : '—',
+//     qrCodeUrl: qrCodeUrl.value || undefined,
+//   }
+// })
 
 onShareAppMessage((res) => {
   if (res.from === 'button' && userStore.profile) {
     // 来自页面内按钮
+    const path = getLoginSharePath()
+    console.log('[shareUserId][productDetail share]', {
+      from: res.from,
+      profileUserId: userStore.profile?._id,
+      path,
+    })
     return {
       title: detailData.value.title,
-      path: `/pages/login/login?inviterCode=${userStore.profile.referralCode}&productId=${productId.value}&proType=${proType.value}`,
+      path,
       imageUrl: detailData.value.cover,
     }
   }
   // 默认分享
+  const path = getProductDetailSharePath()
+  console.log('[shareUserId][productDetail share]', {
+    from: res.from,
+    profileUserId: userStore.profile?._id,
+    path,
+  })
   return {
     title: detailData.value.title,
-    path: `/pages/productDetail/productDetail?inviterCode=${userStore.profile?.referralCode}`,
+    path,
     imageUrl: detailData.value.cover,
   }
 })
@@ -192,7 +252,7 @@ onShareAppMessage((res) => {
             <view class="info">
               <view class="title-row">
                 <view class="title">{{ detailData.title }}</view>
-                <view class="poster-btn" @tap="handleGeneratePoster">生成海报</view>
+                <!-- <view class="poster-btn" @tap="handleGeneratePoster">生成海报</view> -->
               </view>
               <view class="location-info">
                 <view class="time">
@@ -215,7 +275,7 @@ onShareAppMessage((res) => {
               <view class="text">报名费用</view>
               <view class="value">￥{{ detailData.userFee }}</view>
             </view>
-            <view class="row" v-if="userStore.profile?.role === 'manager'">
+            <view class="row" v-if="userStore.isValidManager">
               <view class="text">佣金</view>
               <view class="value">￥{{ detailData.commission }}</view>
             </view>
@@ -277,8 +337,7 @@ onShareAppMessage((res) => {
       <!--   报名按钮   -->
       <view class="sign" @tap="handleSign">行程报名</view>
     </view>
-    <!-- 生成海报弹窗（内容由你后续填充） -->
-    <ProductDetailModal v-model="showPoster" :poster="posterData" :qr-code-url="qrCodeUrl" />
+    <!-- <ProductDetailModal v-model="showPoster" :poster="posterData" :qr-code-url="qrCodeUrl" /> -->
   </view>
 </template>
 
@@ -533,6 +592,7 @@ onShareAppMessage((res) => {
     color: $qs-font-dec;
     line-height: 1.8;
     margin-bottom: 20rpx;
+    white-space: pre-line;
   }
 
   .images {

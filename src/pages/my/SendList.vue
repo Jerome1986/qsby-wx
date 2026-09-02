@@ -6,7 +6,7 @@ const userStore = useUserStore()
 
 // 跳转发布管理
 const handlePublishManagement = () => {
-  if (userStore.profile?.role === 'manager' && userStore.profile._id) {
+  if (userStore.isValidManager && userStore.profile?._id) {
     uni.navigateTo({
       url: '/pagesMember/publishManagement/publishManagement',
     })
@@ -18,7 +18,7 @@ const handlePublishManagement = () => {
 
 <template>
   <view class="sendList" @tap="handlePublishManagement">
-    <NavTitle title="管理发布"></NavTitle>
+    <NavTitle title="活动管理"></NavTitle>
     <view class="dec">已经发布的内容丨有趣的项目丨同城活动丨社交旅行</view>
     <view class="bg">
       <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/send.png" mode="aspectFit"></image>

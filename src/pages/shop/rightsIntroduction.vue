@@ -127,7 +127,7 @@ onLoad((options) => {
       width: 6rpx;
       height: 28rpx;
       margin-right: 12rpx;
-      background: linear-gradient(180deg, $qs-brandColor, darken($qs-brandColor, 8%));
+      background: linear-gradient(180deg, $qs-brandColor, color.adjust($qs-brandColor, $lightness: -8%));
       border-radius: 3rpx;
     }
 

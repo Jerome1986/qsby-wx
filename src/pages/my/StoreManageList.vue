@@ -5,14 +5,20 @@ import { useUserStore } from '@/stores'
 const userStore = useUserStore()
 
 const handleStoreManage = () => {
-  if (userStore.profile?.role === 'manager' || userStore.profile?._id as string) {
-    const shopId = userStore.profile?.shopId || ''
-    if (!shopId) {
+  const hasPermission = userStore.isValidManager || userStore.profile?.role === 'admin'
+  if (hasPermission && userStore.profile?._id) {
+    const profileShopId = userStore.profile?.shopId
+    const shopIds = Array.isArray(profileShopId)
+      ? profileShopId.filter(Boolean)
+      : profileShopId
+        ? [profileShopId]
+        : []
+    if (!shopIds.length) {
       uni.showToast({ icon: 'none', title: '暂无关联门店' })
       return
     }
     uni.navigateTo({
-      url: `/pagesMember/storeManage/storeManage?shopId=${shopId}`,
+      url: `/pagesMember/storeManage/storeManage?shopId=${shopIds[0]}`,
     })
   } else {
     uni.showToast({ icon: 'none', title: '请先登录' })
@@ -22,8 +28,8 @@ const handleStoreManage = () => {
 
 <template>
   <view class="store-manage" @tap="handleStoreManage">
-    <NavTitle title="门店管理"></NavTitle>
-    <view class="dec">店长管理门店订单丨待核销丨已核销丨办理入住</view>
+    <NavTitle title="店长管理"></NavTitle>
+    <view class="dec">店长管理门店订单丨待核销丨已核销</view>
     <view class="bg">
       <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/minsu.png" mode="aspectFit" />
     </view>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useUserStore } from '@/stores'
-import { changeAvatarApi, updateUserInfoApi } from '@/api/user.ts'
+import { checkAvatarImgApi, updateUserInfoApi } from '@/api/user.ts'
 import { onLoad } from '@dcloudio/uni-app'
 import { userInfoGet } from '@/composables/userInfo.ts'
 import NavHead from '@/components/NavHead.vue'
@@ -43,6 +43,13 @@ const formData = ref<FormData>({
   gender: 0, // 0-未选择, 1-男, 2-女
 })
 
+const isAvatarReviewPending = computed(() => userStore.profile?.avatarReviewStatus === 'pending')
+const avatarDisplayUrl = computed(() => {
+  return isAvatarReviewPending.value
+    ? userStore.profile?.avatarReviewUrl || userStore.profile?.avatarUrl
+    : userStore.profile?.avatarUrl
+})
+
 // 表单提交处理
 const handleSubmit = async () => {
   console.log('提交表单:', formData.value)
@@ -73,36 +80,52 @@ const handleSubmit = async () => {
 
 // 更换头像
 const handleChangeAvatar = () => {
+  if (isAvatarReviewPending.value) {
+    uni.showToast({ icon: 'none', title: '头像审核中，请等待' })
+    return
+  }
+
+  const openid = userStore.profile?.openid
+  if (!openid) {
+    uni.showToast({ icon: 'none', title: '缺少用户信息，请重新登录' })
+    return
+  }
+
   // todo校验用户次数
   // 选择头像并上传
   uni.chooseImage({
     count: 1,
     success(e) {
       console.log(e.tempFilePaths[0])
+      uni.showLoading({ title: '上传中...', mask: true })
+      // 上传
       const name = 'avatar_' + Date.now()
       uni.uploadFile({
         url: 'https://x9zmst6evg.sealoshzh.site/upload/images',
         filePath: e.tempFilePaths[0],
         name,
         success: async (uploadFileRes) => {
-          console.log(uploadFileRes.data)
-          if (userStore.profile?._id) {
-            // 将头像更新到数据库
-            const avatarRes = await changeAvatarApi(userStore.profile?._id, uploadFileRes.data)
-            if (avatarRes.code === 200 && avatarRes.data.avatarUrl) {
-              // 同步更新store中的头像
-              userStore.setProfile({
-                avatarUrl: avatarRes.data.avatarUrl,
-              })
-              console.log('头像已更新到store')
-              setTimeout(() => {
-                uni.showToast({ icon: 'success', duration: 2000, title: avatarRes.message })
-              }, 800)
-            } else {
-              // 超过3次修改
-              await uni.showToast({ icon: 'none', duration: 2000, title: avatarRes.message })
+          console.log('上传的图片地址', uploadFileRes.data)
+          try {
+            // 微信内容校验
+            const checkRes = await checkAvatarImgApi(uploadFileRes.data, openid)
+            if (checkRes.message === '审核中') {
+              userStore.setAvatarReviewPending(uploadFileRes.data)
+              uni.hideLoading()
+              uni.showToast({ icon: 'none', title: '头像已提交审核，请等待' })
+              return
             }
+            uni.hideLoading()
+            uni.showToast({ icon: 'none', title: checkRes.message || '头像提交失败，请重试' })
+          } catch (err) {
+            console.error(err)
+            uni.hideLoading()
+            uni.showToast({ icon: 'none', title: '头像提交失败，请重试' })
           }
+        },
+        fail: () => {
+          uni.hideLoading()
+          uni.showToast({ icon: 'none', title: '头像上传失败，请重试' })
         },
       })
     },
@@ -135,9 +158,12 @@ const handleLoginOut = () => {
     <view class="form-box">
       <view class="up-pic" @tap="handleChangeAvatar">
         <image class="avatar-img"
-          :src="userStore.profile?.avatarUrl || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
-          mode="aspectFill" />
-        <view class="tip-label">更换头像</view>
+          :src="avatarDisplayUrl || 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/avatar.png'"
+          mode="aspectFit" />
+        <view class="avatar-review-mask" v-if="isAvatarReviewPending">
+          <text>审核中</text>
+        </view>
+        <view class="tip-label" v-if="!isAvatarReviewPending">更换头像</view>
       </view>
 
       <uni-forms :modelValue="formData" labelWidth="60px">
@@ -215,6 +241,24 @@ const handleLoginOut = () => {
       border-radius: 50%;
       border: 3rpx solid #ffffff;
       box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+    }
+
+    .avatar-review-mask {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160rpx;
+      height: 160rpx;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.46);
+      color: #ffffff;
+      font-size: 24rpx;
+      font-weight: 500;
+      pointer-events: none;
     }
 
     .tip-label {

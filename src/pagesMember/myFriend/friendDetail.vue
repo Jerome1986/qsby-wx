@@ -11,8 +11,8 @@ import { formatFieldValue } from '@/utils/formatField'
 
 // ========== 页面状态（来自路由或接口） ==========
 const userId = ref('')
-const totalConsumption = ref(0) // 个人消费金额，来自上一页传参
-const totalCount = ref(0) // 已核销金额/次数，来自上一页传参
+const totalConsumption = ref(0) // 当前月份个人消费金额，来自详情接口
+const totalCount = ref(0) // 当前月份已核销订单数，来自详情接口
 const userInfo = ref<UserItem>() // 好友用户信息，首次请求时从接口获取
 const friendData = ref<OrderItem[]>([]) // 好友消费订单列表
 
@@ -25,13 +25,14 @@ const finish = ref(false) // 是否已加载完所有页
 const friendOrderGet = async (userId: string, time: string) => {
   if (finish.value) return
   const res = await friendDetailOrderApi(userId, time, pageNum.value, pageSize.value)
-  console.log(res)
+  console.log('好友消费详情', res)
   if (!userInfo.value) {
     userInfo.value = res.data.userInfo
   }
+  totalConsumption.value = Number(res.data.summary.totalConsumption) || 0
+  totalCount.value = Number(res.data.summary.totalVerifiedCount) || 0
   friendData.value.push(...res.data.list)
-  totalCount.value = res.data.total
-  if (pageNum.value < res.data.totalPage) {
+  if (pageNum.value < res.data.pagination.totalPage) {
     pageNum.value++
   } else {
     finish.value = true
@@ -43,7 +44,6 @@ onLoad((options) => {
   console.log(options)
   if (options) {
     userId.value = options.userId ?? ''
-    totalConsumption.value = Number(options.totalConsumption) || 0
   }
   friendOrderGet(userId.value, selectedMonth.value)
 })
@@ -91,7 +91,7 @@ const fields: { label: string; key: string }[] = [
       </view>
     </view>
 
-    <!-- 区域2：统计卡片（个人消费、已核销金额，数据来自路由传参） -->
+    <!-- 区域2：当前月份统计卡片，数据来自好友详情接口 -->
     <view class="nav">
       <!-- 个人消费 -->
       <view class="nav-item">
@@ -228,6 +228,7 @@ const fields: { label: string; key: string }[] = [
 .consumptionDetails {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   padding: 24rpx;
   margin-top: 20rpx;
   width: 100%;
@@ -244,6 +245,8 @@ const fields: { label: string; key: string }[] = [
   /* 明细列表 / 空状态 */
   .list {
     flex: 1;
+    min-height: 0;
+    height: 0;
     margin-top: 20rpx;
     width: 100%;
 

@@ -55,7 +55,7 @@ const goDetail = (productId: string) => {
 
 /** 仅上架商品可点击进入详情 */
 const handleProductTap = (item: ScoreProduct) => {
-  if (item.status === 'active') goDetail(item._id)
+  if (item.status === 'active' && item.stock > 0) goDetail(item._id)
 }
 
 /** 积分明细 / 积分订单 跳转 */
@@ -95,26 +95,47 @@ const handelGo = (val: string) => {
     <scroll-view class="productScore" :scroll-y="true" @scrolltolower="handleScroll" :enhanced="true"
       :show-scrollbar="false">
       <view class="product-list">
-        <view class="product-item" v-for="item in scoreProdctData" :key="item._id"
-          :class="{ disabled: item.status === 'disabled' }" @tap="handleProductTap(item)">
+        <view
+          class="product-item"
+          v-for="item in scoreProdctData"
+          :key="item._id"
+          :class="{
+            disabled: item.status === 'disabled',
+            'sold-out': item.stock <= 0,
+          }"
+          @tap="handleProductTap(item)"
+        >
           <view class="cover-wrap">
             <image class="cover" :src="item.cover" mode="aspectFill"></image>
             <view class="category-tag" v-if="item.categoryName">{{ item.categoryName }}</view>
+            <view class="status-mask" v-if="item.status === 'disabled' || item.stock <= 0">
+              <text>{{ item.status === 'disabled' ? '已下架' : '已兑完' }}</text>
+            </view>
           </view>
           <view class="info">
             <view class="meta">
               <view class="title">{{ item.name }}</view>
-              <view class="category" v-if="item.categoryName">{{ item.categoryName }}</view>
+              <view
+                class="stock-tag"
+                :class="{ warning: item.stock > 0 && item.stock <= 5, empty: item.stock <= 0 }"
+              >
+                {{ item.stock > 0 ? `剩余 ${item.stock} 件` : '暂无库存' }}
+              </view>
             </view>
             <view class="content">
               <view class="score-row">
-                <text class="label">所需</text>
-                <text class="score-price">{{ item.scorePrice }}积分</text>
+                <text class="score-price">{{ item.scorePrice }}</text>
+                <text class="score-unit">积分</text>
               </view>
-              <view class="exchange-btn">{{ item.status === 'disabled' ? '暂不可兑' : '立即兑换' }}</view>
+              <view class="exchange-btn">
+                {{ item.status === 'disabled' ? '暂不可兑' : item.stock <= 0 ? '已兑完' : '立即兑换' }}
+              </view>
             </view>
           </view>
         </view>
+        <view class="list-state" v-if="loading">加载中...</view>
+        <view class="list-state" v-else-if="scoreProdctData.length === 0">暂无积分商品</view>
+        <view class="list-state" v-else-if="finish">没有更多了</view>
       </view>
       <view class="bottom-placeholder"></view>
     </scroll-view>
@@ -188,44 +209,35 @@ const handelGo = (val: string) => {
 }
 
 .product-list {
-  padding: 0 24rpx;
+  padding: 0 24rpx 12rpx;
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 24rpx;
 }
 
 /* 单个商品卡片 */
 .product-item {
   display: flex;
   align-items: stretch;
-  padding: 24rpx;
+  padding: 22rpx;
   background-color: $qs-card-bg;
   border-radius: 24rpx;
   @include customShadow();
 
-  /* 下架商品 */
-  &.disabled {
-    opacity: 0.6;
-
-    .cover-wrap::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 16rpx;
-    }
-
+  &.disabled,
+  &.sold-out {
     .exchange-btn {
-      background: $qs-font-dec2;
-      color: $qs-font-dec;
+      color: #ffffff;
+      background: #b8b8b8;
+      box-shadow: none;
     }
   }
 
   /* 商品封面 */
   .cover-wrap {
     position: relative;
-    width: 200rpx;
-    height: 200rpx;
+    width: 210rpx;
+    height: 210rpx;
     flex-shrink: 0;
     margin-right: 24rpx;
     border-radius: 16rpx;
@@ -244,9 +256,28 @@ const handelGo = (val: string) => {
       padding: 6rpx 14rpx;
       font-size: 20rpx;
       color: #fff;
-      background: linear-gradient(135deg, $qs-brandColor, darken($qs-brandColor, 10%));
+      background: linear-gradient(135deg, $qs-brandColor, color.adjust($qs-brandColor, $lightness: -10%));
       border-radius: 16rpx 0 12rpx 0;
       z-index: 1;
+    }
+
+    .status-mask {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.38);
+
+      text {
+        padding: 10rpx 24rpx;
+        border: 2rpx solid rgba(255, 255, 255, 0.9);
+        border-radius: 30rpx;
+        font-size: 26rpx;
+        font-weight: 500;
+        color: #ffffff;
+      }
     }
   }
 
@@ -263,28 +294,37 @@ const handelGo = (val: string) => {
         font-size: 30rpx;
         font-weight: bold;
         color: $qs-font-title;
-        line-height: 1.4;
+        line-height: 1.45;
         @include ellipsis(2);
       }
 
-      .category {
-        margin-top: 6rpx;
-        font-size: 24rpx;
-        color: $qs-font-dec2;
-      }
+      .stock-tag {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 14rpx;
+        padding: 5rpx 14rpx;
+        border-radius: 18rpx;
+        font-size: 22rpx;
+        line-height: 1.4;
+        color: #4f7c63;
+        background: #edf8f1;
 
-      .store-name {
-        margin-top: 6rpx;
-        font-size: 24rpx;
-        color: $qs-font-dec;
+        &.warning {
+          color: #c76b16;
+          background: #fff3e5;
+        }
+
+        &.empty {
+          color: $qs-font-dec2;
+          background: #f1f1f1;
+        }
       }
     }
 
-    /* 积分价格 + 兑换按钮 */
     .content {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
       margin-top: 12rpx;
       padding-top: 12rpx;
       border-top: 1rpx solid rgba($qs-border, 0.6);
@@ -292,33 +332,43 @@ const handelGo = (val: string) => {
       .score-row {
         display: flex;
         align-items: baseline;
-        gap: 6rpx;
-
-        .label {
-          font-size: 24rpx;
-          color: $qs-font-dec2;
-        }
+        gap: 4rpx;
 
         .score-price {
-          font-size: 32rpx;
+          font-size: 38rpx;
           font-weight: bold;
-          color: $qs-brandColor;
+          line-height: 1;
+          color: #e49a14;
+        }
+
+        .score-unit {
+          font-size: 22rpx;
+          color: #b87910;
         }
       }
 
       .exchange-btn {
-        padding: 0 28rpx;
-        height: 56rpx;
-        line-height: 56rpx;
-        font-size: 26rpx;
+        min-width: 132rpx;
+        height: 58rpx;
+        padding: 0 20rpx;
+        border-radius: 29rpx;
+        font-size: 24rpx;
         font-weight: 500;
+        line-height: 58rpx;
+        text-align: center;
         color: $qs-font-title;
-        background: linear-gradient(135deg, $qs-brandColor 0%, darken($qs-brandColor, 6%) 100%);
-        border-radius: 28rpx;
+        background: linear-gradient(135deg, $qs-brandColor 0%, color.adjust($qs-brandColor, $lightness: -6%) 100%);
         box-shadow: 0 4rpx 12rpx rgba($qs-brandColor, 0.35);
       }
     }
   }
+}
+
+.list-state {
+  padding: 24rpx 0 8rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: $qs-font-dec2;
 }
 
 /* 底部占位，防止内容被裁切 */

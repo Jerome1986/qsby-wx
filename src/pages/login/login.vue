@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { wxLogin } from '@/api/login.ts'
 import { onLoad } from '@dcloudio/uni-app'
 import { useUserStore } from '@/stores'
-import { sceneFindOneApi } from '@/api/poster'
 
 // store
 const userStore = useUserStore()
@@ -14,6 +13,19 @@ const isAgreePrivacy = ref(false)
 // 切换协议勾选状态
 const toggleAgreement = () => {
   isAgreePrivacy.value = !isAgreePrivacy.value
+}
+
+// 跳转协议详情
+const goAgreement = (type: 'terms' | 'privacy') => {
+  uni.navigateTo({
+    url: `/pages/agreement/agreement?type=${type}`,
+  })
+}
+
+const withShareUserId = (url: string) => {
+  if (!shareUserId.value) return url
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}shareUserId=${encodeURIComponent(shareUserId.value)}`
 }
 
 // 获取手机号凭证返回类型
@@ -47,8 +59,15 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
       await uni.showToast({ icon: 'success', title: '登录成功', duration: 1000 })
       // 如果携带了商品链接直接跳转商品详情
       if (productId.value && proType.value !== 'shop') {
+        const url = withShareUserId(
+          `/pages/productDetail/productDetail?productId=${productId.value}&proType=${proType.value}`,
+        )
+        console.log('[shareUserId][login -> productDetail]', {
+          shareUserId: shareUserId.value,
+          url,
+        })
         await uni.redirectTo({
-          url: `/pages/productDetail/productDetail?productId=${productId.value}&proType=${proType.value}`,
+          url,
         })
         return
       }
@@ -57,21 +76,18 @@ const handleLogin = async (e: GetPhoneNumberEvent) => {
         console.log('shop')
 
         await uni.redirectTo({
-          url: `/pages/shop/createOrder?productId=${productId.value}&proType=${proType.value}`,
+          url: withShareUserId(
+            `/pages/shop/createOrder?productId=${productId.value}&proType=${proType.value}`,
+          ),
         })
         return
       }
       // 如果携带了项目链接直接跳转项目详情
       if (projectId.value) {
         await uni.redirectTo({
-          url: `/pages/project/projectDetail?projectId=${projectId.value}&proType=${proType.value}`,
-        })
-        return
-      }
-      // 如果从门店详情办理入住进入，登录后返回门店详情
-      if (shopId.value) {
-        await uni.redirectTo({
-          url: `/pages/shop/shopDetail?shopId=${shopId.value}`,
+          url: withShareUserId(
+            `/pages/project/projectDetail?projectId=${projectId.value}&proType=${proType.value}`,
+          ),
         })
         return
       }
@@ -89,8 +105,8 @@ const freshCode = ref('')
 const inviterCode = ref('')
 const productId = ref('')
 const projectId = ref('')
-const shopId = ref('')
 const proType = ref('')
+const shareUserId = ref('')
 onLoad(async (options: any) => {
   // 进页面就重新获取code，防止过期
   uni.login({
@@ -110,26 +126,18 @@ onLoad(async (options: any) => {
 
   console.log('立即打印 options', options)
 
-  // 先判断分享链接进入且是分享商品/项目详情进入（多页面统一）
-  // 海报分享
-  if (options.scene) {
-    const scene = decodeURIComponent(options.scene || '')
-    console.log(scene)
-    // 请求分享码数据，获取具体参数
-    const result = await sceneFindOneApi(scene)
-    console.log('海报进入', result)
-    proType.value = result.data.proType
-    inviterCode.value = result.data.inviterCode
-    productId.value = result.data.productId
-  } else {
-    // 按钮分享
-    console.log('按钮分享')
-    inviterCode.value = options.inviterCode
-    productId.value = options.productId
-    projectId.value = options.projectId
-    shopId.value = options.shopId
-    proType.value = options.proType
-  }
+  // 按钮分享
+  console.log('按钮分享')
+  inviterCode.value = options.inviterCode
+  productId.value = options.productId
+  projectId.value = options.projectId
+  proType.value = options.proType
+  shareUserId.value = options.shareUserId || ''
+  console.log('[shareUserId][login received]', {
+    optionValue: options.shareUserId,
+    storedValue: shareUserId.value,
+    options,
+  })
 
   setTimeout(() => {
     console.log('1秒后打印 inviterCode.value', inviterCode.value, 'and', options.inviterCode)
@@ -155,7 +163,7 @@ onLoad(async (options: any) => {
       <!-- 标题区域 -->
       <view class="title-block">
         <view class="title">欢迎使用千宿百院</view>
-        <view class="subtitle">一家有温暖的社交民宿聚集地</view>
+        <view class="subtitle">一家有趣的文旅生活旅居平台</view>
       </view>
 
       <!-- 登录按钮 -->
@@ -173,9 +181,9 @@ onLoad(async (options: any) => {
             <text v-if="isAgreePrivacy" class="check-mark">✓</text>
           </view>
           <text class="agreement-text">已阅读并同意</text>
-          <text class="link">《服务条款》</text>
+          <text class="link" @tap.stop="goAgreement('terms')">《服务条款》</text>
           <text class="and-text">和</text>
-          <text class="link">《隐私协议》</text>
+          <text class="link" @tap.stop="goAgreement('privacy')">《隐私协议》</text>
         </view>
       </view>
     </view>

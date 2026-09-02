@@ -7,10 +7,31 @@ import ImageTextDetail from '@/components/ImageTextDetail.vue'
 import BottomActionBar from '@/components/BottomActionBar.vue'
 import { ref } from 'vue'
 import { shopPorductByOne } from '@/api/store'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
 import type { ProductItem } from '@/types/store'
+import { useUserStore } from '@/stores'
 
+const userStore = useUserStore()
 const producntData = ref<ProductItem>()
+const productId = ref('')
+const inviterCode = ref('')
+
+const buildShareQuery = (query: Record<string, string | undefined>) => {
+  return Object.entries(query)
+    .filter(([, value]) => value)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`)
+    .join('&')
+}
+
+const getShopProductSharePath = () => {
+  const query = buildShareQuery({
+    productId: productId.value,
+    proType: 'shop',
+    inviterCode: userStore.profile?.referralCode,
+  })
+  return query ? `/pages/shop/shopProductDetail?${query}` : '/pages/shop/shopProductDetail'
+}
+
 const productGet = async (productId: string) => {
   const res = await shopPorductByOne(productId)
   console.log('产品', res)
@@ -23,7 +44,17 @@ onLoad((options) => {
   console.log('参数', options)
 
   if (options?.productId) {
-    productGet(options.productId)
+    productId.value = options.productId
+    productGet(productId.value)
+  }
+  inviterCode.value = options?.inviterCode || ''
+})
+
+onShareAppMessage(() => {
+  return {
+    title: producntData.value?.name || '千宿百院',
+    path: getShopProductSharePath(),
+    imageUrl: producntData.value?.cover,
   }
 })
 
@@ -42,18 +73,30 @@ onLoad((options) => {
           <NavTitle :title="producntData?.name as string"></NavTitle>
         </view>
         <!--  商品信息  -->
-        <BookFlow type="product" :price="producntData?.price" :commission="producntData?.commission"></BookFlow>
+        <BookFlow
+          type="product"
+          :price="producntData?.price"
+          :spec-label="producntData?.specLabel"
+          :commission="producntData?.commission"
+        ></BookFlow>
         <!--  预约须知  -->
         <Note :store-id="producntData?.storeId"></Note>
         <!--  图文详情    -->
-        <ImageTextDetail :images="producntData?.images as string[]" :description="producntData?.description as string">
+        <ImageTextDetail :images="producntData?.images || []" :description="producntData?.description || ''">
         </ImageTextDetail>
         <!-- 底部占位，防止内容被操作栏遮挡 -->
         <view class="action-bar-placeholder"></view>
       </view>
     </scroll-view>
     <!--  底部操作栏  -->
-    <BottomActionBar page-type="product" :price="producntData?.price" :product-id="producntData?._id"></BottomActionBar>
+    <BottomActionBar
+      page-type="product"
+      :price="producntData?.price"
+      :spec-label="producntData?.specLabel"
+      :product-id="producntData?._id"
+      :inviter-code="inviterCode"
+      :show-group="false"
+    ></BottomActionBar>
   </view>
 </template>
 

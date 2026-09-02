@@ -1,4 +1,5 @@
 import type { ActivityListItem, ActivityPageResponse } from '@/types/Activity'
+import type { PublishPlanData } from '@/types/Content'
 import type { DelResult } from '@/types/Gobal'
 import type { SortType } from '@/types/Play'
 import type { ActivityTypeItem, PublicActivityResponse, SubmitFormData } from '@/types/Public'
@@ -59,9 +60,17 @@ export const activityDetail = (activityId: string) => {
   })
 }
 
+/** 获取民宿博主计划软文 */
+export const activityPublishPlanApi = () => {
+  return request<PublishPlanData>({
+    method: 'GET',
+    url: '/activity/publishPlan',
+  })
+}
+
 /** 编辑活动 */
 export const activityEditApi = (data: SubmitFormData & { _id: string }) => {
-  return request<{ code: number; message: string }>({
+  return request<PublicActivityResponse>({
     method: 'POST',
     url: '/activity/edit',
     data,

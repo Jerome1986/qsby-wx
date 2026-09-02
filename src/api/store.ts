@@ -1,13 +1,11 @@
 import type {
-  CheckInExternalItem,
-  CheckInExternalPageResult,
-  CheckInExternalParams,
   CityItem,
   ProductItem,
   StoreCategoryListPageResult,
   StoreDetail,
   StoreListPageResult,
 } from '@/types/store'
+import type { ScenicItem, ScenicListPageResult } from '@/types/Scenic'
 import { request } from '@/utils/http'
 
 /**
@@ -75,68 +73,25 @@ export const shopPorductByOne = (productId: string) => {
   })
 }
 
-/**
- *
- * @param userId - 用户ID
- * @param orderId - 业务订单号
- * @param icCardFont - 身份证正面
- * @param icCardBack - 身份证反面
- * @param shopId - 门店ID
- * @returns
- */
-export const checkInShopApi = (
-  userId: string,
-  orderId: string,
-  icCardFont: string,
-  icCardBack: string,
-) => {
-  return request({
-    method: 'POST',
-    url: '/checkIn/updateOrder',
-    data: { userId, orderId, icCardFont, icCardBack },
-  })
-}
-
-/** 抖音/外部订单办理入住（无 orderId） */
-export const checkInExternalApi = (params: CheckInExternalParams) => {
-  return request({
-    method: 'POST',
-    url: '/checkIn/external',
-    data: params,
-  })
-}
-
-/** 按门店查询外部入住记录（分页） */
-export const checkInExternalFindByShop = (
-  shopId: string,
+/** 获取门店周边景区列表 */
+export const storeScenicListApi = (
+  storeId: string,
   pageNum: number,
   pageSize: number,
+  name = '',
 ) => {
-  return request<CheckInExternalPageResult>({
+  return request<ScenicListPageResult>({
     method: 'GET',
-    url: '/checkIn/external/byShop',
-    data: { shopId, pageNum, pageSize },
+    url: '/store/findAllScenic',
+    data: { storeId, pageNum, pageSize, name },
   })
 }
 
-/** 获取外部入住记录详情 */
-export const checkInExternalFindOne = (id: string) => {
-  return request<CheckInExternalItem>({
+/** 获取景区详情 */
+export const storeScenicDetailApi = (scenicId: string) => {
+  return request<ScenicItem>({
     method: 'GET',
-    url: '/checkIn/external/findOne',
-    data: { id },
-  })
-}
-
-/**
- *
- * @param userId - 用户ID
- * @param orderId - 业务订单号
- */
-export const checkInInspectApi = (userId: string, orderId: string) => {
-  return request<{ isOrder: boolean }>({
-    method: 'GET',
-    url: '/checkIn/inspect',
-    data: { userId, orderId },
+    url: '/store/findScenicDetail',
+    data: { scenicId },
   })
 }

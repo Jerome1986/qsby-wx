@@ -1,35 +1,56 @@
 <script setup lang="ts">
 import NavHead from '@/components/NavHead.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { sendFindAll } from '@/api/send'
+import { activityTypeFindAll } from '@/api/activity'
 import { useUserStore } from '@/stores'
-import type { SendListItem, SendType } from '@/types/Send'
+import type { SendListItem } from '@/types/Send'
+import type { ActivityTypeItem } from '@/types/Public'
 import { onLoad, onShow, onHide } from '@dcloudio/uni-app'
 import { formatTimestamp } from '@/utils/generateMonth'
 import { unifiedProcessDel } from './unifiedProcess'
 
 const userStore = useUserStore()
 
-const tagList: { id: string; label: string; value: SendType }[] = [
-  { id: '1', label: '趣哪游', value: 'trip' },
-  { id: '2', label: '同城活动', value: 'activity' },
-  { id: '3', label: '有趣的项目', value: 'project' },
-]
+type ActivityTabItem = ActivityTypeItem & { _id: string; name: string }
 
-const currentTab = ref<SendType>('trip')
+const tagList = ref<ActivityTabItem[]>([{ _id: 'all', name: '全部' }])
+const currentCateId = ref('all')
 const activeIndex = ref(0)
-/** 切换 tab 并重新拉取列表 */
-const handleTab = (tabItem: SendType, index: number) => {
+const tabIndicatorStyle = computed(() => {
+  const tabWidth = 100 / Math.max(tagList.value.length, 1)
+  return {
+    left: `calc(${activeIndex.value * tabWidth}% + (${tabWidth}% - 48rpx) / 2)`,
+  }
+})
+
+const displayList = computed(() => {
+  if (currentCateId.value === 'all') return publicList.value
+  return publicList.value.filter((item) => item.type === currentCateId.value)
+})
+
+/** 加载活动分类 tab */
+const activityTypeGet = async () => {
+  const res = await activityTypeFindAll()
+  tagList.value = [{ _id: 'all', name: '全部' }, ...res.data]
+}
+
+/** 切换活动分类并重新拉取列表 */
+const handleTab = (cateId: string, index: number) => {
   reset()
   activeIndex.value = index
-  currentTab.value = tabItem
-  if (userStore.profile?._id && currentTab.value) {
-    publicListGet(userStore.profile._id, currentTab.value)
+  currentCateId.value = cateId
+  if (cateId !== 'all') {
+    console.log('TODO: 活动管理分类接口参数', cateId)
+  }
+  if (userStore.profile?._id) {
+    publicListGet(userStore.profile._id)
   }
 }
 
 /** 重置分页与列表状态 */
 const reset = () => {
+  requestVersion.value++
   pageNum.value = 1
   publicList.value = []
   finish.value = false
@@ -43,22 +64,34 @@ const pageSize = ref(10)
 const loading = ref(false)
 const finish = ref(false)
 const hasFetched = ref(false)
-/** 获取发布列表（分页） */
-const publicListGet = async (userId: string, publicType: SendType) => {
+const requestVersion = ref(0)
+/** 获取活动发布列表（分页） */
+const publicListGet = async (userId: string) => {
   if (finish.value || loading.value) return
+  const currentRequestVersion = requestVersion.value
+  const requestPageNum = pageNum.value
+  if (currentCateId.value !== 'all') {
+    console.log('TODO: 活动管理分类接口参数', currentCateId.value)
+  }
   loading.value = true
   try {
-    const res = await sendFindAll(userId, publicType, pageNum.value, pageSize.value)
+    const res = await sendFindAll(userId, 'activity', requestPageNum, pageSize.value)
+    if (currentRequestVersion !== requestVersion.value) return
     const list = res.data?.list ?? []
-    publicList.value.push(...list)
-    if (pageNum.value < (res.data?.totalPage ?? 0)) {
-      pageNum.value++
+    if (requestPageNum === 1) {
+      publicList.value = list
+    } else {
+      publicList.value.push(...list)
+    }
+    if (requestPageNum < (res.data?.totalPage ?? 0)) {
+      pageNum.value = requestPageNum + 1
     } else {
       finish.value = true
     }
   } catch {
     // 请求失败时也标记已尝试过
   } finally {
+    if (currentRequestVersion !== requestVersion.value) return
     loading.value = false
     hasFetched.value = true
   }
@@ -66,13 +99,14 @@ const publicListGet = async (userId: string, publicType: SendType) => {
 
 /** 上拉加载更多 */
 const handleMore = () => {
-  if (!finish.value) publicListGet(userStore.profile?._id as string, currentTab.value)
+  if (!finish.value && userStore.profile?._id) publicListGet(userStore.profile._id)
 }
 
 /** 页面加载时拉取列表 */
-onLoad(() => {
-  if (userStore.profile?._id && currentTab.value) {
-    publicListGet(userStore.profile._id, currentTab.value)
+onLoad(async () => {
+  await activityTypeGet()
+  if (userStore.profile?._id) {
+    publicListGet(userStore.profile._id)
   }
 })
 
@@ -83,36 +117,31 @@ onHide(() => {
 /** 从编辑/报名等页返回时刷新（首次 onShow 不刷新，避免清空 onLoad 已拉取的数据） */
 onShow(() => {
   if (!wasHidden.value) return
-  if (userStore.profile?._id && currentTab.value) {
+  if (userStore.profile?._id) {
     reset()
-    publicListGet(userStore.profile._id, currentTab.value)
+    publicListGet(userStore.profile._id)
   }
 })
 
-/** 跳转编辑页（项目跳 sendProject，行程/活动跳 public） */
+/** 跳转编辑页 */
 const handleEdit = (itemId: string) => {
-  if (currentTab.value === 'project') {
-    uni.navigateTo({ url: `/pages/project/sendProject?projectId=${itemId}` })
-  } else {
-    uni.navigateTo({ url: `/pages/public/public?sendType=${currentTab.value}&itemId=${itemId}` })
-  }
+  uni.navigateTo({ url: `/pages/public/public?itemId=${itemId}` })
 }
 
-/** 跳转报名列表页 */
-const handleSignUpList = (itemId: string) => {
+/** 跳转核销列表页 */
+const handleVerificationList = (item: SendListItem) => {
   uni.navigateTo({
-    url: `/pagesMember/publishManagement/signupList?itemId=${itemId}&type=${currentTab.value}`,
+    url: `/pagesMember/publishManagement/verificationList?itemId=${item._id}&type=activity&title=${encodeURIComponent(item.title)}`,
   })
 }
 
-/** 费用：项目用 viewFee，否则用 userFee */
-const getFee = (item: SendListItem) => item.viewFee ?? item.userFee ?? 0
+/** 费用 */
+const getFee = (item: SendListItem) => item.userFee ?? 0
 
 /** 报名人数 */
 const getCount = (item: SendListItem) => (Array.isArray(item.signUpList) ? item.signUpList.length : 0)
-/** 删除（trip/activity/project 均支持） */
+/** 删除 */
 const handleDel = (itemId: string) => {
-  const tab = currentTab.value
   const userId = userStore.profile?._id
   if (!userId) return
   uni.showModal({
@@ -121,11 +150,11 @@ const handleDel = (itemId: string) => {
     confirmColor: '#ffd018',
     success: async (res) => {
       if (!res.confirm) return
-      const { ok, message } = await unifiedProcessDel[tab](itemId, userId)
+      const { ok, message } = await unifiedProcessDel.activity(itemId, userId)
       uni.showToast({ icon: ok ? 'success' : 'none', title: message })
       if (ok) {
         reset()
-        publicListGet(userId, tab)
+        publicListGet(userId)
       }
     },
   })
@@ -134,18 +163,20 @@ const handleDel = (itemId: string) => {
 </script>
 <template>
   <view class="publishManagement">
-    <NavHead title="发布管理" :show-back="true"></NavHead>
+    <NavHead title="活动管理" :show-back="true"></NavHead>
     <view class="tabList">
-      <view class="tabItem" v-for="(item, index) in tagList" :key="item.id"
-        :class="{ activeTabItem: activeIndex === index }" @tap="handleTab(item.value, index)">
-        {{ item.label }}
+      <view class="tabItem" v-for="(item, index) in tagList" :key="item._id"
+        :class="{ activeTabItem: activeIndex === index }" @tap="handleTab(item._id, index)">
+        {{ item.name }}
       </view>
-      <view class="tab-indicator" :style="{ left: `calc(${activeIndex * 33.333}% + (33.333% - 48rpx) / 2)` }"></view>
+      <view class="tab-indicator" :style="tabIndicatorStyle"></view>
     </view>
     <view class="list-wrapper">
       <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false"
         @scrolltolower="handleMore">
-        <view class="orderItem" v-for="item in publicList" :key="item._id">
+        <view class="list-content">
+          <view class="orderItem" v-for="item in displayList" :key="item._id">
+          <view class="delete-chip" @tap.stop="handleDel(item._id)">删除</view>
           <view class="card-body">
             <view class="left">
               <image class="cover"
@@ -155,48 +186,26 @@ const handleDel = (itemId: string) => {
             <view class="right">
               <view class="title">{{ item.title }}</view>
               <view class="info-group">
-                <!-- 行程/活动：日期、门店、地址、报名金额、人数 -->
-                <template v-if="currentTab === 'trip' || currentTab === 'activity'">
-                  <view class="info-row" v-if="item.time">
-                    <text class="label">{{ currentTab === 'trip' ? '行程日期：' : '活动日期：' }}</text>
-                    <text class="value">{{ formatTimestamp(item.time, 2) }}</text>
-                  </view>
-                  <view class="info-row" v-if="item.address_name">
-                    <text class="label">{{ currentTab === 'trip' ? '行程门店：' : '活动门店：' }}</text>
-                    <text class="value">{{ item.address_name }}</text>
-                  </view>
-                  <view class="info-row" v-if="item.event_address">
-                    <text class="label">{{ currentTab === 'trip' ? '行程地址：' : '活动地址：' }}</text>
-                    <text class="value">{{ item.event_address }}</text>
-                  </view>
-                  <view class="info-row">
-                    <text class="label">报名金额：</text>
-                    <text class="value price">¥{{ getFee(item) }}元</text>
-                  </view>
-                  <view class="info-row">
-                    <text class="label">{{ currentTab === 'trip' ? '行程人数：' : '活动人数：' }}</text>
-                    <text class="value">{{ getCount(item) }}人</text>
-                  </view>
-                </template>
-                <!-- 项目：基地名称、地址、查看费用、报名人数 -->
-                <template v-else-if="currentTab === 'project'">
-                  <view class="info-row" v-if="item.address_name || item.address">
-                    <text class="label">项目名称：</text>
-                    <text class="value">{{ item.address_name || item.address || '-' }}</text>
-                  </view>
-                  <view class="info-row" v-if="item.event_address">
-                    <text class="label">项目地址：</text>
-                    <text class="value">{{ item.event_address }}</text>
-                  </view>
-                  <view class="info-row">
-                    <text class="label">查看费用：</text>
-                    <text class="value price">¥{{ getFee(item) }}元</text>
-                  </view>
-                  <view class="info-row">
-                    <text class="label">报名人数：</text>
-                    <text class="value">{{ getCount(item) }}人</text>
-                  </view>
-                </template>
+                <view class="info-row" v-if="item.time">
+                  <text class="label">活动日期：</text>
+                  <text class="value">{{ formatTimestamp(item.time, 2) }}</text>
+                </view>
+                <view class="info-row" v-if="item.address_name">
+                  <text class="label">活动门店：</text>
+                  <text class="value">{{ item.address_name }}</text>
+                </view>
+                <view class="info-row" v-if="item.event_address">
+                  <text class="label">活动地址：</text>
+                  <text class="value">{{ item.event_address }}</text>
+                </view>
+                <view class="info-row">
+                  <text class="label">报名金额：</text>
+                  <text class="value price">¥{{ getFee(item) }}元</text>
+                </view>
+                <view class="info-row">
+                  <text class="label">活动人数：</text>
+                  <text class="value">{{ getCount(item) }}人</text>
+                </view>
               </view>
             </view>
           </view>
@@ -205,24 +214,24 @@ const handleDel = (itemId: string) => {
               重新编辑
             </view>
             <view class="footer-right">
-              <view class="action-btn primary" @tap="handleSignUpList(item._id)">报名列表</view>
-              <view class="action-btn" @tap="handleDel(item._id)">删除</view>
+              <view class="action-btn" @tap="handleVerificationList(item)">报名列表</view>
             </view>
           </view>
-        </view>
-        <view class="load-more-tip" v-if="publicList.length && (loading || !finish)">
-          <text v-if="loading">加载中...</text>
-          <text v-else>上拉加载更多</text>
-        </view>
-        <view class="scroll-bottom-placeholder" style="height: 20rpx"></view>
-        <Transition name="empty-fade">
-          <view class="empty" v-if="hasFetched && !loading && !publicList.length">
-            <image class="empty-img"
-              src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png" mode="widthFix">
-            </image>
-            <text class="empty-text">暂无数据</text>
           </view>
-        </Transition>
+          <view class="load-more-tip" v-if="displayList.length && (loading || !finish)">
+            <text v-if="loading">加载中...</text>
+            <text v-else>上拉加载更多</text>
+          </view>
+          <view class="scroll-bottom-placeholder" style="height: 20rpx"></view>
+          <Transition name="empty-fade">
+            <view class="empty" v-if="hasFetched && !loading && !displayList.length">
+              <image class="empty-img"
+                src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/noData.png" mode="widthFix">
+              </image>
+              <text class="empty-text">暂无数据</text>
+            </view>
+          </Transition>
+        </view>
       </scroll-view>
     </view>
   </view>
@@ -282,10 +291,14 @@ const handleDel = (itemId: string) => {
   border-radius: 30rpx;
 }
 
-/* 行程单列表 */
+/* 活动列表 */
 .content {
   flex: 1;
   width: 100%;
+
+  .list-content {
+    padding: 6rpx 8rpx 12rpx;
+  }
 
   /* 加载更多提示 */
   .load-more-tip {
@@ -327,11 +340,26 @@ const handleDel = (itemId: string) => {
 }
 
 .orderItem {
+  position: relative;
   padding: 24rpx;
   border-radius: 30rpx;
   background-color: #ffffff;
   @include customShadow();
   margin-bottom: 24rpx;
+}
+
+.delete-chip {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  z-index: 2;
+  padding: 8rpx 22rpx;
+  border: 1px solid rgba(255, 59, 59, 0.45);
+  border-radius: 24rpx;
+  background-color: rgba(255, 59, 59, 0.08);
+  font-size: 24rpx;
+  line-height: 1;
+  color: #ff3b3b;
 }
 
 .card-body {
@@ -363,6 +391,8 @@ const handleDel = (itemId: string) => {
   flex-direction: column;
 
   .title {
+    box-sizing: border-box;
+    padding-right: 116rpx;
     font-size: 28rpx;
     font-weight: bold;
     color: $qs-font-title;
@@ -433,10 +463,5 @@ const handleDel = (itemId: string) => {
   border: 1px solid #cdcdcd;
   font-size: 24rpx;
   color: $qs-font-title;
-
-  &.primary {
-    border-color: $qs-brandColor;
-    background-color: rgba(255, 208, 24, 0.1);
-  }
 }
 </style>

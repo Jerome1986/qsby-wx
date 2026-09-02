@@ -11,11 +11,11 @@ export interface UserBalanceFlow {
   /** 变动金额 */
   amount: number
   /** 变动前余额 */
-  before_balance: number
+  before_balance?: number
   /** 变动后余额 */
-  after_balance: number
+  after_balance?: number
   /** 支付方式 cash=现金 voucher=代金券 commission=佣金 points=积分 */
-  pay_type: 'cash' | 'voucher' | 'commission' | 'points'
+  pay_type?: 'cash' | 'voucher' | 'commission' | 'points'
   /** 业务类型 order=订单 refund=退款 withdraw=提现 commission=佣金结算 activity=活动奖励 admin=后台调整 */
   business_type: 'order' | 'refund' | 'withdraw' | 'commission' | 'activity' | 'admin'
   /** 业务ID */
@@ -25,7 +25,29 @@ export interface UserBalanceFlow {
   /** 备注 */
   remark?: string
   /** 创建时间 */
-  created_at: Date
+  created_at: Date | string
+  /** 关联订单ID */
+  order_id?: string
+  /** 订单编号 */
+  out_trade_no?: string
+  /** 购买人 */
+  buyerName?: string
+  /** 产品金额 */
+  totalAmount?: number
+  /** 下单时间 */
+  orderTime?: Date | string
+  /** 产品名称 */
+  productName?: string
+  /** 订单状态 */
+  orderStatus?: string
+}
+
+export interface BalanceFlowPage {
+  list: UserBalanceFlow[]
+  total: number
+  pageNum: number
+  pageSize: number
+  totalPage: number
 }
 
 // 查询代金券账单格式

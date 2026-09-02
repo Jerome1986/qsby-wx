@@ -21,10 +21,10 @@ export const homeData: Data[] = [
     type: 'play',
   },
   {
-    icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/home/jinpin.png',
-    dec: 'ACTIVITY',
-    title: '同城活动',
-    type: 'city',
+    icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/home/house.png',
+    dec: 'PREMIUM B&B',
+    title: '自营门店',
+    type: 'store',
   },
   {
     icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/home/balloon.png',
@@ -33,10 +33,10 @@ export const homeData: Data[] = [
     type: 'interesting',
   },
   {
-    icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/home/house.png',
-    dec: 'PREMIUM B&B',
-    title: '自营门店',
-    type: 'store',
+    icon: 'https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/home/jinpin.png',
+    dec: 'HOMESTAY BLOGGER PLAN',
+    title: '千宿百院民宿博主计划',
+    type: 'city',
   },
 ]
 
@@ -48,7 +48,7 @@ export const HomeJump: Record<NavType, () => void> = {
   },
   city: () => {
     uni.navigateTo({
-      url: '/pages/activity/activity',
+      url: '/pages/activity/publishPlan',
     })
   },
   interesting: () => {

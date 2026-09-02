@@ -8,9 +8,17 @@ export type PageOrderType = OrderType | 'all'
 
 // 订单状态
 // pending: 待支付, paid: 已支付（待核销）, verified: 已核销（已完成）, cancelled: 已取消, refunding: 退款中, refunded: 已退款
-export type OrderStatus = 'pending' | 'paid' | 'verified' | 'cancelled' | 'refunding' | 'refunded'
+export type OrderStatus =
+  | 'pending'
+  | 'payment_processing'
+  | 'paid'
+  | 'verified'
+  | 'cancelled'
+  | 'refunding'
+  | 'refunded'
+  | 'payment_exception'
 // 页面展示订单状态类型
-export type PageOrderStatus = OrderStatus | 'all'
+export type PageOrderStatus = OrderStatus | 'all' | 'afterSale'
 
 // 订单支付方式
 export type OrderPaymentMethod = 'wechat' | 'alipay' | 'bank'
@@ -41,7 +49,7 @@ export interface ShopInfo {
   /** 门店地址 */
   address: string
   /** 门店电话 */
-  phone: string
+  phone: string | string[]
   /** 纬度 */
   latitude?: number
   /** 经度 */
@@ -49,7 +57,7 @@ export interface ShopInfo {
 }
 
 // 抵扣类型
-export type DiscountType = 'cash' | 'voucher' | 'commission' | 'points'
+export type DiscountType = 'none' | 'voucher' | 'commission' | 'points'
 
 // 订单提交参数
 export interface OrderSubmitParams {
@@ -73,6 +81,8 @@ export interface OrderSubmitParams {
   viewFee?: number
   /** 报名人信息 */
   userInfo: OrderUserInfo
+  /** 分享来源用户ID */
+  shareUserId?: string
   /** 发起人信息 */
   initiatorInfo?: InitiatorInfo
   shopInfo?: ShopInfo
@@ -108,6 +118,8 @@ export interface OrderItem {
   productInfo: ProductInfo
   /** 用户信息嵌套对象(报名人信息) */
   userInfo: OrderUserInfo
+  /** 分享来源用户ID */
+  shareUserId?: string
   /** 门店信息 */
   shopInfo?: ShopInfo
   /** 发起人信息 */
@@ -126,6 +138,10 @@ export interface OrderItem {
   payScore: number
   /** 订单状态（pending-待付款/verifying-待核销/verified-已核销/refunded-退款） */
   status: OrderStatus
+  /** 支付成功但业务处理失败时的异常标记 */
+  paymentException?: boolean
+  /** 支付异常原因 */
+  paymentExceptionMessage?: string
   /** 核销码 - 用于记录和手动核销 */
   verifyCode?: string
   /** 是否已核销 */
@@ -160,12 +176,20 @@ export interface ProductInfo {
   cover: string
   /** 产品名称 */
   title: string
+  /** 活动分类ID */
+  type?: string
+  /** 活动分类名称 */
+  typeName?: string
   /** 产品时间 行程、活动等，项目不包括时间，长期有效 */
   time?: string
   /** 产品对应的门店名称 */
   address_name?: string
   /** 产品对应的门店地址 */
   event_address?: string
+  /** 产品位置纬度 */
+  latitude?: number
+  /** 产品位置经度 */
+  longitude?: number
 }
 
 // 订单对应的发起人信息 酒店类订单除外，默认空对象
@@ -186,6 +210,30 @@ export interface OrderPage {
   pageNum: number
   pageSize: number
   totalPage: number
+}
+
+/** 门店经营概览 */
+export interface StorePerformanceSummary {
+  /** 统计期内已核销且未退款订单的实付金额 */
+  verifiedRevenue: number
+  /** 统计期内已核销订单数 */
+  verifiedOrderCount: number
+  /** 当前待核销订单数，不受统计日期影响 */
+  pendingVerificationCount: number
+  /** 统计期内已退款订单的实付金额 */
+  refundAmount: number
+  /** 与上一相同周期相比的业绩变化百分比 */
+  comparisonRate?: number | null
+}
+
+/** 门店经营概览查询参数 */
+export interface StorePerformanceParams {
+  /** 门店ID */
+  shopId: string
+  /** 统计开始日期（YYYY-MM-DD，包含当天） */
+  startDate: string
+  /** 统计结束日期（YYYY-MM-DD，包含当天） */
+  endDate: string
 }
 
 /** 取消订单接口返回 */
@@ -209,6 +257,10 @@ export interface CreateOrderFreeResult {
 
 // 核销订单接口返回
 export interface WriteOrderResult {
+  /** 订单ID */
+  orderId: string
   out_trade_no: string
+  /** 订单所属门店ID（非门店订单为 null） */
+  shopId: string | null
   isVerified: boolean
 }

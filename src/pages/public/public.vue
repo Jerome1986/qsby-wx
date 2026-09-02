@@ -10,13 +10,14 @@ const {
   isEditMode,
   cover,
   typeOptions,
-  showRequirementInput,
+  requirementPreview,
   pickerTime,
   fileList,
   action,
   handleUpdateCover,
   changeLocal,
   handleChange,
+  handleEditRequirement,
   handleSubmit,
   init,
 } = usePublicForm()
@@ -51,43 +52,43 @@ onLoad((options) => {
         <view class="formCard">
           <uni-forms ref="formRef" :modelValue="formData" labelWidth="160rpx">
             <!-- 行程主题 -->
-            <uni-forms-item label="行程主题" name="title">
-              <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入行程主题" primaryColor="#ffd018"
+            <uni-forms-item label="活动主题" name="title">
+              <uni-easyinput v-model="formData.title" :inputBorder="false" placeholder="请输入活动主题" primaryColor="#ffd018"
                 trim />
             </uni-forms-item>
-            <!-- 行程类型 -->
-            <uni-forms-item label="行程类型" name="type">
+            <!-- 活动类型 -->
+            <uni-forms-item label="活动类型" name="type">
               <uni-data-select v-model="formData.type" :localdata="typeOptions" placeholder="请选择"
                 mode="none"></uni-data-select>
             </uni-forms-item>
-            <!-- 行程时间 -->
-            <uni-forms-item label="行程时间" name="time">
+            <!-- 活动时间 -->
+            <uni-forms-item label="活动时间" name="time">
               <view class="time">
                 <wd-datetime-picker v-model="pickerTime" :min-date="minDate" :displayFormat="displayFormat" label=""
-                  placeholder="请选择行程开始日期" confirmButtonText="选择" />
+                  placeholder="请选择活动开始日期" confirmButtonText="选择" />
               </view>
             </uni-forms-item>
-            <!-- 行程地点 -->
-            <uni-forms-item label="行程地点" name="location">
+            <!-- 活动地点 -->
+            <uni-forms-item label="活动地点" name="location">
               <view class="location-row">
-                <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择行程地点"
+                <uni-easyinput v-model="formData.address_name" :inputBorder="false" placeholder="请选择活动地点"
                   primaryColor="#ffd018" disabled trim />
                 <view class="search-btn" @tap="changeLocal">搜索</view>
               </view>
             </uni-forms-item>
-            <!-- 行程地址 -->
-            <uni-forms-item label="行程地址" name="address">
-              <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请输入行程地址"
+            <!-- 活动地址 -->
+            <uni-forms-item label="活动地址" name="address">
+              <uni-easyinput v-model="formData.event_address" :inputBorder="false" placeholder="请输入活动地址"
                 primaryColor="#ffd018" trim />
             </uni-forms-item>
             <!-- 联系微信 -->
             <uni-forms-item label="联系微信" name="wechat">
-              <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入行程联系微信"
+              <uni-easyinput v-model="formData.wechat" :inputBorder="false" placeholder="请输入活动联系微信"
                 primaryColor="#ffd018" trim />
             </uni-forms-item>
             <!-- 联系电话 -->
             <uni-forms-item label="联系电话" name="phone">
-              <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入行程联系电话"
+              <uni-easyinput v-model="formData.phone" :inputBorder="false" placeholder="请输入活动联系电话"
                 primaryColor="#ffd018" type="number" trim />
             </uni-forms-item>
             <!-- 人数限制 -->
@@ -124,20 +125,19 @@ onLoad((options) => {
               <uni-easyinput v-model="formData.commission" :inputBorder="false" placeholder="请输入主理人佣金"
                 primaryColor="#ffd018" type="number" trim />
             </uni-forms-item>
-            <!-- 行程需求 -->
-            <uni-forms-item label="行程需求" name="requirement">
-              <view class="requirement-row" v-show="!showRequirementInput" @tap="showRequirementInput = true">
-                <text class="requirement-placeholder">去填写</text>
+            <!-- 活动需求 -->
+            <uni-forms-item label="活动需求" name="requirement">
+              <view class="requirement-row" @tap="handleEditRequirement">
+                <text v-if="requirementPreview" class="requirement-preview">{{ requirementPreview }}</text>
+                <text class="requirement-placeholder">{{ requirementPreview ? '去修改' : '去填写' }}</text>
               </view>
             </uni-forms-item>
-            <wd-textarea v-if="showRequirementInput" v-model="formData.requirement" placeholder="请输入行程需求"
-              :maxlength="500" />
           </uni-forms>
         </view>
-        <!-- 行程图片上传 -->
+        <!-- 活动图片上传 -->
         <view class="contentUpdateImage">
           <view class="contentUpdateImage-header">
-            <text>行程图片</text>
+            <text>活动图片</text>
           </view>
           <wd-upload :file-list="fileList" image-mode="aspectFill" :action="action" :limit="6" multiple
             @change="handleChange"></wd-upload>
@@ -350,8 +350,21 @@ onLoad((options) => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  min-width: 0;
+
+  .requirement-preview {
+    flex: 1;
+    margin-right: 16rpx;
+    font-size: 26rpx;
+    color: $qs-font-dec;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   .requirement-placeholder {
+    flex-shrink: 0;
     padding: 8rpx 24rpx;
     background: #ffd018;
     border-radius: 24rpx;

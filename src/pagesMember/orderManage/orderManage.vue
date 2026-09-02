@@ -2,27 +2,35 @@
 import NavHead from '@/components/NavHead.vue'
 import { ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
-import type { OrderItem, OrderType, PageOrderStatus, PageOrderType } from '@/types/OrderItem'
+import type { OrderItem, OrderStatus, PageOrderStatus, PageOrderType } from '@/types/OrderItem'
 import { orderFindAll } from '@/api/order'
 import { useUserStore } from '@/stores'
-
+import { activityTypeFindAll } from '@/api/activity'
+import type { ActivityTypeItem } from '@/types/Public'
+import { formatTimestamp } from '@/utils/generateMonth'
 
 // store
 const userStore = useUserStore()
 
-// 一级Tab：订单类型
-const orderTypes = [
-  { label: '全部', value: 'all' },
-  { label: '趣哪游', value: 'trip' },
-  { label: '趣活动', value: 'activity' },
-  { label: '门店', value: 'shop' },
-  { label: '项目', value: 'project' },
-] as const
+type OrderTabType = 'all' | 'activityCategory' | 'shop'
 
-const currentOrderType = ref<PageOrderType>('all')
-const handleTypeTab = (value: PageOrderType) => {
-  currentOrderType.value = value
-  fetchOrders(currentOrderType.value, currentStatus.value)
+interface OrderTypeTab {
+  label: string
+  value: string
+  type: OrderTabType
+  activityTypeId?: string
+}
+
+// 一级Tab：全部 + 活动分类 + 门店
+const orderTypes = ref<OrderTypeTab[]>([
+  { label: '全部', value: 'all', type: 'all' },
+  { label: '门店', value: 'shop', type: 'shop' },
+])
+
+const currentOrderType = ref('all')
+const handleTypeTab = (item: OrderTypeTab) => {
+  currentOrderType.value = item.value
+  refreshOrders()
 }
 
 // 二级Tab：订单状态
@@ -31,14 +39,14 @@ const statusTabs = [
   { label: '待付款', value: 'pending' },
   { label: '待核销', value: 'paid' },
   { label: '已核销', value: 'verified' },
-  { label: '退款/售后', value: 'refunded' },
+  { label: '退款/售后', value: 'afterSale' },
 ] as const
 
 // 当前订单状态
 const currentStatus = ref<PageOrderStatus>('all')
 const handleStatusTab = (value: PageOrderStatus) => {
   currentStatus.value = value
-  fetchOrders(currentOrderType.value, currentStatus.value)
+  refreshOrders()
 }
 
 
@@ -48,48 +56,157 @@ const loading = ref(false)
 const pageNum = ref(1)
 const pageSize = ref(10)
 const finish = ref(false)
+const initialized = ref(false)
+
+const loadActivityTabs = async () => {
+  try {
+    const res = await activityTypeFindAll()
+    const activityTypes = Array.isArray(res.data) ? res.data : []
+    const activityTabs = activityTypes.map((item: ActivityTypeItem) => ({
+      label: item.name,
+      value: item._id,
+      type: 'activityCategory' as const,
+      activityTypeId: item._id,
+    }))
+
+    orderTypes.value = [
+      { label: '全部', value: 'all', type: 'all' },
+      ...activityTabs,
+      { label: '门店', value: 'shop', type: 'shop' },
+    ]
+  } catch (error) {
+    // 活动分类加载失败不能阻断“全部”和“门店”订单查询
+    console.error('获取活动分类失败', error)
+  }
+}
+
+const getCurrentTypeTab = () => {
+  return orderTypes.value.find((item) => item.value === currentOrderType.value) ?? orderTypes.value[0]
+}
+
+const refreshOrders = async () => {
+  orderList.value = []
+  pageNum.value = 1
+  finish.value = false
+  await fetchOrders()
+}
+
 // TODO: 分页查询
-const fetchOrders = async (orderType: PageOrderType, orderStatus: PageOrderStatus) => {
+const fetchOrders = async () => {
+  if (loading.value || finish.value) return
+
   loading.value = true
-  const openid = userStore.profile?.openid as string
-  console.log('参数', orderType, orderStatus)
+  try {
+    const openid = userStore.profile?.openid
+    if (!openid) {
+      orderList.value = []
+      finish.value = true
+      uni.showToast({ icon: 'none', title: '请先登录' })
+      return
+    }
 
-  const res = await orderFindAll(orderType, orderStatus, openid, pageNum.value, pageSize.value)
-  console.log(res)
+    const currentTypeTab = getCurrentTypeTab()
+    const orderType: PageOrderType =
+      currentTypeTab.type === 'activityCategory' ? 'activity' : currentTypeTab.type
 
-  orderList.value = res.data.list
-  loading.value = false
+    const res = await orderFindAll(
+      orderType,
+      currentStatus.value,
+      openid,
+      pageNum.value,
+      pageSize.value,
+      currentTypeTab.activityTypeId,
+    )
+
+    const page = res.data
+    const list = Array.isArray(page?.list) ? page.list : []
+
+    orderList.value = pageNum.value === 1 ? list : [...orderList.value, ...list]
+    finish.value = list.length < pageSize.value || pageNum.value >= Number(page?.totalPage || 0)
+
+    if (!finish.value) pageNum.value++
+  } catch (error) {
+    console.error('获取订单列表失败', error)
+    uni.showToast({ icon: 'none', title: '订单加载失败，请重试' })
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadMoreOrders = () => {
+  if (!loading.value && !finish.value) fetchOrders()
+}
+
+const handleOrderUpdated = (updatedOrder: OrderItem) => {
+  const index = orderList.value.findIndex((item) => item._id === updatedOrder._id)
+  if (index < 0) return
+
+  const matchesAfterSale =
+    currentStatus.value === 'afterSale' &&
+    ['refunding', 'refunded'].includes(updatedOrder.status)
+
+  if (
+    currentStatus.value !== 'all' &&
+    !matchesAfterSale &&
+    updatedOrder.status !== currentStatus.value
+  ) {
+    orderList.value.splice(index, 1)
+    return
+  }
+
+  orderList.value.splice(index, 1, { ...orderList.value[index], ...updatedOrder })
 }
 
 // 查看订单详情
 const handleViewDetail = (item: OrderItem) => {
   uni.navigateTo({
     url: `/pagesMember/orderDetail/orderDetail?orderId=${item._id}&type=${item.orderType}`,
+    events: {
+      'order-updated': handleOrderUpdated,
+    },
   })
 }
 
 // 获取订单类型标签
-const getOrderTypeLabel = (type: OrderType) => {
-  const map: Record<OrderType, string> = {
-    trip: '趣哪游',
-    activity: '趣活动',
-    shop: '门店',
-    project: '项目',
-  }
-  return map[type] || ''
+const getOrderTypeLabel = (item: OrderItem) => {
+  if (item.orderType === 'activity') return item.productInfo.typeName || '趣活动'
+  if (item.orderType === 'shop') return '门店'
+  return ''
 }
 
-onLoad((options) => {
+const orderStatusMap: Record<OrderStatus, string> = {
+  pending: '待付款',
+  payment_processing: '支付处理中',
+  paid: '待核销',
+  verified: '已核销',
+  cancelled: '已取消',
+  refunding: '退款中',
+  refunded: '已退款',
+  payment_exception: '支付异常',
+}
+
+const getOrderStatusLabel = (status: OrderStatus) => orderStatusMap[status]
+
+const formatMoney = (amount: unknown) => {
+  const value = Number(amount)
+  return Number.isFinite(value) ? value.toFixed(2) : '0.00'
+}
+
+onLoad(async (options) => {
   if (options?.orderStatus) {
     currentStatus.value = options.orderStatus as PageOrderStatus
   }
-  if (options?.orderType) {
-    currentOrderType.value = options.orderType as PageOrderType
+  if (options?.orderType === 'shop') {
+    currentOrderType.value = 'shop'
   }
+  await loadActivityTabs()
+  await refreshOrders()
+  initialized.value = true
 })
 
 onShow(() => {
-  fetchOrders(currentOrderType.value, currentStatus.value)
+  // 从订单详情返回时重新获取当前筛选条件下的数据
+  if (initialized.value) refreshOrders()
 })
 </script>
 
@@ -104,7 +221,7 @@ onShow(() => {
         <scroll-view class="type-tabs-scroll" :scroll-x="true" enable-flex :show-scrollbar="false">
           <view class="type-tabs">
             <view v-for="item in orderTypes" :key="item.value" class="type-tab-item"
-              :class="{ active: currentOrderType === item.value }" @tap="handleTypeTab(item.value)">
+              :class="{ active: currentOrderType === item.value }" @tap="handleTypeTab(item)">
               {{ item.label }}
             </view>
           </view>
@@ -120,7 +237,8 @@ onShow(() => {
     </view>
 
     <!-- 订单列表 -->
-    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
+    <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false"
+      lower-threshold="100" @scrolltolower="loadMoreOrders">
       <view style="padding:0 24rpx;">
         <view v-if="loading" class="loading">
           <text>加载中...</text>
@@ -135,16 +253,27 @@ onShow(() => {
             <!-- 封面图 -->
             <view class="cover-wrap">
               <image class="cover" :src="item.productInfo.cover" mode="aspectFill"></image>
-              <view class="type-tag">{{ getOrderTypeLabel(item.orderType) }}</view>
+              <view class="type-tag">{{ getOrderTypeLabel(item) }}</view>
             </view>
             <!-- 订单信息：标题、每条信息、价格+按钮 各为独立 view -->
             <view class="order-info">
+              <view class="order-status-tag" :class="`is-${item.status}`">
+                {{ getOrderStatusLabel(item.status) }}
+              </view>
               <!-- 已核销印章 -->
               <view class="status" v-if="item.status === 'verified'">
                 <image src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/images/hx.png"
                   mode="aspectFit" />
               </view>
               <view class="title">{{ item.productInfo.title }}</view>
+              <view class="info-row" v-if="item.createdAt">
+                <text class="label">下单时间：</text>
+                <text class="value">{{ formatTimestamp(item.createdAt, 2) }}</text>
+              </view>
+              <view class="info-row" v-if="item.status === 'verified' && item.verifiedTime">
+                <text class="label">核销时间：</text>
+                <text class="value">{{ formatTimestamp(item.verifiedTime, 2) }}</text>
+              </view>
               <!-- 门店类型 -->
               <template>
                 <view class="info-row" v-if="item.orderType !== 'shop'">
@@ -167,13 +296,13 @@ onShow(() => {
                   <template v-if="item.orderType === 'shop'">
                     <template>
                       <text class="label">订单价格：</text>
-                      <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
+                      <text class="price">￥{{ formatMoney(item.payAmount) }}</text>
                     </template>
                   </template>
                   <template v-else>
                     <template>
                       <text class="label">报名金额：</text>
-                      <text class="price">￥{{ item.payAmount.toFixed(2) }}</text>
+                      <text class="price">￥{{ formatMoney(item.payAmount) }}</text>
                     </template>
                   </template>
                 </view>
@@ -181,6 +310,8 @@ onShow(() => {
             </view>
           </view>
         </view>
+        <view v-if="loading && orderList.length > 0" class="load-more">加载中...</view>
+        <view v-else-if="finish && orderList.length > 0" class="load-more">没有更多了</view>
         <view class="bottom-placeholder"></view>
       </view>
     </scroll-view>
@@ -281,6 +412,13 @@ onShow(() => {
   color: $qs-font-dec;
 }
 
+.load-more {
+  padding: 28rpx 0 8rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: $qs-font-dec2;
+}
+
 .empty {
   display: flex;
   flex-direction: column;
@@ -338,7 +476,7 @@ onShow(() => {
     padding: 6rpx 16rpx;
     font-size: 20rpx;
     color: #ffffff;
-    background: linear-gradient(135deg, $qs-brandColor, darken($qs-brandColor, 10%));
+    background: linear-gradient(135deg, $qs-brandColor, color.adjust($qs-brandColor, $lightness: -10%));
     border-radius: 16rpx 0 16rpx 0;
     z-index: 1;
   }
@@ -362,10 +500,52 @@ onShow(() => {
   }
 
   .title {
+    padding-right: 112rpx;
     margin-bottom: 8rpx;
     font-weight: bold;
     color: $qs-font-title;
     @include ellipsis(1);
+  }
+
+  .order-status-tag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    padding: 6rpx 14rpx;
+    border-radius: 18rpx;
+    font-size: 22rpx;
+    line-height: 1.4;
+    color: #ffffff;
+    background-color: $qs-brandColor;
+
+    &.is-paid {
+      background-color: #ff9f1c;
+    }
+
+    &.is-payment_processing {
+      background-color: #ff9f1c;
+    }
+
+    &.is-verified {
+      background-color: #35a873;
+    }
+
+    &.is-cancelled {
+      background-color: #999999;
+    }
+
+    &.is-refunding {
+      background-color: #f07b3f;
+    }
+
+    &.is-refunded {
+      background-color: #8a78b5;
+    }
+
+    &.is-payment_exception {
+      background-color: #e5484d;
+    }
   }
 
   .info-row {

@@ -81,12 +81,13 @@ const handleSelectedSort = (currentSortId: SortType) => {
 }
 
 const handleSend = () => {
-  if (userStore.profile?.role === 'user' || !userStore.profile) {
+  const isAdmin = userStore.profile?.role === 'admin'
+  if (!isAdmin && !userStore.isValidManager) {
     uni.showToast({ icon: 'none', title: '请先申请主理人' })
     return
   }
   uni.navigateTo({
-    url: `/pages/public/public?sendType=activity`,
+    url: '/pages/public/public',
   })
 }
 </script>

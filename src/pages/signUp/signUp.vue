@@ -11,7 +11,7 @@ import { vaildateMoible } from '@/utils/validateMobile'
 import type { OrderSubmitParams, OrderUserInfo, InitiatorInfo, OrderType } from '@/types/OrderItem'
 import PayMethod from '@/components/PayMethod.vue'
 import TipsBlock from '@/components/TipsBlock.vue'
-import { createQrCode, createOrderFree, orderAdd } from '@/api/order'
+import { createOrderFree, createQrCode, orderAdd } from '@/api/order'
 import { userInfoGetApi } from '@/api/user'
 import { activityDetail } from '@/api/activity'
 import { isSignUp, isVerify } from '@/composables/isVerifySignUp';
@@ -37,6 +37,12 @@ onLoad(async () => {
 
 onLoad((options) => {
   proType.value = options?.proType
+  shareUserId.value = options?.shareUserId || ''
+  console.log('[shareUserId][signUp received]', {
+    optionValue: options?.shareUserId,
+    storedValue: shareUserId.value,
+    options,
+  })
 
   isSignUp(options?.productId, proType.value as OrderType, userStore.profile?._id as string)
 })
@@ -65,27 +71,16 @@ const detailGet = async (id: string, proType: OrderType) => {
   initiatorInfo.wechat = detailData.value.wechat as string
 }
 
-// 是否使用代金券
-const useVoucher = ref(false)
-
 // 抵扣金额
 const discountAmount = computed(() => {
-  const userFee = detailData.value.userFee || 0
-
   // 非主理人无抵扣
-  if (userStore.profile?.role !== 'manager') {
+  if (!userStore.isValidManager) {
     return 0
   }
 
   const commission = detailData.value.commission || 0
-  const couponBalance = userStore.profile?.couponBalance || 0
 
-  // 代金券和主理人折扣二选一，不可叠加
-  if (useVoucher.value && couponBalance > 0) {
-    // 使用代金券抵扣，最多抵扣原价
-    return Number(Math.min(couponBalance, userFee).toFixed(2))
-  } else if (commission > 0) {
-    // 使用主理人折扣
+  if (commission > 0) {
     return Number(commission.toFixed(2))
   }
 
@@ -143,16 +138,22 @@ const submit = async () => {
 
   // 检查用户是否有openid,如果没有就跳转登录
   if (!userStore.profile?.openid) {
-    uni.navigateTo({ url: `/pages/login/login?productId=${detailData.value._id}&proType=${proType.value}` })
+    const query = [
+      `productId=${encodeURIComponent(detailData.value._id as string)}`,
+      `proType=${encodeURIComponent(proType.value as string)}`,
+      shareUserId.value ? `shareUserId=${encodeURIComponent(shareUserId.value)}` : '',
+    ]
+      .filter(Boolean)
+      .join('&')
+    uni.navigateTo({ url: `/pages/login/login?${query}` })
     return
   }
 
   // 确定抵扣类型
   const getDiscountType = () => {
-    if (userStore.profile?.role !== 'manager') return 'cash'
-    if (useVoucher.value && (userStore.profile?.couponBalance || 0) > 0) return 'voucher'
+    if (!userStore.isValidManager) return 'none'
     if (commission > 0) return 'commission'
-    return 'cash'
+    return 'none'
   }
 
   // 准备提交参数
@@ -163,9 +164,13 @@ const submit = async () => {
       productId: detailData.value._id as string,
       cover: detailData.value.cover as string,
       title: detailData.value.title as string,
+      type: detailData.value.type as string,
+      typeName: detailData.value.typeName as string,
       time: detailData.value.time as string,
       address_name: detailData.value.address_name as string,
-      event_address: detailData.value.event_address as string
+      event_address: detailData.value.event_address as string,
+      latitude: detailData.value.latitude,
+      longitude: detailData.value.longitude,
     },
     userInfo: {
       userId: userStore.profile?._id as string,
@@ -180,30 +185,29 @@ const submit = async () => {
     discountType: getDiscountType(),
     payAmount,
     description: detailData.value.title as string,
-  }
-
-  // 如果是代金券抵扣，且支付金额抵扣完为0就走下单流程，不用支付
-  if (payAmount === 0 && params.discountType === 'voucher') {
-    console.log('提交参数', params)
-
-    try {
-      const res = await createOrderFree(params)
-      console.log('创建订单', res)
-
-      await createQrCode(res.data?.orderId, userStore.profile?.openid as string).catch((err) =>
-        console.error('核销码创建失败', err)
-      )
-      await uni.redirectTo({
-        url: `/pagesMember/orderDetail/orderDetail?orderId=${res.data.orderId}&proType=${proType.value}`,
-      })
-    } catch (err) {
-      console.error('免支付下单失败', err)
-      uni.showToast({ icon: 'none', title: '下单失败，请重试' })
-    }
-    return
+    shareUserId: shareUserId.value || '',
   }
 
   console.log('提交报名参数', params)
+  console.log('[shareUserId][signUp -> commonPay]', {
+    refValue: shareUserId.value,
+    requestValue: params.shareUserId,
+  })
+
+  // 抵扣后实付为 0 时直接创建待核销订单，不调起微信支付
+  if (payAmount === 0) {
+    const freeOrderRes = await createOrderFree(params)
+    try {
+      await createQrCode(freeOrderRes.data.orderId, userStore.profile?.openid as string)
+    } catch (err) {
+      console.error('核销码创建失败', err)
+    }
+    await uni.redirectTo({
+      url: `/pagesMember/orderDetail/orderDetail?orderId=${freeOrderRes.data.orderId}&type=${proType.value}`,
+    })
+    return
+  }
+
   //  调用生成订单+支付接口
   const payRes = await orderAdd(params)
   console.log('支付返回结果', payRes)
@@ -237,6 +241,7 @@ const submit = async () => {
 }
 
 const proType = ref<OrderType>()
+const shareUserId = ref('')
 onLoad(async (options: any) => {
   console.log(options)
   if (options.productId) {
@@ -324,7 +329,7 @@ onLoad(async (options: any) => {
           <text class="label">实际费用</text>
           <text class="value">￥{{ realPayAmount }}</text>
         </view>
-        <view class="row discount" v-if="userStore.profile?.role === 'manager'">
+        <view class="row discount" v-if="userStore.isValidManager">
           <text class="label">主理人折扣</text>
           <text class="value">-￥{{ detailData.commission?.toFixed(2) }}</text>
         </view>
