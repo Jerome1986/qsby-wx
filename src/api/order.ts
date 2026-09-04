@@ -49,6 +49,7 @@ export const orderPay = (orderId: string, openid: string) => {
  * @param orderStatus - 订单状态
  * @param startDate - 开始日期（YYYY-MM-DD）
  * @param endDate - 结束日期（YYYY-MM-DD）
+ * @returns 订单列表；每项的 storeNetAmount 为扣除实际分享佣金后的门店实收金额
  */
 export const orderFindByShop = (
   shopId: string,
@@ -72,8 +73,7 @@ export const orderFindByShop = (
 }
 
 /**
- * 获取门店经营概览
- * 页面暂时使用模拟数据，后端接口完成后接入此方法
+ * 获取门店经营概览；verifiedRevenue 为已核销且未退款订单的门店实收金额合计
  */
 export const orderShopPerformance = (params: StorePerformanceParams) => {
   return request<StorePerformanceSummary>({

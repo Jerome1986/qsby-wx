@@ -132,6 +132,10 @@ const formatAmount = (amount?: number | null) => {
   return hasAmount(amount) ? Number(amount).toFixed(2) : '0.00'
 }
 
+const formatOptionalAmount = (amount?: number | null) => {
+  return hasAmount(amount) ? `¥${formatAmount(amount)}` : '--'
+}
+
 const orderStatusMap: Record<OrderStatus, string> = {
   pending: '待付款',
   paid: '待核销',
@@ -626,6 +630,12 @@ onShow(() => {
                   <view v-if="hasAmount(item.payAmount)" class="amount-row">
                     <text class="label">实付：</text>
                     <text class="price paid-price">¥{{ formatAmount(item.payAmount) }}</text>
+                  </view>
+                  <view class="amount-row">
+                    <text class="label">实收：</text>
+                    <text class="price net-amount-price">
+                      {{ formatOptionalAmount(item.storeNetAmount) }}
+                    </text>
                   </view>
                 </view>
               </view>
@@ -1224,6 +1234,10 @@ onShow(() => {
 
   .paid-price {
     color: color.adjust($qs-brandColor, $lightness: -28%);
+  }
+
+  .net-amount-price {
+    color: #35a873;
   }
 }
 

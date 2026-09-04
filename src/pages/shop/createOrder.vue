@@ -16,6 +16,7 @@ import { createQrCode, orderAdd } from '@/api/order'
 const userStore = useUserStore()
 const shopStore = useShopStore()
 const inviterCode = ref('')
+const shareUserId = ref('')
 // 获取产品信息
 const productData = ref<ProductItem>()
 const productDetailGet = async (productId: string) => {
@@ -44,6 +45,7 @@ onLoad(async (options) => {
     await productDetailGet(options?.productId as string)
   }
   inviterCode.value = options?.inviterCode || ''
+  shareUserId.value = options?.shareUserId || ''
 })
 
 // 订单联系人
@@ -93,6 +95,7 @@ const handlePay = async () => {
       `productId=${encodeURIComponent(productData.value?._id || '')}`,
       'proType=shop',
       inviterCode.value ? `inviterCode=${encodeURIComponent(inviterCode.value)}` : '',
+      shareUserId.value ? `shareUserId=${encodeURIComponent(shareUserId.value)}` : '',
     ]
       .filter(Boolean)
       .join('&')
@@ -152,6 +155,7 @@ const handlePay = async () => {
             discountType: getDiscountType(),
             payAmount,
             description: '酒店房间团购',
+            shareUserId: shareUserId.value || '',
           }
 
           console.log('参数', params)

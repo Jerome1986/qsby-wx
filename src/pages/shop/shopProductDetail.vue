@@ -6,15 +6,17 @@ import Note from '@/components/Note.vue'
 import ImageTextDetail from '@/components/ImageTextDetail.vue'
 import BottomActionBar from '@/components/BottomActionBar.vue'
 import { ref } from 'vue'
-import { shopPorductByOne } from '@/api/store'
+import { shopDetailApi, shopPorductByOne } from '@/api/store'
 import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
-import type { ProductItem } from '@/types/store'
+import type { ProductItem, StoreItem } from '@/types/store'
 import { useUserStore } from '@/stores'
 
 const userStore = useUserStore()
 const producntData = ref<ProductItem>()
+const shopInfo = ref<StoreItem>()
 const productId = ref('')
 const inviterCode = ref('')
+const shareUserId = ref('')
 
 const buildShareQuery = (query: Record<string, string | undefined>) => {
   return Object.entries(query)
@@ -28,6 +30,7 @@ const getShopProductSharePath = () => {
     productId: productId.value,
     proType: 'shop',
     inviterCode: userStore.profile?.referralCode,
+    shareUserId: userStore.profile?._id,
   })
   return query ? `/pages/shop/shopProductDetail?${query}` : '/pages/shop/shopProductDetail'
 }
@@ -37,6 +40,19 @@ const productGet = async (productId: string) => {
   console.log('产品', res)
 
   producntData.value = res.data
+
+  if (!res.data?.storeId) {
+    shopInfo.value = undefined
+    return
+  }
+
+  try {
+    const shopRes = await shopDetailApi(res.data.storeId)
+    shopInfo.value = shopRes.data.shopInfo
+  } catch (err) {
+    shopInfo.value = undefined
+    console.error('获取门店信息失败', err)
+  }
 }
 
 
@@ -48,6 +64,7 @@ onLoad((options) => {
     productGet(productId.value)
   }
   inviterCode.value = options?.inviterCode || ''
+  shareUserId.value = options?.shareUserId || ''
 })
 
 onShareAppMessage(() => {
@@ -78,6 +95,7 @@ onShareAppMessage(() => {
           :price="producntData?.price"
           :spec-label="producntData?.specLabel"
           :commission="producntData?.commission"
+          :shop-info="shopInfo"
         ></BookFlow>
         <!--  预约须知  -->
         <Note :store-id="producntData?.storeId"></Note>
@@ -95,6 +113,7 @@ onShareAppMessage(() => {
       :spec-label="producntData?.specLabel"
       :product-id="producntData?._id"
       :inviter-code="inviterCode"
+      :share-user-id="shareUserId"
       :show-group="false"
     ></BottomActionBar>
   </view>

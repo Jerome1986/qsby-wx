@@ -9,6 +9,7 @@ const props = withDefaults(
     specLabel?: string
     productId?: string
     inviterCode?: string
+    shareUserId?: string
     disabled?: boolean
     actionText?: string
     showGroup?: boolean
@@ -43,6 +44,7 @@ const buy = () => {
   const query = [
     `productId=${encodeURIComponent(props.productId)}`,
     props.inviterCode ? `inviterCode=${encodeURIComponent(props.inviterCode)}` : '',
+    props.shareUserId ? `shareUserId=${encodeURIComponent(props.shareUserId)}` : '',
   ]
     .filter(Boolean)
     .join('&')

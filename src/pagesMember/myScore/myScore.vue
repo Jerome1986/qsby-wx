@@ -190,8 +190,9 @@ const handelGo = (val: string) => {
 
       .details {
         margin-right: 10rpx;
-        border: 1px solid $qs-brandColor;
-        color: #ffd018;
+        border: 2rpx solid #b87910;
+        color: #9a6508;
+        font-weight: 500;
       }
 
       .order {

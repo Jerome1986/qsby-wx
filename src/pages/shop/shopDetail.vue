@@ -22,6 +22,7 @@ const getShopDetailSharePath = () => {
   const query = buildShareQuery({
     shopId: shopId.value,
     inviterCode: userStore.profile?.referralCode,
+    shareUserId: userStore.profile?._id,
   })
   return query ? `/pages/shop/shopDetail?${query}` : '/pages/shop/shopDetail'
 }
@@ -29,6 +30,7 @@ const getShopDetailSharePath = () => {
 // 获取门店的商品详情--返回门店信息shopInfo,和门店对应的商品列表product
 const shopId = ref('')
 const inviterCode = ref('')
+const shareUserId = ref('')
 const shopDetailData = ref<StoreDetail>()
 const shopDetailGet = async (shopId: string) => {
   const res = await shopDetailApi(shopId)
@@ -44,6 +46,7 @@ onLoad(async (options) => {
     await shopDetailGet(shopId.value)
   }
   inviterCode.value = options?.inviterCode || ''
+  shareUserId.value = options?.shareUserId || ''
 })
 
 // 跳转详情
@@ -51,6 +54,7 @@ const handleDetail = (productId: string) => {
   const query = buildShareQuery({
     productId,
     inviterCode: inviterCode.value,
+    shareUserId: shareUserId.value,
   })
   uni.navigateTo({
     url: `/pages/shop/shopProductDetail?${query}`,

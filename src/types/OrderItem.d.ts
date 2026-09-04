@@ -134,6 +134,12 @@ export interface OrderItem {
   discountType: DiscountType
   /** 实际支付金额（单位：元，0表示免支付） */
   payAmount: number
+  /**
+   * 门店实收金额（单位：元）
+   * 由后端按“实际支付金额 - 该订单实际产生的分享人佣金”计算。
+   * 字段在后端接口灰度期间可能缺失；前端不得使用商品佣金配置自行推算。
+   */
+  storeNetAmount?: number | null
   /** 实际支付积分 只用于积分订单 */
   payScore: number
   /** 订单状态（pending-待付款/verifying-待核销/verified-已核销/refunded-退款） */
@@ -214,7 +220,7 @@ export interface OrderPage {
 
 /** 门店经营概览 */
 export interface StorePerformanceSummary {
-  /** 统计期内已核销且未退款订单的实付金额 */
+  /** 统计期内已核销且未退款订单扣除分享人佣金后的门店实收金额合计 */
   verifiedRevenue: number
   /** 统计期内已核销订单数 */
   verifiedOrderCount: number

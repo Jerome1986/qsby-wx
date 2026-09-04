@@ -101,9 +101,15 @@ onUnload(() => {
       <!--  使用流程  -->
       <view class="progress">
         <NavTitle title="使用流程"></NavTitle>
-        <view class="progress-text">购买后→联系店家→确认预约→再进店（不接受没有预约）</view>
+        <view class="progress-text">购买后→联系客服→确认预约→再进店（不接受没有预约）</view>
+        <button class="contact-service-btn" open-type="contact">
+          <text class="iconfont icon-kefu contact-service-icon"></text>
+          <text>联系客服预约</text>
+        </button>
+        <view class="verify-divider"></view>
         <!-- 核销码（已支付才展示） -->
         <view class="qrcode-wrap" v-if="orderDetail.status === 'paid' && orderDetail.verifyCode">
+          <view class="verify-status">待核销</view>
           <view class="qrcode-grid" v-if="qrcodeModules.length">
             <view v-for="(row, rowI) in qrcodeModules" :key="rowI" class="qrcode-row">
               <view v-for="(col, colI) in row" :key="colI" class="qrcode-cell" :class="{ black: col.isBlack }"></view>
@@ -218,12 +224,55 @@ onUnload(() => {
     color: $qs-font-dec;
   }
 
+  .contact-service-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12rpx;
+    width: 100%;
+    height: 80rpx;
+    margin: 24rpx 0 0;
+    padding: 0;
+    border: none;
+    border-radius: 40rpx;
+    background: #1a1a1a;
+    color: #ffb034;
+    font-size: 28rpx;
+    font-weight: 500;
+    line-height: 80rpx;
+
+    &::after {
+      border: none;
+    }
+
+    .contact-service-icon {
+      font-size: 34rpx;
+    }
+  }
+
+  .verify-divider {
+    width: 100%;
+    margin-top: 32rpx;
+    border-top: 2rpx dashed #e5e5e5;
+  }
+
   /* 核销码区域（参考 orderDetail） */
   .qrcode-wrap {
     margin: 40rpx 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    .verify-status {
+      margin-bottom: 20rpx;
+      padding: 8rpx 24rpx;
+      border-radius: 24rpx;
+      background-color: rgba(255, 176, 52, 0.14);
+      color: #d8890d;
+      font-size: 24rpx;
+      font-weight: 500;
+      line-height: 32rpx;
+    }
 
     .qrcode-grid {
       display: flex;
