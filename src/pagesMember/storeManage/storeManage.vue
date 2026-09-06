@@ -627,9 +627,28 @@ onShow(() => {
                     <text class="label">订单价格：</text>
                     <text class="price">¥{{ formatAmount(item.totalAmount) }}</text>
                   </view>
+                  <view
+                    v-if="hasAmount(item.discountAmount) && Number(item.discountAmount) > 0"
+                    class="amount-row"
+                  >
+                    <text class="label">
+                      {{
+                        item.discountType === 'commission'
+                          ? '主理人抵扣：'
+                          : item.discountType === 'voucher'
+                            ? '代金券抵扣：'
+                            : '优惠：'
+                      }}
+                    </text>
+                    <text class="price">-¥{{ formatAmount(item.discountAmount) }}</text>
+                  </view>
                   <view v-if="hasAmount(item.payAmount)" class="amount-row">
                     <text class="label">实付：</text>
                     <text class="price paid-price">¥{{ formatAmount(item.payAmount) }}</text>
+                  </view>
+                  <view class="amount-row">
+                    <text class="label">佣金：</text>
+                    <text class="price">{{ formatOptionalAmount(item.shareCommissionAmount) }}</text>
                   </view>
                   <view class="amount-row">
                     <text class="label">实收：</text>

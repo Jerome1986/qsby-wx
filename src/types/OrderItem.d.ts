@@ -128,6 +128,12 @@ export interface OrderItem {
   totalAmount: number
   /** 佣金金额（推广返佣，单位：元） */
   commission: number
+  /** 本订单实际发放的分享人/上级主理人佣金（单位：元） */
+  shareCommissionAmount?: number | null
+  /** 实际佣金接收人ID */
+  commissionRecipientId?: string
+  /** 实际佣金来源 */
+  commissionType?: 'share' | 'inviter' | 'none'
   /** 优惠金额（抵扣金额，单位：元） */
   discountAmount: number
   /** 优惠类型（'cash' | 'voucher' | 'commission' | 'points'） */
