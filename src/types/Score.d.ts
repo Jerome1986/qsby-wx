@@ -66,6 +66,13 @@ export interface ScoreOrder {
   updatedAt: string
 }
 
+export interface ScoreWriteResult {
+  orderId: string
+  out_trade_no: string
+  isVerified: boolean
+  verifiedTime: string
+}
+
 export interface ScoreOrderPage {
   /** 商品列表 */
   list: ScoreOrder[]

@@ -10,9 +10,14 @@ import SendList from '@/pages/my/SendList.vue'
 import StoreManageList from '@/pages/my/StoreManageList.vue'
 import MyUtile from '@/pages/my/MyUtile.vue'
 import { writeOrder } from '@/api/order'
+import { computed } from 'vue'
+import { writeScoreOrder } from '@/api/scoreOrder'
 
 // store
 const userStore = useUserStore()
+const canVerifyScore = computed(
+  () => String(userStore.profile?.mobile ?? '').trim() === '13871388282',
+)
 
 const getInviteLoginPath = () => {
   const inviterCode = userStore.profile?.referralCode
@@ -66,9 +71,9 @@ const navigateStoreOrderDetail = (orderId: string) => {
 }
 
 // 扫码核销
-const openCode = () => {
+const openCode = (isScoreOrder = false) => {
   const isAdmin = userStore.profile?.role === 'admin'
-  if (!isAdmin && !userStore.isValidManager) {
+  if (isScoreOrder ? !canVerifyScore.value : !isAdmin && !userStore.isValidManager) {
     uni.showToast({ icon: 'error', title: '没有权限' })
     return
   }
@@ -77,7 +82,7 @@ const openCode = () => {
     success: (success) => {
       uni.showModal({
         title: '提示',
-        content: '确定核销吗',
+        content: isScoreOrder ? '确定核销该积分兑换订单吗？' : '确定核销吗',
         confirmColor: '#eed261',
         success: async (res) => {
           if (!res.confirm) return
@@ -87,20 +92,35 @@ const openCode = () => {
           console.log('核销了', success.result, profile._id, profile.role)
 
           try {
-            const result = await writeOrder(success.result, profile._id)
+            const verifyCode = success.result.trim()
+            if (!verifyCode) {
+              uni.showToast({ icon: 'none', title: '核销码为空，请重新扫码' })
+              return
+            }
+            const result = isScoreOrder
+              ? await writeScoreOrder(verifyCode, profile._id)
+              : await writeOrder(verifyCode, profile._id)
             console.log('核销结果', result)
 
             uni.showToast({
               icon: result.code === 200 ? 'success' : 'none',
-              title: result.code === 200 ? '核销成功' : '核销失败',
+              title: result.code === 200 ? '核销成功' : result.message || '核销失败',
             })
 
-            if (result.code !== 200 || !result.data.out_trade_no.startsWith('shop')) return
+            if (
+              isScoreOrder ||
+              result.code !== 200 ||
+              !result.data?.out_trade_no?.toLowerCase().startsWith('shop')
+            )
+              return
             console.log('核销结果', result.data)
             navigateStoreOrderDetail(result.data.orderId)
           } catch (err) {
             console.error('核销失败', err)
-            uni.showToast({ icon: 'none', title: '核销失败' })
+            uni.showToast({
+              icon: 'none',
+              title: err instanceof Error ? err.message : '核销失败',
+            })
           }
         },
         fail: (fail) => {
@@ -123,13 +143,21 @@ const openCode = () => {
       <!-- 用户信息 -->
       <UserInfo></UserInfo>
       <!-- 扫码核销 -->
-      <view class="code" @tap="openCode" v-if="userStore.profile?.role === 'admin' || userStore.isValidManager">
-        <image class="icon" src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/code.png"
-          mode="aspectFit" />
+      <view
+        class="code"
+        @tap="openCode(false)"
+        v-if="userStore.profile?.role === 'admin' || userStore.isValidManager"
+      >
+        <image
+          class="icon"
+          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/code.png"
+          mode="aspectFit"
+        />
         <view class="text">扫码核销</view>
       </view>
     </view>
     <view class="content">
+      <button v-if="canVerifyScore" @tap="openCode(true)">积分扫码核销</button>
       <!-- 功能区 -->
       <Function></Function>
       <!--   订单管理   -->
@@ -138,7 +166,11 @@ const openCode = () => {
       <SendList v-if="userStore.isValidManager"></SendList>
       <!--  门店管理  -->
       <StoreManageList
-        v-if="userStore.profile?.shopId && (userStore.isValidManager || userStore.profile?.role === 'admin')">
+        v-if="
+          userStore.profile?.shopId &&
+          (userStore.isValidManager || userStore.profile?.role === 'admin')
+        "
+      >
       </StoreManageList>
       <!-- 我的工具  -->
       <MyUtile></MyUtile>

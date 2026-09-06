@@ -3,7 +3,7 @@ import NavHead from '@/components/NavHead.vue'
 import NavTitle from '@/components/NavTitle.vue'
 import TipsBlock from '@/components/TipsBlock.vue'
 import { ref, watch } from 'vue'
-import { onLoad, onUnload } from '@dcloudio/uni-app'
+import { onLoad, onShow, onUnload } from '@dcloudio/uni-app'
 import UQRCode from 'uqrcodejs'
 import type { ScoreOrder } from '@/types/Score'
 import { scoreOrderFindOne } from '@/api/order'
@@ -70,8 +70,9 @@ onLoad((options) => {
   }
   openerEventChannel = currentPage?.getOpenerEventChannel?.()
   orderId.value = options?.orderId || ''
-  fetchOrderDetail()
 })
+
+onShow(() => fetchOrderDetail())
 
 onUnload(() => {
   if (orderDetail.value) openerEventChannel?.emit('order-updated', orderDetail.value)
@@ -101,7 +102,7 @@ onUnload(() => {
       <!--  使用流程  -->
       <view class="progress">
         <NavTitle title="使用流程"></NavTitle>
-        <view class="progress-text">购买后→联系客服→确认预约→再进店（不接受没有预约）</view>
+        <view class="progress-text">兑换后→联系平台客服→进行核销</view>
         <button class="contact-service-btn" open-type="contact">
           <text class="iconfont icon-kefu contact-service-icon"></text>
           <text>联系客服预约</text>
@@ -112,12 +113,20 @@ onUnload(() => {
           <view class="verify-status">待核销</view>
           <view class="qrcode-grid" v-if="qrcodeModules.length">
             <view v-for="(row, rowI) in qrcodeModules" :key="rowI" class="qrcode-row">
-              <view v-for="(col, colI) in row" :key="colI" class="qrcode-cell" :class="{ black: col.isBlack }"></view>
+              <view
+                v-for="(col, colI) in row"
+                :key="colI"
+                class="qrcode-cell"
+                :class="{ black: col.isBlack }"
+              ></view>
             </view>
           </view>
           <view class="number" @tap="handleCopyVerifyCode">
             券号 {{ orderDetail.verifyCode }}·<text class="copy-btn">复制</text>
           </view>
+        </view>
+        <view class="qrcode-placeholder" v-else-if="orderDetail.status === 'verified'">
+          <text class="placeholder-text">已核销</text>
         </view>
         <view class="qrcode-placeholder" v-else-if="!orderDetail.verifyCode">
           <text class="placeholder-text">核销码生成中...</text>
@@ -170,7 +179,6 @@ onUnload(() => {
 
 /* 商品信息和使用期限 */
 .usedTime {
-
   /* 商品名称 */
   .productName {
     font-weight: bold;

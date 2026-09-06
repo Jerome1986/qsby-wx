@@ -298,7 +298,7 @@ onShareAppMessage((res) => {
           <view class="bottom">
             <view class="signUp">已报名（{{ Number(detailData.maleCount) + Number(detailData.femaleCount) }}/{{
               detailData.maxPeople
-            }}）</view>
+              }}）</view>
             <view class="num">
               <view class="item">
                 <text class="male">男</text>
@@ -335,7 +335,7 @@ onShareAppMessage((res) => {
         <view>分享</view>
       </button>
       <!--   报名按钮   -->
-      <view class="sign" @tap="handleSign">行程报名</view>
+      <view class="sign" @tap="handleSign">活动报名</view>
     </view>
     <!-- <ProductDetailModal v-model="showPoster" :poster="posterData" :qr-code-url="qrCodeUrl" /> -->
   </view>

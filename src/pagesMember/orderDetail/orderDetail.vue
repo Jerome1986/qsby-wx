@@ -798,7 +798,7 @@ watch(
   .contact-icon {
     flex-shrink: 0;
     font-size: 36rpx;
-    color: $qs-brandColor;
+    color: #b19a3e;
     margin-left: 24rpx;
   }
 
