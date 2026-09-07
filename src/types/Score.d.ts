@@ -67,10 +67,12 @@ export interface ScoreOrder {
 }
 
 export interface ScoreWriteResult {
-  orderId: string
-  out_trade_no: string
-  isVerified: boolean
-  verifiedTime: string
+  /** false 表示核销码不属于积分订单 */
+  matched: boolean
+  orderId?: string
+  out_trade_no?: string
+  isVerified?: boolean
+  verifiedTime?: string
 }
 
 export interface ScoreOrderPage {

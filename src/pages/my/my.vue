@@ -10,14 +10,10 @@ import SendList from '@/pages/my/SendList.vue'
 import StoreManageList from '@/pages/my/StoreManageList.vue'
 import MyUtile from '@/pages/my/MyUtile.vue'
 import { writeOrder } from '@/api/order'
-import { computed } from 'vue'
 import { writeScoreOrder } from '@/api/scoreOrder'
 
 // store
 const userStore = useUserStore()
-const canVerifyScore = computed(
-  () => String(userStore.profile?.mobile ?? '').trim() === '13871388282',
-)
 
 const getInviteLoginPath = () => {
   const inviterCode = userStore.profile?.referralCode
@@ -71,10 +67,9 @@ const navigateStoreOrderDetail = (orderId: string) => {
 }
 
 // 扫码核销
-const openCode = (isScoreOrder = false) => {
-  const isAdmin = userStore.profile?.role === 'admin'
-  if (isScoreOrder ? !canVerifyScore.value : !isAdmin && !userStore.isValidManager) {
-    uni.showToast({ icon: 'error', title: '没有权限' })
+const openCode = () => {
+  if (!userStore.profile?._id) {
+    uni.showToast({ icon: 'none', title: '请先登录' })
     return
   }
 
@@ -82,7 +77,7 @@ const openCode = (isScoreOrder = false) => {
     success: (success) => {
       uni.showModal({
         title: '提示',
-        content: isScoreOrder ? '确定核销该积分兑换订单吗？' : '确定核销吗',
+        content: '确定核销吗',
         confirmColor: '#eed261',
         success: async (res) => {
           if (!res.confirm) return
@@ -97,9 +92,12 @@ const openCode = (isScoreOrder = false) => {
               uni.showToast({ icon: 'none', title: '核销码为空，请重新扫码' })
               return
             }
-            const result = isScoreOrder
-              ? await writeScoreOrder(verifyCode, profile._id)
-              : await writeOrder(verifyCode, profile._id)
+            // 后端识别积分订单并校验固定核销手机号；非积分码再尝试普通订单。
+            const scoreResult = await writeScoreOrder(verifyCode, profile._id)
+            const result =
+              scoreResult.data.matched === false
+                ? await writeOrder(verifyCode, profile._id)
+                : scoreResult
             console.log('核销结果', result)
 
             uni.showToast({
@@ -107,14 +105,16 @@ const openCode = (isScoreOrder = false) => {
               title: result.code === 200 ? '核销成功' : result.message || '核销失败',
             })
 
+            const outTradeNo = result.data?.out_trade_no ?? ''
+            const resultOrderId = result.data?.orderId ?? ''
             if (
-              isScoreOrder ||
               result.code !== 200 ||
-              !result.data?.out_trade_no?.toLowerCase().startsWith('shop')
+              !resultOrderId ||
+              !outTradeNo.toLowerCase().startsWith('shop')
             )
               return
             console.log('核销结果', result.data)
-            navigateStoreOrderDetail(result.data.orderId)
+            navigateStoreOrderDetail(resultOrderId)
           } catch (err) {
             console.error('核销失败', err)
             uni.showToast({
@@ -143,21 +143,18 @@ const openCode = (isScoreOrder = false) => {
       <!-- 用户信息 -->
       <UserInfo></UserInfo>
       <!-- 扫码核销 -->
-      <view
-        class="code"
-        @tap="openCode(false)"
-        v-if="userStore.profile?.role === 'admin' || userStore.isValidManager"
-      >
-        <image
-          class="icon"
-          src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/code.png"
-          mode="aspectFit"
-        />
-        <view class="text">扫码核销</view>
+      <view class="allCode">
+        <view class="code" @tap="openCode" v-if="userStore.profile?._id">
+          <image
+            class="icon"
+            src="https://objectstorageapi.hzh.sealos.run/pyaqb5pe-qsby/static/my/code.png"
+            mode="aspectFit"
+          />
+          <view class="text">扫码核销</view>
+        </view>
       </view>
     </view>
     <view class="content">
-      <button v-if="canVerifyScore" @tap="openCode(true)">积分扫码核销</button>
       <!-- 功能区 -->
       <Function></Function>
       <!--   订单管理   -->
@@ -192,25 +189,30 @@ const openCode = (isScoreOrder = false) => {
   z-index: 1;
 
   /*核销扫码*/
-  .code {
-    margin-top: 40rpx;
+  .allCode {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 236rpx;
-    height: 71rpx;
-    border-radius: 35.5rpx 0 0 35.5rpx;
-    background-color: #1a1a1a;
+    flex-direction: column;
 
-    .icon {
-      margin-right: 14rpx;
-      width: 40rpx;
-      height: 39rpx;
-    }
+    .code {
+      margin-top: 40rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 236rpx;
+      height: 71rpx;
+      border-radius: 35.5rpx 0 0 35.5rpx;
+      background-color: #1a1a1a;
 
-    .text {
-      font-size: 29rpx;
-      color: #f1efc5;
+      .icon {
+        margin-right: 14rpx;
+        width: 40rpx;
+        height: 39rpx;
+      }
+
+      .text {
+        font-size: 29rpx;
+        color: #f1efc5;
+      }
     }
   }
 }

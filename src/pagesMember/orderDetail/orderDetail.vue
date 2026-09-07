@@ -9,7 +9,6 @@ import { orderFindOne, orderPay, orderCancel, orderRefund, createQrCode } from '
 import { useUserStore } from '@/stores'
 import { formatTimestamp } from '@/utils/generateMonth'
 
-
 // store
 const userStore = useUserStore()
 
@@ -52,9 +51,7 @@ const orderDetailGet = async (orderId: string) => {
 }
 
 // 是否显示发起人（行程、活动、项目）
-const showInitiator = computed(() =>
-  ['trip', 'activity', 'project'].includes(orderType.value)
-)
+const showInitiator = computed(() => ['trip', 'activity', 'project'].includes(orderType.value))
 
 // 数组首项为后端补充的独立门店电话，兼容历史订单返回的字符串
 const shopPhone = computed(() => {
@@ -83,7 +80,7 @@ watch(
     qr.make()
     qrcodeModules.value = (qr as { modules: { isBlack: boolean }[][] }).modules || []
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 拨打电话
@@ -351,22 +348,22 @@ watch(
     }
   },
 )
-
-
 </script>
 
 <template>
   <view class="orderDetail">
     <NavHead title="订单详情" :show-back="true"></NavHead>
     <scroll-view class="content" :scroll-y="true" :enhanced="true" :show-scrollbar="false">
-      <view style="padding: 24rpx;">
+      <view style="padding: 24rpx">
         <!-- 商品信息卡片 -->
         <view class="card product-card">
           <view class="product-top">
             <view class="cover-wrap">
               <image class="cover" :src="orderDetail?.productInfo.cover" mode="aspectFill"></image>
               <view class="type-tag">{{ typeLabels[orderDetail?.orderType as OrderType] }}</view>
-              <view class="status-tag pending" v-if="orderDetail?.status === 'pending'">待付款</view>
+              <view class="status-tag pending" v-if="orderDetail?.status === 'pending'"
+                >待付款</view
+              >
             </view>
             <view class="product-info">
               <view class="title">{{ orderDetail?.productInfo.title }}</view>
@@ -374,7 +371,10 @@ watch(
                 <text class="label">下单时间：</text>
                 <text class="value">{{ formatTimestamp(orderDetail.createdAt, 2) }}</text>
               </view>
-              <view class="info-row" v-if="orderDetail?.status === 'verified' && orderDetail?.verifiedTime">
+              <view
+                class="info-row"
+                v-if="orderDetail?.status === 'verified' && orderDetail?.verifiedTime"
+              >
                 <text class="label">核销时间：</text>
                 <text class="value">{{ formatTimestamp(orderDetail.verifiedTime, 2) }}</text>
               </view>
@@ -382,15 +382,23 @@ watch(
               <template v-if="['trip', 'activity'].includes(orderDetail?.orderType as OrderType)">
                 <view class="info-group">
                   <view class="info-row" v-if="orderDetail?.productInfo.time">
-                    <text class="label">{{ orderDetail.orderType === 'trip' ? '行程日期：' : '活动日期：' }}</text>
-                    <text class="value">{{ formatTimestamp(orderDetail.productInfo.time, 2) }}</text>
+                    <text class="label">{{
+                      orderDetail.orderType === 'trip' ? '行程日期：' : '活动日期：'
+                    }}</text>
+                    <text class="value">{{
+                      formatTimestamp(orderDetail.productInfo.time, 2)
+                    }}</text>
                   </view>
                   <view class="info-row" v-if="orderDetail?.productInfo.address_name">
-                    <text class="label">{{ orderDetail.orderType === 'trip' ? '行程门店：' : '活动门店：' }}</text>
+                    <text class="label">{{
+                      orderDetail.orderType === 'trip' ? '行程门店：' : '活动门店：'
+                    }}</text>
                     <text class="value">{{ orderDetail.productInfo.address_name }}</text>
                   </view>
                   <view class="info-row" v-if="orderDetail?.productInfo.event_address">
-                    <text class="label">{{ orderDetail?.orderType === 'trip' ? '行程地址：' : '活动地址：' }}</text>
+                    <text class="label">{{
+                      orderDetail?.orderType === 'trip' ? '行程地址：' : '活动地址：'
+                    }}</text>
                     <text class="value">{{ orderDetail?.productInfo.event_address }}</text>
                   </view>
                   <view class="price-row">
@@ -435,17 +443,32 @@ watch(
                     <text class="label">合作规模：</text>
                     <text class="value">{{ orderDetail.cooperationScale }}</text>
                   </view>
-                  <view class="info-row" v-if="orderDetail.baseName || orderDetail?.productInfo?.address_name">
+                  <view
+                    class="info-row"
+                    v-if="orderDetail.baseName || orderDetail?.productInfo?.address_name"
+                  >
                     <text class="label">基地名称：</text>
-                    <text class="value">{{ orderDetail.baseName || orderDetail?.productInfo?.address_name }}</text>
+                    <text class="value">{{
+                      orderDetail.baseName || orderDetail?.productInfo?.address_name
+                    }}</text>
                   </view>
-                  <view class="info-row" v-if="orderDetail.baseAddress || orderDetail?.productInfo?.event_address">
+                  <view
+                    class="info-row"
+                    v-if="orderDetail.baseAddress || orderDetail?.productInfo?.event_address"
+                  >
                     <text class="label">地址：</text>
-                    <text class="value">{{ orderDetail.baseAddress || orderDetail?.productInfo?.event_address }}</text>
+                    <text class="value">{{
+                      orderDetail.baseAddress || orderDetail?.productInfo?.event_address
+                    }}</text>
                   </view>
-                  <view class="price-row" v-if="(orderDetail.viewFee ?? orderDetail?.payAmount) !== undefined">
+                  <view
+                    class="price-row"
+                    v-if="(orderDetail.viewFee ?? orderDetail?.payAmount) !== undefined"
+                  >
                     <text class="label">查看费用：</text>
-                    <text class="price">¥{{ (orderDetail.viewFee ?? orderDetail?.payAmount ?? 0).toFixed(2) }}</text>
+                    <text class="price"
+                      >¥{{ (orderDetail.viewFee ?? orderDetail?.payAmount ?? 0).toFixed(2) }}</text
+                    >
                   </view>
                 </view>
               </template>
@@ -479,8 +502,11 @@ watch(
               </view>
               <view class="copy-btn" @tap.stop="handleCopyWx">复制</view>
             </view>
-            <view class="info-item info-item-address" v-if="orderDetail?.productInfo?.event_address"
-              @tap="handleInitiatorAddress">
+            <view
+              class="info-item info-item-address"
+              v-if="orderDetail?.productInfo?.event_address"
+              @tap="handleInitiatorAddress"
+            >
               <view class="info-item-left">
                 <text class="label">地址</text>
                 <text class="value">：{{ orderDetail.productInfo.event_address }}</text>
@@ -497,7 +523,9 @@ watch(
             <text class="section-title">联系门店</text>
           </view>
           <view class="contact-row" @tap="handleViewAddress">
-            <text class="contact-text">门店地址：{{ orderDetail?.shopInfo?.address || '请填写门店地址' }}</text>
+            <text class="contact-text"
+              >门店地址：{{ orderDetail?.shopInfo?.address || '请填写门店地址' }}</text
+            >
             <text class="iconfont icon-ditu contact-icon"></text>
           </view>
           <view class="contact-row" @tap="handleShopCall">
@@ -507,8 +535,15 @@ watch(
         </view>
 
         <!-- 核销码（待付款不展示） -->
-        <view class="card verify-card" :class="{ 'is-verified': orderDetail?.status === 'verified' }"
-          v-if="!isVerificationView && ['paid', 'verified'].includes(orderDetail?.status || '') && orderDetail?.orderType !== 'project'">
+        <view
+          class="card verify-card"
+          :class="{ 'is-verified': orderDetail?.status === 'verified' }"
+          v-if="
+            !isVerificationView &&
+            ['paid', 'verified'].includes(orderDetail?.status || '') &&
+            orderDetail?.orderType !== 'project'
+          "
+        >
           <view class="section-header">
             <view class="bar"></view>
             <text class="section-title">核销码</text>
@@ -517,7 +552,12 @@ watch(
           <view class="qrcode-wrap" v-if="orderDetail?.verifyCode">
             <view class="qrcode-grid" v-if="qrcodeModules.length">
               <view v-for="(row, rowI) in qrcodeModules" :key="rowI" class="qrcode-row">
-                <view v-for="(col, colI) in row" :key="colI" class="qrcode-cell" :class="{ black: col.isBlack }"></view>
+                <view
+                  v-for="(col, colI) in row"
+                  :key="colI"
+                  class="qrcode-cell"
+                  :class="{ black: col.isBlack }"
+                ></view>
               </view>
             </view>
             <view class="verify-code-text">{{ orderDetail.verifyCode }}</view>
@@ -540,24 +580,53 @@ watch(
         </view>
 
         <!-- 申请退款 -->
-        <view class="action-wrap"
-          v-if="!isVerificationView && ['paid', 'refunding', 'refunded'].includes(orderDetail?.status || '') && orderDetail?.orderType !== 'project'">
-          <view class="action-btn-sm" :class="{ refunded: orderDetail?.status === 'refunded' }"
-            v-if="orderDetail?.status !== 'paid' || orderDetail?.discountType !== 'voucher'" @tap="handleRefund">
-            {{ orderDetail?.status === 'refunded' ? '已退款' : orderDetail?.status === 'refunding' ? '退款中' : '申请退款' }}
+        <view
+          class="action-wrap"
+          v-if="
+            !isVerificationView &&
+            ['paid', 'refunding', 'refunded'].includes(orderDetail?.status || '') &&
+            orderDetail?.orderType !== 'project'
+          "
+        >
+          <view
+            class="action-btn-sm"
+            :class="{ refunded: orderDetail?.status === 'refunded' }"
+            v-if="orderDetail?.status !== 'paid' || orderDetail?.discountType !== 'voucher'"
+            @tap="handleRefund"
+          >
+            {{
+              orderDetail?.status === 'refunded'
+                ? '已退款'
+                : orderDetail?.status === 'refunding'
+                ? '退款中'
+                : '申请退款'
+            }}
           </view>
         </view>
 
-        <view class="card payment-exception-card" v-if="orderDetail?.status === 'payment_exception'">
+        <view
+          class="card payment-exception-card"
+          v-if="orderDetail?.status === 'payment_exception'"
+        >
           <view class="exception-title">支付异常</view>
           <view class="exception-message">
-            {{ orderDetail?.paymentExceptionMessage || '微信已完成支付，但订单业务处理失败，请联系客服处理退款。' }}
+            {{
+              orderDetail?.paymentExceptionMessage ||
+              '微信已完成支付，但订单业务处理失败，请联系客服处理退款。'
+            }}
           </view>
         </view>
 
         <!-- 待付款：取消订单、去支付 -->
-        <view class="pending-actions" v-if="!isVerificationView && orderDetail?.status === 'pending'">
-          <view class="action-btn cancel" :class="{ disabled: isCancelling }" @tap="handleCancelOrder">
+        <view
+          class="pending-actions"
+          v-if="!isVerificationView && orderDetail?.status === 'pending'"
+        >
+          <view
+            class="action-btn cancel"
+            :class="{ disabled: isCancelling }"
+            @tap="handleCancelOrder"
+          >
             {{ isCancelling ? '取消中...' : '取消订单' }}
           </view>
           <view class="action-btn primary" :class="{ disabled: isPaying }" @tap="handleGoPay">
@@ -566,7 +635,6 @@ watch(
         </view>
       </view>
     </scroll-view>
-
   </view>
 </template>
 
@@ -625,7 +693,11 @@ watch(
   font-size: 26rpx;
   font-weight: 500;
   color: $qs-font-title;
-  background: linear-gradient(135deg, $qs-brandColor 0%, color.adjust($qs-brandColor, $lightness: -6%) 100%);
+  background: linear-gradient(
+    135deg,
+    $qs-brandColor 0%,
+    color.adjust($qs-brandColor, $lightness: -6%) 100%
+  );
   @include customShadow();
 
   &.refunded {
@@ -695,7 +767,11 @@ watch(
         padding: 6rpx 16rpx;
         font-size: 20rpx;
         color: #ffffff;
-        background: linear-gradient(135deg, $qs-brandColor, color.adjust($qs-brandColor, $lightness: -10%));
+        background: linear-gradient(
+          135deg,
+          $qs-brandColor,
+          color.adjust($qs-brandColor, $lightness: -10%)
+        );
         border-radius: 10rpx 0 10rpx 0;
         z-index: 1;
       }
@@ -798,10 +874,9 @@ watch(
   .contact-icon {
     flex-shrink: 0;
     font-size: 36rpx;
-    color: #b19a3e;
+    color: color.adjust($qs-brandColor, $lightness: -32%);
     margin-left: 24rpx;
   }
-
 }
 
 /* 信息列表 */
@@ -1014,7 +1089,11 @@ watch(
     }
 
     &.primary {
-      background: linear-gradient(135deg, $qs-brandColor 0%, color.adjust($qs-brandColor, $lightness: -6%) 100%);
+      background: linear-gradient(
+        135deg,
+        $qs-brandColor 0%,
+        color.adjust($qs-brandColor, $lightness: -6%) 100%
+      );
       color: $qs-font-title;
       @include customShadow();
 
